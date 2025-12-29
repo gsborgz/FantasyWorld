@@ -37,7 +37,5 @@ export const handleLogin: Handler = async (client: WebSocket, message: Websocket
     console.error('Valkey error on login:', err);
   }
 
-  console.log("opa");
-
   client.send(JSON.stringify({ type: WebsocketEvents.OK_RESPONSE }));
 };
