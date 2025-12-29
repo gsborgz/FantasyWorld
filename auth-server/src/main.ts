@@ -48,15 +48,6 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  const closeApp = async (signal: string) => {
-    // eslint-disable-next-line no-console
-    console.warn(`[shutdown] signal=${signal} encerrando aplicação...`);
-    await app.close();
-    process.exit(0);
-  };
-
-  ['SIGINT', 'SIGTERM'].forEach((sig) => process.on(sig, () => void closeApp(sig)));
-
   await app.listen(port);
 }
 
