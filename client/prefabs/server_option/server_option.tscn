@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvkcnrogtljrv"]
+
+[ext_resource type="Script" uid="uid://2e6if8nfrtta" path="res://prefabs/server_option/server_option.gd" id="1_lgomu"]
+
+[node name="ServerOption" type="BoxContainer"]
+script = ExtResource("1_lgomu")
+
+[node name="SeverName" type="Label" parent="."]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+
+[node name="ServerStatus" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="EnterButton" type="Button" parent="."]
+layout_mode = 2
+text = "Enter"

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "typeRoots": ["./types/**/*.ts", "./node_modules/@types"],
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "ts-node": {
+    "files": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "./**/*.d.ts"]
+}

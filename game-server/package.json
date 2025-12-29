@@ -1,0 +1,31 @@
+{
+  "name": "fantasy-world-server",
+  "version": "1.0.0",
+  "description": "Fantasy World MMO Server",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "scripts": {
+    "start": "tsc && node dist/src/main.js",
+    "build": "tsc",
+    "dev": "npm run services:up && ts-node src/main.ts",
+    "services:up": "docker compose up -d",
+    "services:stop": "docker compose stop",
+    "services:down": "docker compose down",
+    "build:shared": "ts-node scripts/build-shared.ts",
+    "lint:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
+    "lint": "prettier --write \"**/*.{json,md,yml,yaml}\""
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "typeorm": "^0.3.28",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/ws": "^8.18.1",
+    "prettier": "^3.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

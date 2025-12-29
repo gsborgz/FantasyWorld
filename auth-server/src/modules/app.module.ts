@@ -1,0 +1,31 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PostgresConfig } from '../core/datasources/postgres.datasource';
+import { AuthModule } from './auth/auth.module';
+import { I18nModule, HeaderResolver } from 'nestjs-i18n';
+import path from 'node:path';
+import * as dotenv from 'dotenv';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { GameServerModule } from './game-server/game-server.module';
+
+dotenv.config();
+
+@Module({
+  imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'ptbr',
+      loaderOptions: {
+        path: path.join(__dirname, '../i18n/'),
+        watch: true,
+      },
+      resolvers: [{ use: HeaderResolver, options: ['language'] }],
+    }),
+    TypeOrmModule.forRoot(PostgresConfig),
+    AuthModule,
+    GameServerModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}

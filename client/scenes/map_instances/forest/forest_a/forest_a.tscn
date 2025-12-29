@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://fktp5c2ntbmu"]
+
+[ext_resource type="Script" uid="uid://dgjxd3kn8ch38" path="res://scenes/map_instances/forest/forest_a/forest_a.gd" id="1_gjfah"]
+
+[node name="ForestA" type="Node"]
+script = ExtResource("1_gjfah")
