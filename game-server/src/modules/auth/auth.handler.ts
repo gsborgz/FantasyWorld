@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 import { randomUUID } from 'node:crypto';
-import { WebsocketEvents, WebsocketMessage } from '../../../shared/ws-utils';
-import { valkey, keys } from '../../../core/datasources/valkey.datasource';
-import type { Handler } from '../../router';
+import { Handler } from '../../router';
+import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
+import { keys, valkey } from '../../core/datasources/valkey.datasource';
 
 export const handleLogin: Handler = async (client: WebSocket, message: WebsocketMessage<any>) => {
   const res = await fetch('http://localhost:3000/v1/auth/me', {

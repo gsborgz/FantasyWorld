@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../../shared/ws-utils';
-import { valkey, keys } from '../../../core/datasources/valkey.datasource';
+import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
+import { valkey, keys } from '../../core/datasources/valkey.datasource';
 import type { Handler } from '../../router';
 
 export const handleJoinInstance: Handler = async (

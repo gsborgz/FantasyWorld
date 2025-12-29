@@ -1,4 +1,4 @@
-import { WebsocketEvents } from "../../../shared/ws-utils";
+import { WebsocketEvents } from "../../shared/ws-utils";
 import { handleLogin } from "./auth.handler";
 
 export const AuthModule = {

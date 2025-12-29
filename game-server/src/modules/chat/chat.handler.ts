@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { WebsocketMessage } from '../../../shared/ws-utils';
+import { WebsocketMessage } from '../../shared/ws-utils';
 import type { Handler } from '../../router';
 
 export const handleGlobalChat: Handler = (_client: WebSocket, message: WebsocketMessage<any>, ctx) => {

@@ -1,4 +1,4 @@
-import { WebsocketEvents } from "../../../shared/ws-utils";
+import { WebsocketEvents } from "../../shared/ws-utils";
 import { handleGlobalChat, handleInstanceChat } from "./chat.handler";
 
 export const ChatModule = {

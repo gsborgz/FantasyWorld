@@ -2,7 +2,7 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { WebsocketMessage } from './shared/ws-utils';
 import { valkey, keys } from './core/datasources/valkey.datasource';
-import { dispatchMessage } from './websocket/router';
+import { dispatchMessage } from './router';
 import * as dotenv from 'dotenv';
 
 dotenv.config();

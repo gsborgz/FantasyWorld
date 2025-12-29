@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
+import { WebsocketEvents, WebsocketMessage } from './shared/ws-utils';
 import { Modules } from './modules/modules';
 
 type HandlerContext = {
