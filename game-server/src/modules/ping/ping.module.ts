@@ -1,6 +1,8 @@
-import { WebsocketEvents } from "../../shared/ws-utils";
-import { handlePing } from "./ping.handler";
+import { Module } from '@nestjs/common';
+import { PingService } from './ping.service';
 
-export const PingModule = {
-  [WebsocketEvents.PING]: handlePing,
-}
+@Module({
+  providers: [PingService],
+  exports: [PingService],
+})
+export class PingModule {}

@@ -45,7 +45,7 @@ func _on_enter_button_pressed() -> void:
 	
 	if server_url:
 		var ws_url := _to_ws_url(server_url)
-		print("Connecting WS:", ws_url)
+		print("Connecting to:", ws_url)
 		WS.connect_to_url(ws_url)
 	else:
 		print("URL do servidor inválida")

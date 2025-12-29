@@ -49,6 +49,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen(port);
+
+  // eslint-disable-next-line no-console
+  console.log(`Auth server running on port ${port}`);
 }
 
 void bootstrap();

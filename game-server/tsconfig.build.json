@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts",
+    "src/router.ts",
+    "src/modules/modules.ts",
+    "src/modules/**/**.handler.ts",
+    "src/modules/**/**.module.ts"
+  ]
+}

@@ -1,6 +1,8 @@
-import { WebsocketEvents } from "../../shared/ws-utils";
-import { handleLogin } from "./auth.handler";
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
 
-export const AuthModule = {
-  [WebsocketEvents.LOGIN_REQUEST]: handleLogin,
-}
+@Module({
+  providers: [AuthService],
+  exports: [AuthService],
+})
+export class AuthModule {}

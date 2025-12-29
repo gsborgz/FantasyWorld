@@ -1,7 +1,8 @@
-import { WebsocketEvents } from "../../shared/ws-utils";
-import { handleGlobalChat, handleInstanceChat } from "./chat.handler";
+import { Module } from '@nestjs/common';
+import { ChatService } from './chat.service';
 
-export const ChatModule = {
-  [WebsocketEvents.GLOBAL_CHAT_MESSAGE]: handleGlobalChat,
-  [WebsocketEvents.INSTANCE_CHAT_MESSAGE]: handleInstanceChat
-}
+@Module({
+  providers: [ChatService],
+  exports: [ChatService],
+})
+export class ChatModule {}

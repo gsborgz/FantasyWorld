@@ -54,6 +54,7 @@ func _on_ws_packet_received(message):
 	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
 		GameManager.set_scene("character_selection")
 	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
+		print("sdsdf")
 		GameManager.set_scene("server_list")
 
 

@@ -1,6 +1,8 @@
-import { WebsocketEvents } from "../../shared/ws-utils";
-import { handleJoinInstance } from "./instance.handler";
+import { Module } from '@nestjs/common';
+import { InstanceService } from './instance.service';
 
-export const InstanceModule = {
-  [WebsocketEvents.JOIN_INSTANCE]: handleJoinInstance
-}
+@Module({
+  providers: [InstanceService],
+  exports: [InstanceService],
+})
+export class InstanceModule {}
