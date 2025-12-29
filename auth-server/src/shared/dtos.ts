@@ -27,3 +27,11 @@ export class SessionData {
   token: string;
 
 }
+
+export class GameServerInfo {
+  name: string;
+  location: string;
+  url: string;
+  status?: 'online' | 'offline';
+  clientsCount?: number;
+}

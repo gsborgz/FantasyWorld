@@ -2,13 +2,14 @@ enum WebsocketEvents {
     NONE = 0,
     JOIN_INSTANCE = 1,
     GLOBAL_CHAT_MESSAGE = 2,
-    LEAVE_INSTANCE = 3,
-    LOGIN_REQUEST = 4,
-    REGISTER_REQUEST = 5,
-    OK_RESPONSE = 6,
-    DENY_RESPONSE = 7,
-    PING = 8,
-    PONG = 9,
+    INSTANCE_CHAT_MESSAGE = 3,
+    LEAVE_INSTANCE = 4,
+    LOGIN_REQUEST = 5,
+    REGISTER_REQUEST = 6,
+    OK_RESPONSE = 7,
+    DENY_RESPONSE = 8,
+    PING = 9,
+    PONG = 10,
 }
 
 class JoinInstanceData:

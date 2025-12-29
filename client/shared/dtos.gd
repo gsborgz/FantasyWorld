@@ -35,3 +35,17 @@ class SessionData:
 
     func _init(_token: String = ""):
         token = _token
+
+class GameServerInfo:
+    var name: String
+    var location: String
+    var url: String
+    var status: Variant
+    var clientsCount: float
+
+    func _init(_name: String = "", _location: String = "", _url: String = "", _status: Variant = null, _clientsCount: float = 0.0):
+        name = _name
+        location = _location
+        url = _url
+        status = _status
+        clientsCount = _clientsCount

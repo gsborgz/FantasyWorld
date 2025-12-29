@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents } from '../../shared/ws-utils';
+import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
 
 export interface IWsSendOptions {
   timeoutMs?: number;
 }
 
+
 @Injectable()
 export class WebsocketService {
 
-  public async ping(url: string, timeoutMs = 2000): Promise<boolean> {
+  public async ping(url: string, timeoutMs = 2000): Promise<{ ok: boolean; message?: WebsocketMessage<any>; error?: any }> {
     const payload = { type: WebsocketEvents.PING };
-    const res = await this.sendAndWait(url, payload, (m) => m && m.type === WebsocketEvents.PONG, { timeoutMs });
 
-    return res.ok === true;
+    return this.sendAndWait(url, payload, (m) => m && m.type === WebsocketEvents.PONG, { timeoutMs });
   }
 
   private async sendAndWait<T = any>(

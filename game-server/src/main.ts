@@ -1,7 +1,8 @@
 
 import { WebSocketServer, WebSocket } from 'ws';
 import { WebsocketMessage } from './shared/ws-utils';
-import { leaveInstance, handleMessage } from './websocket/message-handler';
+import { valkey, keys } from './core/datasources/valkey.datasource';
+import { dispatchMessage } from './websocket/router';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -36,15 +37,41 @@ wss.on('connection', (client) => {
       return;
     }
 
-		handleMessage(client, msg, allClients);
+    dispatchMessage(client, msg, allClients);
 	});
 
-	client.on('close', () => {
+	client.on('close', async () => {
     if (allClients.has(client)) {
       allClients.delete(client);
     }
 
-		leaveInstance(client);
+		const clientId = (client as any).id as string | undefined;
+    const sid = (client as any).sid as string | undefined;
+    const instancePath = (client as any).instancePath as string | undefined;
+
+    if (!clientId) return;
+
+    try {
+      const pipeline = valkey.multi();
+      
+      if (instancePath) {
+        pipeline.srem(keys.instanceClients(instancePath), clientId);
+      }
+      
+      pipeline.srem(keys.clientSet, clientId);
+      
+      if (sid) {
+        pipeline.del(keys.session(sid));
+      }
+      
+      pipeline.del(keys.clientCurrentInstance(clientId));
+      
+      await pipeline.exec();
+    } catch (err) {
+      console.error('Valkey error on leaveInstance:', err);
+    }
+
+    console.log('Client disconnected, removed from instances');
 	});
 });
 

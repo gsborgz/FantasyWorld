@@ -36,35 +36,22 @@ func _ready() -> void:
 		_enter_button.disabled = false
 		_enter_button.pressed.connect(_on_enter_button_pressed)
 
-	# Conecta sinais do WS apenas uma vez
-	if not WS.connected_to_server.is_connected(_on_ws_connected_to_server):
-		WS.connected_to_server.connect(_on_ws_connected_to_server)
-	if not WS.connection_closed.is_connected(_on_ws_connection_closed):
-		WS.connection_closed.connect(_on_ws_connection_closed)
-	if not WS.message_received.is_connected(_on_ws_packet_received):
-		WS.message_received.connect(_on_ws_packet_received)
-
 
 func _on_enter_button_pressed() -> void:
-	WS.connect_to_url("ws://localhost:8080/ws")
+	WS.clear()
+	
+	if not WS.connected_to_server.is_connected(_on_ws_connected_to_server_once):
+		WS.connected_to_server.connect(_on_ws_connected_to_server_once)
+	
+	if server_url:
+		var ws_url := _to_ws_url(server_url)
+		print("Connecting WS:", ws_url)
+		WS.connect_to_url(ws_url)
+	else:
+		print("URL do servidor inválida")
 
 
-func _on_ws_packet_received(message: _ws_utils.WebsocketMessage) -> void:
-	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
-		_on_ok_response_received()
-	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
-		_on_deny_response_received()
-
-
-func _on_ok_response_received() -> void:
-	GameManager.set_scene("character_selection")
-
-
-func _on_deny_response_received() -> void:
-	GameManager.set_scene("server_list")
-
-
-func _on_ws_connected_to_server() -> void:
+func _on_ws_connected_to_server_once() -> void:
 	var message := _ws_utils.WebsocketMessage.new()
 	
 	message.type = _ws_utils.WebsocketEvents.LOGIN_REQUEST
@@ -73,8 +60,30 @@ func _on_ws_connected_to_server() -> void:
 	}
 	
 	WS.send(message)
-
-
-func _on_ws_connection_closed() -> void:
-	GameManager.set_scene("server_list")
 	
+	if WS.connected_to_server.is_connected(_on_ws_connected_to_server_once):
+		WS.connected_to_server.disconnect(_on_ws_connected_to_server_once)
+
+
+# Converte http/https para ws/wss e garante path padrão /ws
+func _to_ws_url(url: String) -> String:
+	var u := url.strip_edges()
+	if u.begins_with("ws://") or u.begins_with("wss://"):
+		return _ensure_ws_path(u)
+	if u.begins_with("http://"):
+		return _ensure_ws_path("ws://" + u.substr(7))
+	if u.begins_with("https://"):
+		return _ensure_ws_path("wss://" + u.substr(8))
+	# Sem esquema, assume ws://
+	return _ensure_ws_path("ws://" + u)
+
+
+func _ensure_ws_path(u: String) -> String:
+	# Se já tiver um caminho ("/...") mantém; se não, adiciona /ws
+	var idx := u.find("/", 6) # após esquema
+	if idx == -1:
+		return u + "/ws"
+	# Se já inclui /ws em qualquer posição, mantém
+	if u.find("/ws", 6) != -1:
+		return u
+	return u

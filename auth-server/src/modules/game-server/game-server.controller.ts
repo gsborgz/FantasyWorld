@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { GameServerService } from './game-server.service';
-import { GameServerInfo } from '../../shared/game-server';
+import { GameServerInfo } from '../../shared/dtos';
 
 @Controller('v1/game-servers')
 export class GameServerController {

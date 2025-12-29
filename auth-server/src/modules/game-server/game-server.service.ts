@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { WebsocketService } from '../../core/services/websocket.service';
-import { GameServerInfo } from '../../shared/game-server';
+import { GameServerInfo } from '../../shared/dtos';
 
 dotenv.config();
 
@@ -41,9 +41,10 @@ export class GameServerService {
     }
 
     const timeoutMs = 2000;
-    const ok = await this.wsService.ping(server.url, timeoutMs);
+    const result = await this.wsService.ping(server.url, timeoutMs);
 
-    server.status = ok ? 'online' : 'offline';
+    server.status = result.ok ? 'online' : 'offline';
+    server.clientsCount = result.ok ? result.message?.data?.clientsCount || 0 : 0;
 
     return server;
   }

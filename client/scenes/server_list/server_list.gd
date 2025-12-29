@@ -2,12 +2,19 @@ extends Node
 
 const _gs := preload("res://shared/game-server.gd")
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
+const _ws_utils := preload("res://shared/ws-utils.gd")
 
 @onready var _v_box_container: VBoxContainer = $UI/VBoxContainer
 
 
 func _ready() -> void:
 	HTTP.get_data("http://localhost:3000/v1/game-servers", _on_game_servers_request_completed)
+
+	# Conecta sinais globais do WS apenas uma vez por cena
+	if not WS.message_received.is_connected(_on_ws_packet_received):
+		WS.message_received.connect(_on_ws_packet_received)
+	if not WS.connection_closed.is_connected(_on_ws_connection_closed):
+		WS.connection_closed.connect(_on_ws_connection_closed)
 
 
 @warning_ignore("unused_parameter")
@@ -39,3 +46,16 @@ func _create_server_list(servers: Array[_gs.GameServerInfo]) -> void:
 		var serverOption := ServerOption.instantiate(server.name, server.location, server.status, server.url)
 		
 		_v_box_container.add_child(serverOption)
+
+
+func _on_ws_packet_received(message):
+	if message == null:
+		return
+	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
+		GameManager.set_scene("character_selection")
+	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
+		GameManager.set_scene("server_list")
+
+
+func _on_ws_connection_closed() -> void:
+	GameManager.set_scene("server_list")

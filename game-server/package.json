@@ -13,11 +13,13 @@
     "services:stop": "docker compose stop",
     "services:down": "docker compose down",
     "build:shared": "ts-node scripts/build-shared.ts",
+    "valkey:test": "ts-node scripts/valkey-test.ts",
     "lint:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
     "lint": "prettier --write \"**/*.{json,md,yml,yaml}\""
   },
   "dependencies": {
     "dotenv": "^17.2.3",
+    "ioredis": "^5.8.2",
     "typeorm": "^0.3.28",
     "ws": "^8.18.3"
   },
