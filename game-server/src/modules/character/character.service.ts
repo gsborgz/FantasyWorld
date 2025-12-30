@@ -36,8 +36,6 @@ export class CharacterService {
   }
 
   private async handleCharacterAdd(client: WebSocket, message: WebsocketMessage<AddCharacterRequest>) {
-    console.log(client);
-    
     if (!client.user?.id) {
       client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
       return;
