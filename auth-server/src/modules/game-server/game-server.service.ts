@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { WebsocketService } from '../../core/services/websocket.service';
-import { GameServerInfo } from '../../shared/dtos';
+import { GameServerResponse } from '../../shared/dtos';
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ export class GameServerService {
 
   constructor(private readonly wsService: WebsocketService) {}
 
-  public async getServers(): Promise<GameServerInfo[]> {
+  public async getServers(): Promise<GameServerResponse[]> {
     const serverInfos = this.getBasicServersInfos();
     const promises = serverInfos.map((server) => this.getAndSetServerStatus(server));
     const filledServerInfos = await Promise.all(promises);
@@ -18,9 +18,9 @@ export class GameServerService {
     return filledServerInfos;
   }
 
-  private getBasicServersInfos(): GameServerInfo[] {
+  private getBasicServersInfos(): GameServerResponse[] {
     const servers = process.env.GAME_SERVERS ? process.env.GAME_SERVERS.split(';') || [] : [];
-    const serversInfos: GameServerInfo[] = servers.map((serverString) => {
+    const serversInfos: GameServerResponse[] = servers.map((serverString) => {
       const [name, location, url] = serverString.split(',');
   
       return {
@@ -33,7 +33,7 @@ export class GameServerService {
     return serversInfos;
   }
 
-  private async getAndSetServerStatus(server: GameServerInfo): Promise<GameServerInfo> {
+  private async getAndSetServerStatus(server: GameServerResponse): Promise<GameServerResponse> {
     if (!server.url) {
       server.status = 'offline';
 

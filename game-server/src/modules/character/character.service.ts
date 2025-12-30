@@ -1,0 +1,110 @@
+import { Injectable } from '@nestjs/common';
+import { WebSocket } from 'ws';
+import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
+import { Handler } from '../../core/ws/ws.types';
+import { Character } from '../../core/entities/character.entity';
+import { DataSource } from 'typeorm';
+import { WorldInstancePath } from '../../shared/world-instances';
+import { AddCharacterRequest, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../../shared/dtos';
+
+@Injectable()
+export class CharacterService {
+
+  constructor(private readonly dataSource: DataSource) {}
+
+  getHandlers() {
+    return {
+      [WebsocketEvents.LIST_CHARACTERS]: this.handleGetCharacters.bind(this),
+      [WebsocketEvents.ADD_CHARACTER]: this.handleCharacterAdd.bind(this),
+      [WebsocketEvents.SELECT_CHARACTER]: this.handleCharacterSelect.bind(this),
+      [WebsocketEvents.DELETE_CHARACTER]: this.handleCharacterDelete.bind(this),
+    } satisfies Partial<Record<WebsocketEvents, Handler>>;
+  }
+
+  // Handlers
+  private async handleGetCharacters(client: WebSocket) {
+    if (!client.user?.id) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+    
+    const characters = await this.dataSource.getRepository(Character).find({
+      where: { userId: client.user.id },
+    });
+
+    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTERS_LISTED, data: { characters } }));
+  }
+
+  private async handleCharacterAdd(client: WebSocket, message: WebsocketMessage<AddCharacterRequest>) {
+    console.log(client);
+    
+    if (!client.user?.id) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+    
+    const data = message.data;
+    const character = new Character();
+
+    character.userId = client.user.id;
+    character.name = data.name;
+    character.instancePath = WorldInstancePath.MainCity.MainCityA;
+    character.x = 100;
+    character.y = 100;
+    character.direction = Direction.DOWN;
+    
+    await this.dataSource.getRepository(Character).save(character);
+
+    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_ADDED }));
+  }
+
+  private async handleCharacterSelect(client: WebSocket, message: WebsocketMessage<SelectCharacterRequest>) {
+    if (!client.user?.id) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+    
+    const characterId = message.data.characterId as string;
+    const character = await this.dataSource.getRepository(Character).findOne({
+      where: { id: characterId, userId: client.user.id },
+    });
+
+    if (!character) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+
+    client.character = {
+      id: character.id,
+      instancePath: character.instancePath,
+      x: character.x,
+      y: character.y,
+      direction: character.direction,
+      lastPositionUpdate: Date.now(),
+    };
+
+    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
+  }
+
+  private async handleCharacterDelete(client: WebSocket, message: WebsocketMessage<DeleteCharacterRequest>) {    
+    if (!client.user?.id) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+
+    const characterId = message.data.characterId as string;
+    const character = await this.dataSource.getRepository(Character).findOne({
+      where: { id: characterId, userId: client.user.id },
+    });
+
+    if (!character) {
+      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      return;
+    }
+
+    await this.dataSource.getRepository(Character).remove(character);
+
+    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_DELETED, data: character }));
+  }
+
+}

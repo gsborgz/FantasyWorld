@@ -1,3 +1,12 @@
+import type { Character } from "../core/entities/character.entity";
+
+export enum Direction {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+}
+
 export class LoginData {
   username: string;
   password: string;
@@ -28,10 +37,43 @@ export class SessionData {
 
 }
 
-export class GameServerInfo {
+// Request
+export class LoginRequest {
+  sid: string;
+}
+
+export class SelectCharacterRequest {
+  characterId: string;
+}
+
+export class UpdatePositionRequest {
+  x: number;
+  y: number;
+  direction: Direction;
+  speed: number;
+}
+
+export class DeleteCharacterRequest {
+  characterId: string;
+}
+
+export class AddCharacterRequest {
+  name: string;
+}
+
+
+// Response
+export class GameServerResponse {
   name: string;
   location: string;
   url: string;
   status?: 'online' | 'offline';
   clientsCount?: number;
 }
+
+export type CharacterResponse = Character;
+
+export class CharactersListResponse {
+  characters: CharacterResponse[];
+}
+

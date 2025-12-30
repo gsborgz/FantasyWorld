@@ -1,8 +1,10 @@
 extends BoxContainer
 
+const _ws_utils := preload("res://shared/ws-utils.gd")
+const _dtos := preload("res://shared/dtos.gd")
+
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
 const Scene := preload("res://prefabs/server_option/server_option.tscn")
-const _ws_utils := preload("res://shared/ws-utils.gd")
 
 @onready var _sever_name: Label = $SeverName
 @onready var _enter_button: Button = $EnterButton
@@ -53,11 +55,13 @@ func _on_enter_button_pressed() -> void:
 
 func _on_ws_connected_to_server_once() -> void:
 	var message := _ws_utils.WebsocketMessage.new()
+	var data := _dtos.LoginRequest.new()
+
+	# Usa o SID diretamente como String; não serializa JSON aqui
+	data.sid = Session.getSid()
 	
-	message.type = _ws_utils.WebsocketEvents.LOGIN_REQUEST
-	message.data = {
-		"sid" = Session.getId()
-	}
+	message.type = _ws_utils.WebsocketEvents.LOGIN
+	message.data = data
 	
 	WS.send(message)
 	
@@ -65,7 +69,6 @@ func _on_ws_connected_to_server_once() -> void:
 		WS.connected_to_server.disconnect(_on_ws_connected_to_server_once)
 
 
-# Converte http/https para ws/wss e garante path padrão /ws
 func _to_ws_url(url: String) -> String:
 	var u := url.strip_edges()
 	if u.begins_with("ws://") or u.begins_with("wss://"):
@@ -74,16 +77,17 @@ func _to_ws_url(url: String) -> String:
 		return _ensure_ws_path("ws://" + u.substr(7))
 	if u.begins_with("https://"):
 		return _ensure_ws_path("wss://" + u.substr(8))
-	# Sem esquema, assume ws://
+	
 	return _ensure_ws_path("ws://" + u)
 
 
 func _ensure_ws_path(u: String) -> String:
-	# Se já tiver um caminho ("/...") mantém; se não, adiciona /ws
-	var idx := u.find("/", 6) # após esquema
+	var idx := u.find("/", 6)
+	
 	if idx == -1:
 		return u + "/ws"
-	# Se já inclui /ws em qualquer posição, mantém
+	
 	if u.find("/ws", 6) != -1:
 		return u
+	
 	return u

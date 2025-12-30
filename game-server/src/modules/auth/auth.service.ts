@@ -4,17 +4,18 @@ import { randomUUID } from 'node:crypto';
 import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
 import { keys, valkey } from '../../core/datasources/valkey.datasource';
 import { Handler } from '../../core/ws/ws.types';
+import { LoginRequest } from '../../shared/dtos';
 
 @Injectable()
 export class AuthService {
   getHandlers() {
     return {
-      [WebsocketEvents.LOGIN_REQUEST]: this.handleLogin.bind(this),
+      [WebsocketEvents.LOGIN]: this.handleLogin.bind(this),
     } satisfies Partial<Record<WebsocketEvents, Handler>>;
   }
 
   // Handlers
-  private async handleLogin(client: WebSocket, message: WebsocketMessage<any>) {
+  private async handleLogin(client: WebSocket, message: WebsocketMessage<LoginRequest>) {
     const res = await fetch('http://localhost:3000/v1/auth/me', {
       headers: {
         Cookie: `sid=${message.data.sid}`,
@@ -28,20 +29,22 @@ export class AuthService {
 
     const user = await res.json();
 
-    (client as any).id = randomUUID();
-    (client as any).user_id = user.id;
-    (client as any).user_username = user.username;
-    (client as any).sid = message.data.sid;
+    client.id = randomUUID();
+    client.user = {
+      id: user.id,
+      username: user.username,
+    };
+    client.sid = message.data.sid;
 
     try {
       await valkey
         .multi()
         .hset(keys.session(message.data.sid), {
-          client_id: (client as any).id,
+          client_id: client.id,
           user_id: String(user.id),
           username: String(user.username),
         })
-        .sadd(keys.clientSet, (client as any).id)
+        .sadd(keys.clientSet, client.id)
         .exec();
     } catch (err) {
       // eslint-disable-next-line no-console

@@ -7,6 +7,7 @@ import { RouterService } from '../core/ws/router.service';
 
 @WebSocketGateway({ path: '/ws' })
 export class AppGateway implements OnModuleDestroy {
+
   @WebSocketServer()
   server!: WsServer;
 
@@ -63,9 +64,9 @@ export class AppGateway implements OnModuleDestroy {
       this.allClients.delete(client);
     }
 
-    const clientId = (client as any).id as string | undefined;
-    const sid = (client as any).sid as string | undefined;
-    const instancePath = (client as any).instancePath as string | undefined;
+    const clientId = client.id;
+    const sid = client.sid;
+    const instancePath = client.character?.instancePath;
 
     if (!clientId) return;
 
@@ -90,4 +91,5 @@ export class AppGateway implements OnModuleDestroy {
       console.error('Valkey error on leaveInstance:', err);
     }
   }
+
 }

@@ -3,22 +3,30 @@ import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
 import { valkey, keys } from '../../core/datasources/valkey.datasource';
 import { Handler } from '../../core/ws/ws.types';
+import { DataSource } from 'typeorm';
+import { Character } from '../../core/entities/character.entity';
+import { UpdatePositionRequest } from '../../shared/dtos';
 
 @Injectable()
 export class InstanceService {
+
+  constructor(private readonly dataSource: DataSource) {}
+
   getHandlers() {
     return {
       [WebsocketEvents.JOIN_INSTANCE]: this.handleJoinInstance.bind(this),
+      [WebsocketEvents.UPDATE_POSITION]: this.handlePositionUpdate.bind(this),
     } satisfies Partial<Record<WebsocketEvents, Handler>>;
   }
 
   // Handlers
   private async handleJoinInstance(client: WebSocket, message: WebsocketMessage<any>, ctx: { allClients: Set<WebSocket> }) {
     const instancePath = (message.data.instance as string) ?? (message.data.instancePath as string);
-    const clientId = (client as any).id as string | undefined;
+    const clientId = client.id;
+    
     if (!clientId) return;
 
-    const previousInstancePath = (client as any).instancePath as string | undefined;
+    const previousInstancePath = client.character?.instancePath;
 
     try {
       const pipeline = valkey.multi();
@@ -35,29 +43,69 @@ export class InstanceService {
       console.error('Valkey error on joinInstance:', err);
     }
 
-    (client as any).instancePath = instancePath;
+    client.character!.instancePath = instancePath;
 
     if (previousInstancePath) {
       this.broadcastToInstance(client, previousInstancePath, {
-        type: WebsocketEvents.JOIN_INSTANCE,
-        data: { left: clientId },
+        type: WebsocketEvents.INSTANCE_LEFT,
+        data: { clientId },
       }, ctx.allClients);
     }
 
     this.broadcastToInstance(client, instancePath, {
       type: WebsocketEvents.JOIN_INSTANCE,
-      data: { joined: clientId },
+      data: { clientId },
+    }, ctx.allClients);
+  }
+
+  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>, ctx: { allClients: Set<WebSocket> }) {
+    const instancePath = client.character?.instancePath;
+    const clientId = client.id;
+    const data = message.data;
+    
+    if (!clientId || !instancePath) return;
+
+    this.updateClientPosition(client, data);
+
+    this.broadcastToInstance(client, instancePath, {
+      type: WebsocketEvents.UPDATE_POSITION,
+      data: {
+        characterId: client.character?.id,
+        x: data.x,
+        y: data.y,
+        direction: data.direction,
+        speed: data.speed
+      },
     }, ctx.allClients);
   }
 
   // Utils
   private broadcastToInstance(sender: WebSocket, instancePath: string, message: any, allClients: Set<WebSocket>) {
-    for (const c of allClients) {
-      if (c === sender) continue;
-      if ((c as any).instancePath !== instancePath) continue;
-      if (c.readyState === WebSocket.OPEN) {
-        c.send(JSON.stringify(message));
+    for (const client of allClients) {
+      if (client === sender) continue;
+
+      const clientInstancePath = client.character?.instancePath;
+
+      if (clientInstancePath !== instancePath) continue;
+
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
       }
+    }
+  }
+
+  private updateClientPosition(client: WebSocket, data: UpdatePositionRequest) {
+    const x = data.x;
+    const y = data.y;
+    const direction = data.direction;
+
+    if (client.character) {
+      client.character.x = x;
+      client.character.y = y;
+      client.character.direction = direction;
+      client.character.lastPositionUpdate = Date.now();
+  
+      this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y, direction });
     }
   }
 }

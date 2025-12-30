@@ -1,23 +1,39 @@
 export enum WebsocketEvents {
   NONE,
+
+  SELECT_CHARACTER,
+  UPDATE_POSITION,
   JOIN_INSTANCE,
-  GLOBAL_CHAT_MESSAGE,
-  INSTANCE_CHAT_MESSAGE,
-  LEAVE_INSTANCE,
-  LOGIN_REQUEST,
-  REGISTER_REQUEST,
+  LOGIN,
+  PING,
+  ADD_CHARACTER,
+  LIST_CHARACTERS,
+  DELETE_CHARACTER,
+
+  POSITION_UPDATED,
+  CHARACTER_ADDED,
+  CHARACTERS_LISTED,
+  CHARACTER_SELECTED,
+  CHARACTER_DELETED,
+  INSTANCE_LEFT,
+  PONG,
   OK_RESPONSE,
   DENY_RESPONSE,
-  PING,
-  PONG
+
+  GLOBAL_CHAT_MESSAGE,
+  INSTANCE_CHAT_MESSAGE,
 }
 
 export class JoinInstanceData {
-  instance: string;
+
+  instancePath: string;
+
 }
 
 export class WebsocketMessage<T> {
-  client_sid: string;
+
   type: WebsocketEvents;
   data: T;
+
 }
+

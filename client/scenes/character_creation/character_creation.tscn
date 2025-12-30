@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://bt1n3h8hg8xcc"]
+
+[ext_resource type="Script" uid="uid://bpqj6o7qps3e7" path="res://scenes/character_creation/character_creation.gd" id="1_5w2ck"]
+
+[node name="CharacterCreation" type="Node"]
+script = ExtResource("1_5w2ck")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -46.5
+offset_right = 62.0
+offset_bottom = 46.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="UI/VBoxContainer"]
+layout_mode = 2
+text = "Name"
+
+[node name="Name" type="LineEdit" parent="UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Create" type="Button" parent="UI/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Create"
+
+[node name="Cancel" type="Button" parent="UI/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cancel"

@@ -1,11 +1,12 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
+import { Character } from '../entities/character.entity';
 
 dotenv.config();
 
-export const entities = [];
+export const entities = [Character];
 
-export const Datasource = new DataSource({
+export const PostgresConfig: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: Number(process.env.POSTGRES_PORT),
@@ -22,4 +23,10 @@ export const Datasource = new DataSource({
     idleTimeoutMillis: Number(process.env.POSTGRES_IDLE_TIMEOUT) || 30000,
     connectionTimeoutMillis: Number(process.env.POSTGRES_CONN_TIMEOUT) || 5000
   },
-});
+};
+
+const PostgresMigrationDatasourceConfig = {
+  ...PostgresConfig,
+};
+
+export const PostgresMigrationDatasource = new DataSource(PostgresMigrationDatasourceConfig);

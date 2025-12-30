@@ -24,68 +24,310 @@ function writeFileIfChanged(outPath: string, content: string) {
 
 function copyFileIfChanged(src: string, dest: string) {
   const srcContent = fs.readFileSync(src, 'utf-8');
+  const stripped = stripComments(srcContent);
+  const flattened = flattenExtendedClasses(stripped, src);
+  const withTypesAsClasses = transformTypeAliasesToClassesForAuth(flattened, src);
+  const withSemicolons = addSemicolonsForConstDeclarations(withTypesAsClasses);
+  const formatted = formatForAuthServer(withSemicolons);
   const exists = fs.existsSync(dest);
   if (exists) {
     const destContent = fs.readFileSync(dest, 'utf-8');
-    if (destContent === srcContent) {
+    if (destContent === formatted) {
       console.log(`Sem alterações (auth-server): ${dest}`);
       return false;
     }
   }
-  fs.writeFileSync(dest, srcContent, 'utf-8');
+  fs.writeFileSync(dest, formatted, 'utf-8');
   console.log(`${exists ? 'Atualizado' : 'Copiado'} para auth-server: ${dest}`);
   return true;
 }
 
+function collectTsClassProps(ts: string, className: string, filePath: string, seen: Set<string> = new Set()): Array<{ name: string; type: string; optional: boolean }> {
+  if (seen.has(className)) return [];
+  seen.add(className);
+  const importMap = buildImportMap(ts);
+  const declRegex1 = new RegExp(`export\\s+class\\s+${className}([^\\{]*)\\{`);
+  const declRegex2 = new RegExp(`(^|\n)class\\s+${className}([^\\{]*)\\{`);
+  const declMatch = ts.match(declRegex1) || ts.match(declRegex2);
+  const body = getClassBody(ts, className) ?? '';
+  const own = extractTsProps(body);
+  let merged = [...own];
+  if (declMatch) {
+    const declTail = declMatch[1];
+    const baseMatch = declTail.match(/extends\s+(\w+)/);
+    if (baseMatch) {
+      const baseName = baseMatch[1];
+      let baseProps: Array<{ name: string; type: string; optional: boolean }> = [];
+      const rel = importMap.get(baseName);
+      if (rel) {
+        const resolved = path.resolve(path.dirname(filePath), rel.endsWith('.ts') ? rel : rel + '.ts');
+        if (fs.existsSync(resolved)) {
+          const baseContent = fs.readFileSync(resolved, 'utf-8');
+          baseProps = collectTsClassProps(baseContent, baseName, resolved, seen);
+        }
+      } else {
+        baseProps = collectTsClassProps(ts, baseName, filePath, seen);
+      }
+      const map = new Map<string, { type: string; optional: boolean }>();
+      for (const p of baseProps) map.set(p.name, { type: p.type, optional: p.optional });
+      for (const p of merged) map.set(p.name, { type: p.type, optional: p.optional });
+      merged = Array.from(map.entries()).map(([name, v]) => ({ name, type: v.type, optional: v.optional }));
+    }
+  }
+  return merged;
+}
+
+function transformTypeAliasesToClassesForAuth(ts: string, filePath: string): string {
+  // Procura aliases simples e cria classes com props coletadas da classe alvo.
+  const aliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*;/g;
+  let match: RegExpExecArray | null;
+  let out = ts;
+  const replacements: Array<{ start: number; end: number; text: string }> = [];
+  const importsToRemove: Array<{ targetName: string; importRel: string }> = [];
+  const importMap = buildImportMap(ts);
+
+  while ((match = aliasRegex.exec(ts)) !== null) {
+    const full = match[0];
+    const aliasName = match[1];
+    const targetName = match[2];
+    const importRel = importMap.get(targetName);
+    let props: Array<{ name: string; type: string; optional: boolean }> = [];
+    if (importRel) {
+      const resolved = path.resolve(path.dirname(filePath), importRel.endsWith('.ts') ? importRel : importRel + '.ts');
+      if (fs.existsSync(resolved)) {
+        const targetContent = fs.readFileSync(resolved, 'utf-8');
+        props = collectTsClassProps(targetContent, targetName, resolved);
+      }
+      // Marcar import para remoção, pois substituímos pelo corpo
+      importsToRemove.push({ targetName, importRel });
+    } else {
+      // Tenta encontrar classe alvo no mesmo arquivo
+      const body = getClassBody(ts, targetName);
+      if (body) props = collectTsClassProps(ts, targetName, filePath);
+    }
+
+    if (props.length === 0) continue;
+    let classText = `export class ${aliasName} {\n`;
+    for (const p of props) {
+      classText += `  ${p.name}${p.optional ? '?' : ''}: ${p.type};\n`;
+    }
+    classText += `}`;
+    const start = match.index;
+    const end = match.index + full.length;
+    replacements.push({ start, end, text: classText });
+  }
+
+  if (replacements.length > 0) {
+    replacements.sort((a, b) => b.start - a.start);
+    for (const r of replacements) {
+      out = out.slice(0, r.start) + r.text + out.slice(r.end);
+    }
+  }
+
+  // Remover imports das classes alvo convertidas
+  for (const ir of importsToRemove) {
+    const importLineRegex = new RegExp(`\n?import\\s+(?:type\\s+)?\\{[^}]*\\b${escapeRegExp(ir.targetName)}\\b[^}]*\\}\\s*from\\s*['\"]${escapeRegExp(ir.importRel)}['\"];?\n?`, 'g');
+    out = out.replace(importLineRegex, '\n');
+  }
+
+  return out;
+}
+
 function tsEnumToGdscriptEnum(ts: string, name: string): string {
-  // Remove export, enum, chaves e espaços
-  const body = ts
+  // Remove export, enum, chaves e espaços e quaisquer comentários
+  let body = ts
     .replace(/export\s+enum\s+"?([\w_]+)"?\s*{/, '')
     .replace(/}/, '')
     .trim();
+  body = stripComments(body);
   const lines = body
     .split(',')
     .map(l => l.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter(l => !/^\/\//.test(l));
   let gd = `enum ${name} {\n`;
   lines.forEach((l, i) => {
     const key = l.replace(/\s*=.*$/, '');
+    if (!key) return;
     gd += `    ${key} = ${i},\n`;
   });
   gd += '}\n';
   return gd;
 }
 
-function tsClassToGdscriptClass(ts: string, name: string): string {
-  // Extrai propriedades públicas (assume formato simples: public prop: tipo; ou prop: tipo;)
-  const bodyMatch = ts.match(new RegExp(`export\\s+class\\s+"?${name}"?[^\\{]*\\{([\\s\\S]*?)\\}`));
-  if (!bodyMatch) return `class ${name}:\n    pass\n`;
-  const body = bodyMatch[1];
-  const lines = body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  let props: {name: string, type: string}[] = [];
+type Prop = { name: string; type: string; tsType?: string };
+
+function generateGdClass(name: string, props: Prop[]): string {
   let gd = `class ${name}:\n`;
-  for (const line of lines) {
-    // Exemplo: public foo: number; ou foo: string;
-    const propMatch = line.match(/^(?:public|private|protected|readonly)?\s*(\w+)\??\s*:\s*([^;]+);/);
-    if (propMatch) {
-      const prop = propMatch[1];
-      const rawType = propMatch[2].trim();
-      const gdType = tsTypeToGdType(rawType);
-      props.push({name: prop, type: gdType});
-      gd += `    var ${prop}: ${gdType}\n`;
-    }
-  }
   if (props.length > 0) {
+    for (const p of props) {
+      gd += `    var ${p.name}: ${p.type}\n`;
+    }
     gd += `\n    func _init(`;
     gd += props.map(p => `_${p.name}: ${p.type} = ${p.type === 'String' ? '""' : (p.type === 'bool' ? 'false' : (p.type === 'float' ? '0.0' : (p.type === 'int' ? '0' : (p.type === 'Array' ? '[]' : (p.type === 'Dictionary' ? '{}' : 'null'))) ))}`).join(', ');
     gd += `):\n`;
     for (const p of props) {
       gd += `        ${p.name} = _${p.name}\n`;
     }
+    gd += `\n    func to_dict() -> Dictionary:\n`;
+    gd += `        var d: Dictionary = {}\n`;
+    for (const p of props) {
+      gd += `        d["${p.name}"] = ${p.name}\n`;
+    }
+    gd += `        return d\n`;
+
+    // Static from() coercer for typed usage from generic payloads
+    gd += `\n    static func from(value: Variant) -> ${name}:\n`;
+    gd += `        if typeof(value) == TYPE_OBJECT and value is ${name}:\n`;
+    gd += `            return value\n`;
+    gd += `        if typeof(value) == TYPE_DICTIONARY:\n`;
+    gd += `            var raw: Dictionary = value\n`;
+    gd += `            var obj := ${name}.new()\n`;
+    for (const p of props) {
+      const def = p.type === 'String' ? '""' : (p.type === 'bool' ? 'false' : (p.type === 'float' ? '0.0' : (p.type === 'int' ? '0' : (p.type === 'Array' ? '[]' : (p.type === 'Dictionary' ? '{}' : 'null')) )));
+      if (name === 'CharacterResponse' && p.name === 'instancePath') {
+        gd += `            obj.instancePath = raw.get("instancePath", raw.get("instance", ${def}))\n`;
+        continue;
+      }
+      if (p.type === 'Array') {
+        let itemTypeExpr = '';
+        if (p.tsType) {
+          const arrMatch = p.tsType.match(/^Array<([A-Za-z_][A-Za-z0-9_]*)>/);
+          const brMatch = p.tsType.match(/^([A-Za-z_][A-Za-z0-9_]*)\[\]$/);
+          itemTypeExpr = (arrMatch && arrMatch[1]) || (brMatch && brMatch[1]) || '';
+        }
+        gd += `            obj.${p.name} = []\n`;
+        gd += `            if raw.has("${p.name}") and typeof(raw["${p.name}"]) == TYPE_ARRAY:\n`;
+        gd += `                for it in raw["${p.name}"]:\n`;
+        if (itemTypeExpr && /^[A-Z]/.test(itemTypeExpr)) {
+          gd += `                    var conv = ${itemTypeExpr}.from(it)\n`;
+          gd += `                    if conv != null:\n`;
+          gd += `                        obj.${p.name}.append(conv)\n`;
+          gd += `                    else:\n`;
+          gd += `                        obj.${p.name}.append(it)\n`;
+        } else {
+          gd += `                    obj.${p.name}.append(it)\n`;
+        }
+        continue;
+      }
+      gd += `            obj.${p.name} = raw.get("${p.name}", ${def})\n`;
+    }
+    gd += `            return obj\n`;
+    gd += `        return null\n`;
   } else {
     gd += `    pass\n`;
   }
   return gd;
+}
+
+function buildImportMap(ts: string): Map<string, string> {
+  // Suporta: import { A, type B as C } from '...'
+  //          import type { A, B } from '...'
+  const importRegex = /import\s+(?:type\s+)?\{\s*([^}]+)\s*\}\s*from\s*['"]([^'\"]+)['"]/g;
+  const importMap = new Map<string, string>();
+  let m: RegExpExecArray | null;
+  while ((m = importRegex.exec(ts)) !== null) {
+    const names = m[1].split(',').map(s => s.trim()).filter(Boolean);
+    const rel = m[2];
+    for (let n of names) {
+      // remove prefixo 'type ' dentro do bloco
+      n = n.replace(/^type\s+/, '');
+      // remove alias 'as Alias'
+      n = n.replace(/\sas\s+.+$/, '');
+      importMap.set(n.trim(), rel);
+    }
+  }
+  return importMap;
+}
+
+function collectClassPropsFromContent(ts: string, className: string, filePath: string, seen: Set<string> = new Set()): Prop[] {
+  if (seen.has(className)) return [];
+  seen.add(className);
+  const importMap = buildImportMap(ts);
+  const declRegex1 = new RegExp(`export\\s+class\\s+${className}([^\\{]*)\\{`);
+  const declRegex2 = new RegExp(`(^|\n)class\\s+${className}([^\\{]*)\\{`);
+  const declMatch = ts.match(declRegex1) || ts.match(declRegex2);
+  const body = getClassBody(ts, className) ?? '';
+  const own = extractTsProps(body).map(p => ({ name: p.name, type: tsTypeToGdType(p.type), tsType: p.type }));
+  let merged: Prop[] = [...own];
+  if (declMatch) {
+    const declTail = declMatch[1];
+    const baseMatch = declTail.match(/extends\s+(\w+)/);
+    if (baseMatch) {
+      const baseName = baseMatch[1];
+      let baseProps: Prop[] = [];
+      const rel = importMap.get(baseName);
+      if (rel) {
+        const resolved = path.resolve(path.dirname(filePath), rel.endsWith('.ts') ? rel : rel + '.ts');
+        if (fs.existsSync(resolved)) {
+          const baseContent = fs.readFileSync(resolved, 'utf-8');
+          baseProps = collectClassPropsFromContent(baseContent, baseName, resolved, seen);
+        }
+      } else {
+        // Base na mesma unidade
+        baseProps = collectClassPropsFromContent(ts, baseName, filePath, seen);
+      }
+      const map = new Map<string, { type: string; tsType?: string }>();
+      for (const p of baseProps) map.set(p.name, { type: p.type, tsType: p.tsType });
+      for (const p of merged) map.set(p.name, { type: p.type, tsType: p.tsType });
+      merged = Array.from(map.entries()).map(([name, v]) => ({ name, type: v.type, tsType: v.tsType }));
+    }
+  }
+  return merged;
+}
+
+function tsClassToGdscriptClass(ts: string, name: string, filePath: string): string {
+  // Caso especial: gerar WebsocketMessage com data genérica (Variant) e helpers
+  if (name === 'WebsocketMessage') {
+    return [
+      `class WebsocketMessage:`,
+      `    var type: int`,
+      `    var data: Variant`,
+      ``,
+      `    func _init(_type: int = 0, _data: Variant = null):`,
+      `        type = _type`,
+      `        data = _data`,
+      ``,
+      `    func to_dict() -> Dictionary:`,
+      `        var d: Dictionary = {}`,
+      `        d["type"] = type`,
+      `        var payload = data`,
+      `        if typeof(payload) == TYPE_OBJECT and payload != null and payload.has_method("to_dict"):
+            payload = payload.to_dict()`,
+      `        d["data"] = payload`,
+      `        return d`,
+      ``,
+      `    func _to_string() -> String:`,
+      `        var payload_data = data`,
+      `        if typeof(payload_data) == TYPE_OBJECT and payload_data != null and payload_data.has_method("to_dict"):
+            payload_data = payload_data.to_dict()`,
+      `        var json_obj := {`,
+      `            "type": type,`,
+      `            "data": payload_data,`,
+      `        }`,
+      `        return JSON.stringify(json_obj)`,
+      ``,
+    ].join('\n');
+  }
+  const props = collectClassPropsFromContent(ts, name, filePath);
+  return generateGdClass(name, props);
+}
+
+function getClassBody(ts: string, className: string): string | null {
+  const startDeclIdx = ts.indexOf(`class ${className}`);
+  if (startDeclIdx === -1) return null;
+  const openIdx = ts.indexOf('{', startDeclIdx);
+  if (openIdx === -1) return null;
+  let depth = 1;
+  let i = openIdx;
+  while (i < ts.length - 1 && depth > 0) {
+    i++;
+    const ch = ts[i];
+    if (ch === '{') depth++;
+    else if (ch === '}') depth--;
+  }
+  if (depth !== 0) return null;
+  return ts.slice(openIdx + 1, i);
 }
 
 function tsTypeToGdType(type: string): string {
@@ -96,11 +338,207 @@ function tsTypeToGdType(type: string): string {
     case 'any': return 'Variant';
     default:
       if (type === 'WebsocketEvents') return 'int';
+      if (type === 'Direction') return 'int';
+      if (type === 'Date') return 'Variant';
+      // Mapear parâmetros genéricos (e.g., T) para Variant (genérico)
+      if (/^[A-Z]$/.test(type)) return 'Variant';
       if (/^Array<.+>$/.test(type)) return 'Array';
       if (type.endsWith('[]')) return `Array`; // simplificação
       if (type === 'object' || /^Record<.+>$/.test(type)) return 'Dictionary';
       return 'Variant';
   }
+}
+
+function stripComments(ts: string): string {
+  // Remove block comments /* ... */ and line comments // ...
+  let out = ts.replace(/\/\*[\s\S]*?\*\//g, '');
+  out = out.replace(/(^|\s)\/\/.*$/gm, '$1');
+  return out;
+}
+
+function flattenExtendedClasses(ts: string, filePath: string): string {
+  // Processa todas as classes exportadas que usam 'extends <Base>' e substitui por classe plana com props mescladas
+  const importRegex = /import\s*{\s*([^}]+)\s*}\s*from\s*['"]([^'\"]+)['"]/g;
+  const importMap = new Map<string, string>();
+  let m: RegExpExecArray | null;
+  while ((m = importRegex.exec(ts)) !== null) {
+    const names = m[1].split(',').map(s => s.trim()).filter(Boolean);
+    const rel = m[2];
+    for (const n of names) importMap.set(n, rel);
+  }
+
+  const classRegex = /export\s+class\s+(\w+)\s+extends\s+(\w+)[^{]*\{([\s\S]*?)\}/g;
+  let out = ts;
+  let clsMatch: RegExpExecArray | null;
+  const replacements: Array<{ start: number; end: number; text: string }> = [];
+  const importsToRemove: Array<{ baseName: string; importRel: string }> = [];
+
+  while ((clsMatch = classRegex.exec(ts)) !== null) {
+    const full = clsMatch[0];
+    const clsName = clsMatch[1];
+    const baseName = clsMatch[2];
+    const ownBody = clsMatch[3];
+    const importRel = importMap.get(baseName);
+    let baseProps: Array<{ name: string; type: string; optional: boolean }> = [];
+    if (importRel) {
+      const resolved = path.resolve(path.dirname(filePath), importRel.endsWith('.ts') ? importRel : importRel + '.ts');
+      if (fs.existsSync(resolved)) {
+        const baseContent = fs.readFileSync(resolved, 'utf-8');
+        const baseBody = getClassBody(baseContent, baseName);
+        if (baseBody) {
+          baseProps = extractTsProps(baseBody);
+        }
+      }
+    }
+    const ownProps = extractTsProps(ownBody);
+    const mergedMap = new Map<string, { type: string; optional: boolean }>();
+    for (const p of baseProps) mergedMap.set(p.name, { type: p.type, optional: p.optional });
+    for (const p of ownProps) mergedMap.set(p.name, { type: p.type, optional: p.optional });
+    const merged = Array.from(mergedMap.entries()).map(([name, v]) => ({ name, type: v.type, optional: v.optional }));
+
+    let classText = `export class ${clsName} {\n`;
+    for (const p of merged) {
+      classText += `  ${p.name}${p.optional ? '?' : ''}: ${p.type};\n`;
+    }
+    classText += `}`;
+
+    const start = clsMatch.index;
+    const end = clsMatch.index + full.length;
+    replacements.push({ start, end, text: classText });
+
+    // Acumula import para remoção após aplicar substituições
+    if (importRel) {
+      importsToRemove.push({ baseName, importRel });
+    }
+  }
+
+  // Aplicar substituições (do fim para o início para preservar índices)
+  if (replacements.length > 0) {
+    replacements.sort((a, b) => b.start - a.start);
+    for (const r of replacements) {
+      out = out.slice(0, r.start) + r.text + out.slice(r.end);
+    }
+  }
+  // Remove imports das classes bases já substituídas
+  for (const ir of importsToRemove) {
+    const importLineRegex = new RegExp(`\\n?import\\s*{[^}]*\\b${ir.baseName}\\b[^}]*}\\s*from\\s*['\"]${escapeRegExp(ir.importRel)}['\"];?\\n?`, 'g');
+    out = out.replace(importLineRegex, '\n');
+  }
+  return out;
+}
+
+function extractTsProps(body: string): Array<{ name: string; type: string; optional: boolean }> {
+  const lines = body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const result: Array<{ name: string; type: string; optional: boolean }> = [];
+  for (const line of lines) {
+    const propMatch = line.match(/^(?:public|private|protected|readonly)?\s*(\w+)(\??)\s*:\s*([^;]+);/);
+    if (propMatch) {
+      const name = propMatch[1];
+      const optional = propMatch[2] === '?';
+      const type = propMatch[3].trim();
+      result.push({ name, type, optional });
+    }
+  }
+  return result;
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function addSemicolonsForConstDeclarations(ts: string): string {
+  // Insere ';' após declarações export const ... = {...} ou [...]
+  const regex = /export\s+const\s+\w+\s*=\s*(\{|\[)/g;
+  const replacements: Array<{ insertPos: number }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(ts)) !== null) {
+    const openChar = match[1];
+    const startIdx = match.index + match[0].length - 1; // aponta para '{' ou '['
+    let depth = 1;
+    let i = startIdx;
+    while (i < ts.length - 1 && depth > 0) {
+      i++;
+      const ch = ts[i];
+      if (ch === openChar) depth++;
+      else if (openChar === '{' && ch === '}') depth--;
+      else if (openChar === '[' && ch === ']') depth--;
+    }
+    if (depth === 0) {
+      // i é o índice do '}' ou ']'
+      // Procurar próximo caractere não espaço/nova linha
+      let j = i + 1;
+      while (j < ts.length && /[\s]/.test(ts[j])) j++;
+      if (j >= ts.length || ts[j] !== ';') {
+        // Inserir ';' logo após o fechamento
+        replacements.push({ insertPos: i + 1 });
+      }
+    }
+  }
+  if (replacements.length === 0) return ts;
+  // Aplicar inserções do fim para o começo
+  let out = ts;
+  replacements.sort((a, b) => b.insertPos - a.insertPos);
+  for (const r of replacements) {
+    out = out.slice(0, r.insertPos) + ';' + out.slice(r.insertPos);
+  }
+  return out;
+}
+
+function formatForAuthServer(ts: string): string {
+  // Remover espaços em branco no fim das linhas
+  const lines = ts.split(/\r?\n/).map(l => l.replace(/[ \t]+$/, ''));
+  const out: string[] = [];
+  let inClass = false;
+  let braceDepth = 0;
+
+  const isClassStart = (line: string) => /^export\s+class\s+\w+[^\{]*\{\s*$/.test(line);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (isClassStart(line)) {
+      // Garantir uma linha em branco antes da classe
+      if (out.length === 0 || out[out.length - 1].trim() !== '') {
+        out.push('');
+      }
+      inClass = true;
+      // Atualiza profundidade de chaves
+      braceDepth = (line.match(/\{/g)?.length || 0) - (line.match(/\}/g)?.length || 0);
+      out.push(line);
+      // Inserir linha em branco logo após a abertura da classe
+      out.push('');
+      continue;
+    }
+
+    if (inClass) {
+      // Atualiza profundidade de chaves com a linha atual
+      braceDepth += (line.match(/\{/g)?.length || 0) - (line.match(/\}/g)?.length || 0);
+      // Antes de fechar a classe, garantir linha em branco
+      if (line.trim() === '}') {
+        if (out.length > 0 && out[out.length - 1].trim() !== '') {
+          out.push('');
+        }
+      }
+      out.push(line);
+      if (braceDepth <= 0) {
+        // Final da classe: inserir uma linha em branco
+        if (out.length > 0 && out[out.length - 1].trim() !== '') {
+          out.push('');
+        }
+        inClass = false;
+        braceDepth = 0;
+      }
+      continue;
+    }
+
+    out.push(line);
+  }
+
+  // Compactar múltiplas linhas em branco para no máximo uma
+  let result = out.join('\n').replace(/\n{3,}/g, '\n\n');
+  // Garantir uma linha em branco ao final do arquivo
+  result = result.replace(/\n+$/, '\n\n');
+  return result;
 }
 
 function tsObjectToGdscriptDict(ts: string, name: string): string {
@@ -118,6 +556,7 @@ function tsObjectToGdscriptDict(ts: string, name: string): string {
     if (ts[endIdx] === '}') open--;
   }
   let body = ts.slice(startIdx, endIdx + 1);
+  body = stripComments(body);
   // Remove aspas simples e duplas das chaves e valores
   body = body.replace(/(['"])?([a-zA-Z0-9_]+)\1\s*:/g, '"$2":');
   body = body.replace(/: ?'([a-zA-Z0-9_]+)'/g, ': "$1"');
@@ -136,6 +575,33 @@ function tsObjectToGdscriptDict(ts: string, name: string): string {
   return `const ${name} = ${body}`;
 }
 
+function tsArrayToGdscriptArray(ts: string, name: string): string {
+  const startRegex = new RegExp(`export\\s+const\\s+${name}\\s*=\\s*\\[`);
+  const startMatch = ts.match(startRegex);
+  if (!startMatch) return '';
+  const startIdx = ts.indexOf(startMatch[0]) + startMatch[0].length - 1; // at '['
+
+  let openSquare = 1;
+  let openCurly = 0;
+  let endIdx = startIdx;
+  while (endIdx < ts.length - 1 && openSquare > 0) {
+    endIdx++;
+    const ch = ts[endIdx];
+    if (ch === '[') openSquare++;
+    if (ch === ']') openSquare--;
+    if (ch === '{') openCurly++;
+    if (ch === '}') openCurly--;
+  }
+  let body = ts.slice(startIdx, endIdx + 1);
+  body = stripComments(body);
+  // Quote object keys and normalize quotes for strings
+  body = body.replace(/(['"])??([a-zA-Z0-9_]+)\1\s*:/g, '"$2":');
+  body = body.replace(/'([^']*)'/g, '"$1"');
+  // Remove trailing commas before ] or }
+  body = body.replace(/,\s*([\]}])/g, '$1');
+  return `const ${name} = ${body}`;
+}
+
 function tsFunctionToGdscriptFunction(ts: string, name: string): string {
   // Extrai assinatura e corpo da função exportada
   const funcMatch = ts.match(new RegExp(`export\\s+function\\s+${name}\\s*\\(([^)]*)\\)\\s*(:\\s*[^{]+)?\\s*{([\\s\\S]*?)}\\s*$`, 'm'));
@@ -146,6 +612,7 @@ function tsFunctionToGdscriptFunction(ts: string, name: string): string {
     ? args.split(',').map(a => a.split(':')[0].trim()).filter(Boolean).join(', ')
     : '';
   let body = funcMatch[3].trim();
+  body = stripComments(body);
 
   // Extrai apenas o return da função
   const returnMatch = body.match(/return\s+{([\s\S]*?)}/);
@@ -174,8 +641,30 @@ function tsFunctionToGdscriptFunction(ts: string, name: string): string {
   return `func ${name}(${gdArgs}):\n${body}`;
 }
 
+function tsTypeAliasToGdscriptClass(ts: string, aliasName: string, targetName: string, filePath: string): string {
+  // Tenta encontrar a classe alvo no próprio arquivo
+  let props: Prop[] = [];
+  const targetDeclRegex = new RegExp(`export\\s+class\\s+${targetName}\\b|(^|\\n)class\\s+${targetName}\\b`);
+  if (targetDeclRegex.test(ts)) {
+    props = collectClassPropsFromContent(ts, targetName, filePath);
+  } else {
+    // Tenta resolver via import
+    const importMap = buildImportMap(ts);
+    const rel = importMap.get(targetName);
+    if (rel) {
+      const resolved = path.resolve(path.dirname(filePath), rel.endsWith('.ts') ? rel : rel + '.ts');
+      if (fs.existsSync(resolved)) {
+        const targetContent = fs.readFileSync(resolved, 'utf-8');
+        props = collectClassPropsFromContent(targetContent, targetName, resolved);
+      }
+    }
+  }
+  return generateGdClass(aliasName, props);
+}
+
 function processFile(file: string) {
-  const content = fs.readFileSync(file, 'utf-8');
+  const contentRaw = fs.readFileSync(file, 'utf-8');
+  const content = stripComments(contentRaw);
   let output = '';
 
   // Enums
@@ -195,12 +684,21 @@ function processFile(file: string) {
     output += tsObjectToGdscriptDict(content, name) + '\n';
   }
 
+  // Arrays (inclui arrays de objetos)
+  const arrRegex = /export\s+const\s+(\w+)\s*=\s*\[/g;
+  let arrMatch;
+  while ((arrMatch = arrRegex.exec(content)) !== null) {
+    const name = arrMatch[1];
+    const arrOut = tsArrayToGdscriptArray(content, name);
+    if (arrOut) output += arrOut + '\n';
+  }
+
   // Classes (suporta genéricos e qualquer conteúdo entre o nome e '{')
   const classRegex = /export\s+class\s+(\w+)[^{]*{([\s\S]*?)}/g;
   let classMatch;
   while ((classMatch = classRegex.exec(content)) !== null) {
     const name = classMatch[1];
-    output += tsClassToGdscriptClass(content, name) + '\n';
+    output += tsClassToGdscriptClass(content, name, file) + '\n';
   }
 
   // Funções
@@ -209,6 +707,16 @@ function processFile(file: string) {
   while ((funcMatch = funcRegex.exec(content)) !== null) {
     const name = funcMatch[1];
     output += tsFunctionToGdscriptFunction(content, name) + '\n';
+  }
+
+  // Type aliases simples: export type A = B;
+  const typeAliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*;/g;
+  let aliasMatch: RegExpExecArray | null;
+  while ((aliasMatch = typeAliasRegex.exec(content)) !== null) {
+    const aliasName = aliasMatch[1];
+    const targetName = aliasMatch[2];
+    const aliasOut = tsTypeAliasToGdscriptClass(content, aliasName, targetName, file);
+    output += aliasOut + '\n';
   }
 
   if (output.trim().length > 0) {

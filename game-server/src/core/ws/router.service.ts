@@ -6,6 +6,7 @@ import { AuthService } from '../../modules/auth/auth.service';
 import { PingService } from '../../modules/ping/ping.service';
 import { ChatService } from '../../modules/chat/chat.service';
 import { InstanceService } from '../../modules/instance/instance.service';
+import { CharacterService } from '../../modules/character/character.service';
 
 @Injectable()
 export class RouterService {
@@ -16,12 +17,14 @@ export class RouterService {
     private readonly ping: PingService,
     private readonly chat: ChatService,
     private readonly instance: InstanceService,
+    private readonly character: CharacterService,
   ) {
     this.handlers = {
       ...this.auth.getHandlers(),
       ...this.ping.getHandlers(),
       ...this.chat.getHandlers(),
       ...this.instance.getHandlers(),
+      ...this.character.getHandlers(),
     };
   }
 

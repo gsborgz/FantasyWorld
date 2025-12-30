@@ -1,6 +1,6 @@
 extends Node
 
-const _gs := preload("res://shared/game-server.gd")
+const _dtos := preload("res://shared/dtos.gd")
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
 const _ws_utils := preload("res://shared/ws-utils.gd")
 
@@ -26,10 +26,11 @@ func _on_game_servers_request_completed(result, response_code, headers, body) ->
 		return
 
 	if response_code == 200 and typeof(parsed) == TYPE_ARRAY:
-		var servers: Array[_gs.GameServerInfo] = []
+		var servers: Array[_dtos.GameServerResponse] = []
+		
 		for item in parsed:
 			if typeof(item) == TYPE_DICTIONARY:
-				var info := _gs.GameServerInfo.new(
+				var info := _dtos.GameServerResponse.new(
 					item.get("name", ""),
 					item.get("location", ""),
 					item.get("url", ""),
@@ -41,7 +42,7 @@ func _on_game_servers_request_completed(result, response_code, headers, body) ->
 		print("falha ao buscar servidores")
 
 
-func _create_server_list(servers: Array[_gs.GameServerInfo]) -> void:
+func _create_server_list(servers: Array[_dtos.GameServerResponse]) -> void:
 	for server in servers:
 		var serverOption := ServerOption.instantiate(server.name, server.location, server.status, server.url)
 		
@@ -54,7 +55,6 @@ func _on_ws_packet_received(message):
 	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
 		GameManager.set_scene("character_selection")
 	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
-		print("sdsdf")
 		GameManager.set_scene("server_list")
 
 

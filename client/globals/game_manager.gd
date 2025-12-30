@@ -12,6 +12,9 @@ func set_scene(scenePath: String) -> void:
 	var fileName := sceneName[sceneName.size() - 1]
 	var scene: PackedScene = load("res://scenes/" + scenePath + "/" + fileName + ".tscn")
 	
-	_current_scene_root = scene.instantiate()
-	
-	add_child(_current_scene_root)
+	if scene != null:
+		_current_scene_root = scene.instantiate()
+		
+		add_child(_current_scene_root)
+	else:
+		print("failed to load scene: %s" % scenePath)

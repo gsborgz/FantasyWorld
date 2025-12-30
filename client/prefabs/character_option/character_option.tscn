@@ -1,0 +1,20 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmajrgeh5gpp6"]
+
+[ext_resource type="Script" uid="uid://480cehagqmls" path="res://prefabs/character_option/character_option.gd" id="1_j0jx4"]
+
+[node name="CharacterOption" type="VBoxContainer"]
+script = ExtResource("1_j0jx4")
+
+[node name="Name" type="Label" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Select" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Select"
+
+[node name="Delete" type="Button" parent="HBoxContainer"]
+layout_mode = 2
+text = "Delete"

@@ -30,21 +30,27 @@ func connect_to_url(url: String) -> int:
 
 func join_instance(instancePath: String) -> int:
 	var join_msg = _ws_utils.WebsocketMessage.new()
-	
+	var data := _ws_utils.JoinInstanceData.new()
+
+	data.instancePath = instancePath
 	join_msg.type = _ws_utils.WebsocketEvents.JOIN_INSTANCE
-	join_msg.data = {
-		"instancePath": instancePath
-	}
-	
+	join_msg.data = data
+
 	return WS.send(join_msg)
 
 
 func send(msg: _ws_utils.WebsocketMessage) -> int:
 	# Serializa uma representação em Dictionary do objeto
+	var payload_data = msg.data
+	if typeof(payload_data) == TYPE_OBJECT and payload_data != null:
+		if payload_data.has_method("to_dict"):
+			payload_data = payload_data.to_dict()
+		else:
+			# Sem método de conversão: tenta deixar como está (pode falhar)
+			payload_data = payload_data
 	var json_obj := {
-		"client_sid": msg.client_sid,
 		"type": msg.type,
-		"data": msg.data,
+		"data": payload_data,
 	}
 	var json_str = JSON.stringify(json_obj)
 	return socket.send_text(json_str)
@@ -60,11 +66,10 @@ func get_message() -> Variant:
 		var err = json.parse(data.get_string_from_utf8())
 
 		if err == OK:
-			# Converte Dictionary recebido em objeto tipado WebsocketMessage
+			# Retorna dados genéricos (Dictionary/Array) sem conversão para DTOs
 			if typeof(json.data) == TYPE_DICTIONARY:
 				var dict: Dictionary = json.data
 				var msg := _ws_utils.WebsocketMessage.new()
-				msg.client_sid = dict.get("client_sid", "")
 				msg.type = dict.get("type", _ws_utils.WebsocketEvents.NONE)
 				msg.data = dict.get("data", null)
 				return msg
