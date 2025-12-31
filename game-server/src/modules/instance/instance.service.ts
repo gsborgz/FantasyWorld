@@ -54,8 +54,33 @@ export class InstanceService {
 
     this.broadcastToInstance(client, instancePath, {
       type: WebsocketEvents.JOIN_INSTANCE,
-      data: { clientId },
+      data: {
+        clientId,
+        characterId: client.character?.id,
+        characterName: (client.character as any)?.name ?? (client as any).user?.username ?? "",
+        x: (client.character as any)?.x,
+        y: (client.character as any)?.y,
+        direction: (client.character as any)?.direction,
+        speed: (client.character as any)?.speed ?? 200,
+      },
     }, ctx.allClients);
+
+    // Envia imediatamente um UPDATE_POSITION para que clientes já presentes
+    // possam instanciar o novo player sem depender do primeiro movimento
+    if (client.character?.id) {
+      this.broadcastToInstance(client, instancePath, {
+        type: WebsocketEvents.UPDATE_POSITION,
+        data: {
+          clientId: client.id,
+          characterId: client.character.id,
+          characterName: client.character.name,
+          x: client.character.x,
+          y: client.character.y,
+          direction: client.character.direction,
+          speed: client.character?.speed ?? 200,
+        },
+      }, ctx.allClients);
+    }
   }
 
   private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>, ctx: { allClients: Set<WebSocket> }) {
@@ -70,6 +95,7 @@ export class InstanceService {
     this.broadcastToInstance(client, instancePath, {
       type: WebsocketEvents.UPDATE_POSITION,
       data: {
+        clientId: client.id,
         characterId: client.character?.id,
         characterName: client.character?.name,
         x: data.x,

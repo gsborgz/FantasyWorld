@@ -27,10 +27,6 @@ export enum WebsocketEvents {
   INSTANCE_CHAT_MESSAGE,
 }
 
-export class JoinInstanceData {
-  instancePath: string;
-}
-
 export class WebsocketMessage<T> {
   clientId: string;
   type: WebsocketEvents;

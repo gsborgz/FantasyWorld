@@ -2,6 +2,7 @@ class_name WebSocketClient
 extends Node
 
 const _ws_utils := preload("res://shared/ws-utils.gd")
+const _dtos := preload("res://shared/dtos.gd")
 const _instances := preload("res://shared/world-instances.gd")
 
 @export var handshake_headers: PackedStringArray
@@ -30,7 +31,7 @@ func connect_to_url(url: String) -> int:
 
 func join_instance(instancePath: String) -> int:
 	var join_msg = _ws_utils.WebsocketMessage.new()
-	var data := _ws_utils.JoinInstanceData.new()
+	var data := _dtos.JoinInstanceRequest.new()
 
 	data.instancePath = instancePath
 	join_msg.type = _ws_utils.WebsocketEvents.JOIN_INSTANCE

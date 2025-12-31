@@ -21,27 +21,6 @@ enum WebsocketEvents {
     INSTANCE_CHAT_MESSAGE = 19,
 }
 
-class JoinInstanceData:
-    var instancePath: String
-
-    func _init(_instancePath: String = ""):
-        instancePath = _instancePath
-
-    func to_dict() -> Dictionary:
-        var d: Dictionary = {}
-        d["instancePath"] = instancePath
-        return d
-
-    static func from(value: Variant) -> JoinInstanceData:
-        if typeof(value) == TYPE_OBJECT and value is JoinInstanceData:
-            return value
-        if typeof(value) == TYPE_DICTIONARY:
-            var raw: Dictionary = value
-            var obj := JoinInstanceData.new()
-            obj.instancePath = raw.get("instancePath", "")
-            return obj
-        return null
-
 class WebsocketMessage:
     var type: int
     var data: Variant

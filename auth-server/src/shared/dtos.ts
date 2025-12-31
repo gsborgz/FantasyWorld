@@ -74,6 +74,24 @@ export class AddCharacterRequest {
 
 }
 
+export class JoinInstanceRequest {
+
+  instancePath: string;
+
+}
+
+export class JoinInstanceResponse {
+
+  clientId: string;
+  characterId: string;
+  characterName: string;
+  x: number;
+  y: number;
+  direction: number;
+  speed: number;
+
+}
+
 export class UpdatePositionResponse {
 
   characterId: string;

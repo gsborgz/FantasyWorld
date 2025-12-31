@@ -243,6 +243,72 @@ class AddCharacterRequest:
             return obj
         return null
 
+class JoinInstanceRequest:
+    var instancePath: String
+
+    func _init(_instancePath: String = ""):
+        instancePath = _instancePath
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["instancePath"] = instancePath
+        return d
+
+    static func from(value: Variant) -> JoinInstanceRequest:
+        if typeof(value) == TYPE_OBJECT and value is JoinInstanceRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := JoinInstanceRequest.new()
+            obj.instancePath = raw.get("instancePath", "")
+            return obj
+        return null
+
+class JoinInstanceResponse:
+    var clientId: String
+    var characterId: String
+    var characterName: String
+    var x: float
+    var y: float
+    var direction: float
+    var speed: float
+
+    func _init(_clientId: String = "", _characterId: String = "", _characterName: String = "", _x: float = 0.0, _y: float = 0.0, _direction: float = 0.0, _speed: float = 0.0):
+        clientId = _clientId
+        characterId = _characterId
+        characterName = _characterName
+        x = _x
+        y = _y
+        direction = _direction
+        speed = _speed
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["clientId"] = clientId
+        d["characterId"] = characterId
+        d["characterName"] = characterName
+        d["x"] = x
+        d["y"] = y
+        d["direction"] = direction
+        d["speed"] = speed
+        return d
+
+    static func from(value: Variant) -> JoinInstanceResponse:
+        if typeof(value) == TYPE_OBJECT and value is JoinInstanceResponse:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := JoinInstanceResponse.new()
+            obj.clientId = raw.get("clientId", "")
+            obj.characterId = raw.get("characterId", "")
+            obj.characterName = raw.get("characterName", "")
+            obj.x = raw.get("x", 0.0)
+            obj.y = raw.get("y", 0.0)
+            obj.direction = raw.get("direction", 0.0)
+            obj.speed = raw.get("speed", 0.0)
+            return obj
+        return null
+
 class UpdatePositionResponse:
     var characterId: String
     var characterName: String

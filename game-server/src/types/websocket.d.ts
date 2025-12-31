@@ -16,6 +16,7 @@ declare module 'ws' {
       x: number;
       y: number;
       direction: number;
+      speed?: number;
       lastPositionUpdate: number;
     }
   }
