@@ -11,6 +11,7 @@ declare module 'ws' {
     };
     character?: {
       id: string;
+      name: string;
       instancePath: string;
       x: number;
       y: number;

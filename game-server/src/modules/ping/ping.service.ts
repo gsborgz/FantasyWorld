@@ -14,7 +14,7 @@ export class PingService {
   // Handlers
   private handlePing(client: WebSocket, _message: WebsocketMessage<any>, ctx: { allClients: Set<WebSocket> }) {
     client.send(
-      JSON.stringify({ type: WebsocketEvents.PONG, data: { clientsCount: ctx.allClients.size } })
+      JSON.stringify({ clientId: client.id, type: WebsocketEvents.PONG, data: { clientsCount: ctx.allClients.size } })
     );
   }
 }

@@ -24,7 +24,7 @@ export class CharacterService {
   // Handlers
   private async handleGetCharacters(client: WebSocket) {
     if (!client.user?.id) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
     
@@ -32,12 +32,12 @@ export class CharacterService {
       where: { userId: client.user.id },
     });
 
-    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTERS_LISTED, data: { characters } }));
+    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTERS_LISTED, data: { characters } }));
   }
 
   private async handleCharacterAdd(client: WebSocket, message: WebsocketMessage<AddCharacterRequest>) {
     if (!client.user?.id) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
     
@@ -53,12 +53,12 @@ export class CharacterService {
     
     await this.dataSource.getRepository(Character).save(character);
 
-    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_ADDED }));
+    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_ADDED }));
   }
 
   private async handleCharacterSelect(client: WebSocket, message: WebsocketMessage<SelectCharacterRequest>) {
     if (!client.user?.id) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
     
@@ -68,12 +68,13 @@ export class CharacterService {
     });
 
     if (!character) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
 
     client.character = {
       id: character.id,
+      name: character.name,
       instancePath: character.instancePath,
       x: character.x,
       y: character.y,
@@ -81,12 +82,12 @@ export class CharacterService {
       lastPositionUpdate: Date.now(),
     };
 
-    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
+    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
   }
 
   private async handleCharacterDelete(client: WebSocket, message: WebsocketMessage<DeleteCharacterRequest>) {    
     if (!client.user?.id) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
 
@@ -96,13 +97,13 @@ export class CharacterService {
     });
 
     if (!character) {
-      client.send(JSON.stringify({ type: WebsocketEvents.DENY_RESPONSE }));
+      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
 
     await this.dataSource.getRepository(Character).remove(character);
 
-    client.send(JSON.stringify({ type: WebsocketEvents.CHARACTER_DELETED, data: character }));
+    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_DELETED, data: character }));
   }
 
 }

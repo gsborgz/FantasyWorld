@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://703jnkv5c7af"]
+[gd_scene load_steps=3 format=3 uid="uid://703jnkv5c7af"]
 
 [ext_resource type="Script" uid="uid://cfxefs7oquj36" path="res://scenes/map_instances/main_city/main_city_a/main_city_a.gd" id="1_nxpq1"]
+[ext_resource type="Texture2D" uid="uid://ls6ylt8e785g" path="res://assets/floor.svg" id="2_jgqrb"]
 
 [node name="MainCityA" type="Node"]
 script = ExtResource("1_nxpq1")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Texture" type="Sprite2D" parent="World"]
+texture_repeat = 2
+position = Vector2(573, 344)
+texture = ExtResource("2_jgqrb")
+region_enabled = true
+region_rect = Rect2(0, 0, 10000, 10000)
+
+[node name="UI" type="CanvasLayer" parent="."]

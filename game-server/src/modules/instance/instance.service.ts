@@ -71,6 +71,7 @@ export class InstanceService {
       type: WebsocketEvents.UPDATE_POSITION,
       data: {
         characterId: client.character?.id,
+        characterName: client.character?.name,
         x: data.x,
         y: data.y,
         direction: data.direction,
@@ -89,7 +90,7 @@ export class InstanceService {
       if (clientInstancePath !== instancePath) continue;
 
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
+        client.send(JSON.stringify({ clientId: sender.id, ...message }));
       }
     }
   }

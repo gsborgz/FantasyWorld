@@ -31,7 +31,7 @@ export class RouterService {
   dispatchMessage(client: WebSocket, message: WebsocketMessage<any>, allClients: Set<WebSocket>) {
     const handler = this.handlers[message.type as WebsocketEvents];
     if (!handler) {
-      client.send(JSON.stringify({ type: 'echo' }));
+      client.send(JSON.stringify({ clientId: client.id, type: 'echo' }));
       return;
     }
     const ctx: HandlerContext = { allClients };

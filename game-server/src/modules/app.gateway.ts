@@ -4,6 +4,7 @@ import { WebSocketServer as WsServer, WebSocket } from 'ws';
 import { WebsocketMessage } from '../shared/ws-utils';
 import { valkey, keys } from '../core/datasources/valkey.datasource';
 import { RouterService } from '../core/ws/router.service';
+import { randomUUID } from 'node:crypto';
 
 @WebSocketGateway({ path: '/ws' })
 export class AppGateway implements OnModuleDestroy {
@@ -23,7 +24,7 @@ export class AppGateway implements OnModuleDestroy {
 
       if (this.allClients.size >= this.maxClients) {
         try {
-          client.send(JSON.stringify({ type: 'error', error: 'Server full' }));
+          client.send(JSON.stringify({ clientId: client.id, type: 'error', error: 'Server full' }));
         } finally {
           client.close();
         }
@@ -31,6 +32,8 @@ export class AppGateway implements OnModuleDestroy {
       }
 
       if (!this.allClients.has(client)) {
+        client.id = randomUUID() + Date.now().toString();
+
         this.allClients.add(client);
       }
 
@@ -39,7 +42,7 @@ export class AppGateway implements OnModuleDestroy {
         try {
           msg = JSON.parse(data.toString());
         } catch {
-          client.send(JSON.stringify({ type: 'error', error: 'Invalid JSON' }));
+          client.send(JSON.stringify({ clientId: client.id, type: 'error', error: 'Invalid JSON' }));
           return;
         }
 

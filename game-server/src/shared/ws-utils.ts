@@ -32,6 +32,7 @@ export class JoinInstanceData {
 }
 
 export class WebsocketMessage<T> {
+  clientId: string;
   type: WebsocketEvents;
   data: T;
 }

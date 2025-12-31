@@ -63,6 +63,15 @@ export class AddCharacterRequest {
 
 
 // Response
+export class UpdatePositionResponse {
+  characterId: string;
+  characterName: string;
+  x: number;
+  y: number;
+  direction: Direction;
+  speed: number;
+}
+
 export class GameServerResponse {
   name: string;
   location: string;

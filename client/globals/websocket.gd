@@ -49,6 +49,7 @@ func send(msg: _ws_utils.WebsocketMessage) -> int:
 			# Sem método de conversão: tenta deixar como está (pode falhar)
 			payload_data = payload_data
 	var json_obj := {
+		"clientId": Session.getClientId() if Session.has_method("getClientId") else "",
 		"type": msg.type,
 		"data": payload_data,
 	}
@@ -71,7 +72,11 @@ func get_message() -> Variant:
 				var dict: Dictionary = json.data
 				var msg := _ws_utils.WebsocketMessage.new()
 				msg.type = dict.get("type", _ws_utils.WebsocketEvents.NONE)
-				msg.data = dict.get("data", null)
+				var payload = dict.get("data", null)
+				# Embute clientId no payload para evitar depender de msg.clientId
+				if typeof(payload) == TYPE_DICTIONARY:
+					payload["clientId"] = dict.get("clientId", "")
+				msg.data = payload
 				return msg
 			return null
 		else:

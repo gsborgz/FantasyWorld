@@ -49,10 +49,14 @@ func _create_server_list(servers: Array[_dtos.GameServerResponse]) -> void:
 		_v_box_container.add_child(serverOption)
 
 
-func _on_ws_packet_received(message):
+func _on_ws_packet_received(message: _ws_utils.WebsocketMessage):
 	if message == null:
 		return
 	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
+		var cid := ""
+		if typeof(message.data) == TYPE_DICTIONARY:
+			cid = message.data.get("clientId", "")
+		Session.setClientId(cid)
 		GameManager.set_scene("character_selection")
 	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
 		GameManager.set_scene("server_list")

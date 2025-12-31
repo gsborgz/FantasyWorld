@@ -4,6 +4,7 @@ const _dtos := preload("res://shared/dtos.gd")
 
 var _sid: String
 var _character: _dtos.CharacterResponse
+var _client_id: String
 
 
 func setSid(sid: String) -> void:
@@ -20,3 +21,9 @@ func setCharacter(character: _dtos.CharacterResponse) -> void:
 
 func getCharacter() -> _dtos.CharacterResponse:
 	return _character
+
+func setClientId(client_id: String) -> void:
+	_client_id = client_id
+
+func getClientId() -> String:
+	return _client_id
