@@ -91,7 +91,7 @@ export class AppGateway implements OnModuleDestroy {
       await pipeline.exec();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Valkey error on leaveInstance:', err);
+      console.error('Redis error on leaveInstance:', err);
     }
   }
 

@@ -49,7 +49,7 @@ export class AuthHandler {
         .exec();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Valkey error on login:', err);
+      console.error('Redis error on login:', err);
     }
 
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.OK_RESPONSE }));

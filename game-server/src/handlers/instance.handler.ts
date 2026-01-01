@@ -40,7 +40,7 @@ export class InstanceHandler {
       await pipeline.exec();
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Valkey error on joinInstance:', err);
+      console.error('Redis error on joinInstance:', err);
     }
 
     client.character!.instancePath = instancePath;
