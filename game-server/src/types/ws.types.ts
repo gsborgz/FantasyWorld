@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import { WebsocketMessage } from '../../shared/ws-utils';
+import { WebsocketMessage } from '../shared/ws-utils';
 
 export type HandlerContext = {
   allClients: Set<WebSocket>;

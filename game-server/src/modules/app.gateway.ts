@@ -2,8 +2,8 @@ import { OnModuleDestroy } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { WebSocketServer as WsServer, WebSocket } from 'ws';
 import { WebsocketMessage } from '../shared/ws-utils';
-import { valkey, keys } from '../core/datasources/valkey.datasource';
-import { RouterService } from '../core/ws/router.service';
+import { RedisService } from '../core/services/redis.service';
+import { RouterService } from '../core/services/router.service';
 import { randomUUID } from 'node:crypto';
 
 @WebSocketGateway({ path: '/ws' })
@@ -15,7 +15,7 @@ export class AppGateway implements OnModuleDestroy {
   private readonly allClients: Set<WebSocket> = new Set();
   private readonly maxClients = 1000;
 
-  constructor(private readonly router: RouterService) {}
+  constructor(private readonly router: RouterService, private readonly redisService: RedisService) {}
 
   afterInit() {
     // Attach low-level handlers for raw 'ws' messages
@@ -74,19 +74,19 @@ export class AppGateway implements OnModuleDestroy {
     if (!clientId) return;
 
     try {
-      const pipeline = valkey.multi();
+      const pipeline = this.redisService.client.multi();
 
       if (instancePath) {
-        pipeline.srem(keys.instanceClients(instancePath), clientId);
+        pipeline.srem(this.redisService.keys.instanceClients(instancePath), clientId);
       }
 
-      pipeline.srem(keys.clientSet, clientId);
+      pipeline.srem(this.redisService.keys.clientSet, clientId);
 
       if (sid) {
-        pipeline.del(keys.session(sid));
+        pipeline.del(this.redisService.keys.session(sid));
       }
 
-      pipeline.del(keys.clientCurrentInstance(clientId));
+      pipeline.del(this.redisService.keys.clientCurrentInstance(clientId));
 
       await pipeline.exec();
     } catch (err) {

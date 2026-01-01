@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { Handler } from '../../core/ws/ws.types';
+import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
+import { Handler } from '../types/ws.types';
 
 @Injectable()
-export class PingService {
+export class PingHandler {
+
   getHandlers() {
     return {
       [WebsocketEvents.PING]: this.handlePing.bind(this),
@@ -17,4 +18,5 @@ export class PingService {
       JSON.stringify({ clientId: client.id, type: WebsocketEvents.PONG, data: { clientsCount: ctx.allClients.size } })
     );
   }
+
 }

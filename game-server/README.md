@@ -2,27 +2,29 @@
 
 para gerar/atualizar arquivos de tipagem na pasta "shared" do client, use o comando `npm run build:shared`.
 
-## Valkey (Redis)
+## Redis
 
-- O projeto usa Valkey (compatível com Redis) para manter sessões e membros de instâncias de mapa.
-- Serviço já definido em `compose.yaml` como `valkey:6379`.
+- O projeto usa Redis para manter sessões e membros de instâncias de mapa.
+- Serviço definido em `compose.yaml` como `redis_game:6379`.
 
 ### Variáveis de ambiente
 
-- `VALKEY_HOST` (default: `127.0.0.1`)
-- `VALKEY_PORT` (default: `6379`)
-- `VALKEY_PASSWORD` (opcional)
-- `VALKEY_DB` (default: `0`)
+- `REDIS_HOST` (default: `127.0.0.1`)
+- `REDIS_PORT` (default: `6379`)
+- `REDIS_USERNAME` (opcional)
+- `REDIS_PASSWORD` (opcional)
+- `REDIS_DB` (default: `0`)
 
 ### Scripts úteis
 
 - Subir serviços: `npm run services:up`
-- Teste rápido do Valkey: `npm run valkey:test`
+- Teste rápido do Redis: `npm run redis:test`
 
 ### Onde está a integração
 
-- Conexão e chaves: [src/core/datasources/valkey.datasource.ts](src/core/datasources/valkey.datasource.ts)
-- Uso no websocket: [src/websocket/message-handler.ts](src/websocket/message-handler.ts)
+- Injeção de cliente e chaves: [src/core/services/redis.service.ts](src/core/services/redis.service.ts)
+- Uso no websocket: [src/modules/app.gateway.ts](src/modules/app.gateway.ts)
+- Uso em módulos: [src/modules/auth/auth.service.ts](src/modules/auth/auth.service.ts), [src/modules/instance/instance.service.ts](src/modules/instance/instance.service.ts)
 
 ### Operações de dados (exemplos)
 

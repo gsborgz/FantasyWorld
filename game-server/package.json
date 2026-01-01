@@ -15,7 +15,7 @@
     "services:stop": "docker compose stop",
     "services:down": "docker compose down",
     "build:shared": "ts-node scripts/build-shared.ts",
-    "valkey:test": "ts-node scripts/valkey-test.ts",
+    "redis:test": "ts-node scripts/redis-test.ts",
     "lint:prettier:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
     "lint:prettier:fix": "prettier --write \"**/*.{json,md,yml,yaml}\"",
     "lint": "npm run lint:prettier:fix",
@@ -30,6 +30,7 @@
     "clear:test-db": "node -r tsconfig-paths/register -r ts-node/register ./scripts/clear-test-db.ts"
   },
   "dependencies": {
+    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",

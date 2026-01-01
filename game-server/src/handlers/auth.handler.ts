@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { keys, valkey } from '../../core/datasources/valkey.datasource';
-import { Handler } from '../../core/ws/ws.types';
-import { LoginRequest } from '../../shared/dtos';
+import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
+import { RedisService } from '../core/services/redis.service';
+import { Handler } from '../types/ws.types';
+import { LoginRequest } from '../shared/dtos';
 
 @Injectable()
-export class AuthService {
+export class AuthHandler {
+
+  constructor(private readonly redisService: RedisService) {}
+
   getHandlers() {
     return {
       [WebsocketEvents.LOGIN]: this.handleLogin.bind(this),
@@ -35,14 +38,14 @@ export class AuthService {
     client.sid = message.data.sid;
 
     try {
-      await valkey
+      await this.redisService.client
         .multi()
-        .hset(keys.session(message.data.sid), {
+        .hset(this.redisService.keys.session(message.data.sid), {
           client_id: client.id,
           user_id: String(user.id),
           username: String(user.username),
         })
-        .sadd(keys.clientSet, client.id!)
+        .sadd(this.redisService.keys.clientSet, client.id!)
         .exec();
     } catch (err) {
       // eslint-disable-next-line no-console

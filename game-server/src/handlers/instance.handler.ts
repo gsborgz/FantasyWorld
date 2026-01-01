@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { valkey, keys } from '../../core/datasources/valkey.datasource';
-import { Handler } from '../../core/ws/ws.types';
+import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
+import { RedisService } from '../core/services/redis.service';
+import { Handler } from '../types/ws.types';
 import { DataSource } from 'typeorm';
-import { Character } from '../../core/entities/character.entity';
-import { UpdatePositionRequest } from '../../shared/dtos';
+import { Character } from '../core/entities/character.entity';
+import { UpdatePositionRequest } from '../shared/dtos';
 
 @Injectable()
-export class InstanceService {
+export class InstanceHandler {
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource, private readonly redisService: RedisService) {}
 
   getHandlers() {
     return {
@@ -29,14 +29,14 @@ export class InstanceService {
     const previousInstancePath = client.character?.instancePath;
 
     try {
-      const pipeline = valkey.multi();
+      const pipeline = this.redisService.client.multi();
       
       if (previousInstancePath) {
-        pipeline.srem(keys.instanceClients(previousInstancePath), clientId);
+        pipeline.srem(this.redisService.keys.instanceClients(previousInstancePath), clientId);
       }
 
-      pipeline.sadd(keys.instanceClients(instancePath), clientId);
-      pipeline.set(keys.clientCurrentInstance(clientId), instancePath);
+      pipeline.sadd(this.redisService.keys.instanceClients(instancePath), clientId);
+      pipeline.set(this.redisService.keys.clientCurrentInstance(clientId), instancePath);
       await pipeline.exec();
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -135,4 +135,5 @@ export class InstanceService {
       this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y, direction });
     }
   }
+
 }

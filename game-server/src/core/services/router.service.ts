@@ -1,23 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { Handler, HandlerContext } from './ws.types';
-import { AuthService } from '../../modules/auth/auth.service';
-import { PingService } from '../../modules/ping/ping.service';
-import { ChatService } from '../../modules/chat/chat.service';
-import { InstanceService } from '../../modules/instance/instance.service';
-import { CharacterService } from '../../modules/character/character.service';
+import { Handler, HandlerContext } from '../../types/ws.types';
+import { AuthHandler } from '../../handlers/auth.handler';
+import { PingHandler } from '../../handlers/ping.handler';
+import { ChatHandler } from '../../handlers/chat.handler';
+import { InstanceHandler } from '../../handlers/instance.handler';
+import { CharacterHandler } from '../../handlers/character.handler';
 
 @Injectable()
 export class RouterService {
   private handlers: Partial<Record<WebsocketEvents, Handler>> = {};
 
   constructor(
-    private readonly auth: AuthService,
-    private readonly ping: PingService,
-    private readonly chat: ChatService,
-    private readonly instance: InstanceService,
-    private readonly character: CharacterService,
+    private readonly auth: AuthHandler,
+    private readonly ping: PingHandler,
+    private readonly chat: ChatHandler,
+    private readonly instance: InstanceHandler,
+    private readonly character: CharacterHandler,
   ) {
     this.handlers = {
       ...this.auth.getHandlers(),

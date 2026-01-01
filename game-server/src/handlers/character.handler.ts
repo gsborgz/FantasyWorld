@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { Handler } from '../../core/ws/ws.types';
-import { Character } from '../../core/entities/character.entity';
+import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
+import { Handler } from '../types/ws.types';
+import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
-import { WorldInstancePath } from '../../shared/world-instances';
-import { AddCharacterRequest, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../../shared/dtos';
+import { WorldInstancePath } from '../shared/world-instances';
+import { AddCharacterRequest, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
 
 @Injectable()
-export class CharacterService {
+export class CharacterHandler {
 
   constructor(private readonly dataSource: DataSource) {}
 
