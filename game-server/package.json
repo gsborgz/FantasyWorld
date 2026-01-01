@@ -19,7 +19,15 @@
     "lint:prettier:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
     "lint:prettier:fix": "prettier --write \"**/*.{json,md,yml,yaml}\"",
     "lint": "npm run lint:prettier:fix",
-    "lint:check": "npm run lint:prettier:check"
+    "lint:check": "npm run lint:prettier:check",
+    "test": "cross-env NODE_ENV=test && npm run clear:test-db && node -r ts-node/register -r tsconfig-paths/register --test ",
+    "tests": "cross-env NODE_ENV=test && npm run clear:test-db && node -r ts-node/register -r tsconfig-paths/register --test ./src/**/*.spec.ts",
+    "test:cov": "c8 npm run test",
+    "tests:cov": "c8 npm run tests",
+    "migration:run": "npx typeorm-ts-node-commonjs migration:run -d src/core/datasources/postgres.datasource.ts",
+    "migration:generate": "npx typeorm-ts-node-commonjs migration:generate ./src/core/migration/Migration -d src/core/datasources/postgres.datasource.ts",
+    "migration:new": "rm -rf dist && npm run build && npm run migration:run && npm run migration:generate",
+    "clear:test-db": "node -r tsconfig-paths/register -r ts-node/register ./scripts/clear-test-db.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
