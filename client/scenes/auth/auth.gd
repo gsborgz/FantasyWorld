@@ -20,7 +20,7 @@ func _on_login_button_pressed() -> void:
 		"password": _password_field.text
 	}
 	
-	HTTP.post_data("http://localhost:3000/v1/auth/signin", data, _on_login_request_completed)
+	Api.post_data("/v1/auth/signin", data, _on_login_request_completed)
 
 
 func _on_register_button_pressed() -> void:
@@ -30,11 +30,12 @@ func _on_register_button_pressed() -> void:
 		"passwordConfirmation": _password_field.text
 	}
 	
-	HTTP.post_data("http://localhost:3000/v1/auth/signup", data, _on_register_request_completed)
+	Api.post_data("/v1/auth/signup", data, _on_register_request_completed)
 
 
 @warning_ignore("unused_parameter")
 func _on_login_request_completed(result, response_code, headers, body) -> void:
+	print(response_code)
 	var parsed = JSON.parse_string(body.get_string_from_utf8())
 
 	if parsed == null:
@@ -53,6 +54,7 @@ func _on_login_request_completed(result, response_code, headers, body) -> void:
 
 @warning_ignore("unused_parameter")
 func _on_register_request_completed(result, response_code, headers, body) -> void:
+	print(result)
 	var parsed = JSON.parse_string(body.get_string_from_utf8())
 
 	if parsed == null:

@@ -19,8 +19,8 @@ config/icon="res://icon.svg"
 
 WS="*res://globals/websocket.gd"
 GameManager="*res://globals/game_manager.gd"
-HTTP="*res://globals/http.gd"
 Session="*res://globals/session.gd"
+Api="*res://globals/api.gd"
 
 [input]
 

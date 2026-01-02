@@ -8,7 +8,7 @@ const _ws_utils := preload("res://shared/ws-utils.gd")
 
 
 func _ready() -> void:
-	HTTP.get_data("http://localhost:3000/v1/game-servers", _on_game_servers_request_completed)
+	Api.get_data("/v1/game-servers", _on_game_servers_request_completed)
 
 	# Conecta sinais globais do WS apenas uma vez por cena
 	if not WS.message_received.is_connected(_on_ws_packet_received):
