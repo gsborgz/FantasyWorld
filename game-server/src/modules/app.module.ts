@@ -6,13 +6,25 @@ import { PostgresConfig } from '../core/datasources/postgres.datasource';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisConfig } from '../core/datasources/redis.datasource';
 import { RedisService } from '../core/services/redis.service';
-import { HandlersModule } from '../handlers/handlers.module';
+import { AuthHandler } from '../handlers/auth.handler';
+import { CharacterHandler } from '../handlers/character.handler';
+import { ChatHandler } from '../handlers/chat.handler';
+import { InstanceHandler } from '../handlers/instance.handler';
+import { PingHandler } from '../handlers/ping.handler';
+
+const handlers = [
+  AuthHandler,
+  CharacterHandler,
+  ChatHandler,
+  InstanceHandler,
+  PingHandler,
+];
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(PostgresConfig),
     RedisModule.forRoot(RedisConfig),
-    HandlersModule
+    ...handlers,
   ],
   providers: [AppGateway, RouterService, RedisService],
 })
