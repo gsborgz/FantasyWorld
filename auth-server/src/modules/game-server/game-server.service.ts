@@ -43,9 +43,6 @@ export class GameServerService {
     const timeoutMs = 2000;
     const result = await this.wsService.ping(server.url, timeoutMs);
 
-    console.log(server.url);
-    console.log(result);
-    
     server.status = result.ok ? 'online' : 'offline';
     server.clientsCount = result.ok ? result.message?.data?.clientsCount || 0 : 0;
 
