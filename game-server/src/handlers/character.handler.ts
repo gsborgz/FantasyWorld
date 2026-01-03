@@ -5,7 +5,7 @@ import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
 import { WorldInstancePath } from '../shared/world-instances';
-import { AddCharacterRequest, CharacterResponse, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
+import { AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 
 @Injectable()
@@ -13,10 +13,10 @@ export class CharacterHandler {
 
   constructor(
     private readonly dataSource: DataSource,
-    private readonly broadcastHelper: BroadcastHelper
+    private readonly broadcastHelper: BroadcastHelper,
   ) {}
 
-  getHandlers() {
+  public getHandlers() {
     return {
       [WebsocketEvents.LIST_CHARACTERS]: this.handleGetCharacters.bind(this),
       [WebsocketEvents.ADD_CHARACTER]: this.handleCharacterAdd.bind(this),
@@ -60,7 +60,7 @@ export class CharacterHandler {
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_ADDED }));
   }
 
-  private async handleCharacterSelect(sender: WebSocket, message: WebsocketMessage<SelectCharacterRequest>, ctx: { allClients: Set<WebSocket> }) {
+  private async handleCharacterSelect(sender: WebSocket, message: WebsocketMessage<SelectCharacterRequest>) {
     if (!sender.user?.id) {
       sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
@@ -83,16 +83,18 @@ export class CharacterHandler {
       x: character.x,
       y: character.y,
       direction: character.direction,
+      speed: 200,
       lastPositionUpdate: Date.now(),
-    };
+    } as ClientCharacter;
     
-    const joinMessage: WebsocketMessage<CharacterResponse> = {
+    const joinMessage: WebsocketMessage<ClientCharacter> = {
       clientId: sender.id!,
       type: WebsocketEvents.JOIN_INSTANCE,
-      data: sender.character as unknown as CharacterResponse,
+      data: sender.character,
     };
     
-    this.broadcastHelper.broadcastToInstance(sender, joinMessage, ctx.allClients);
+    this.broadcastHelper.broadcastToInstance(sender, sender.character?.instancePath, joinMessage);
+
     sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
   }
 

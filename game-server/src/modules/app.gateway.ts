@@ -2,27 +2,26 @@ import { OnModuleDestroy } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { WebSocketServer as WsServer, WebSocket } from 'ws';
 import { WebsocketMessage } from '../shared/ws-utils';
-import { RedisService } from '../core/services/redis.service';
 import { RouterService } from '../core/services/router.service';
+import { ClientsRegistryService } from '../core/services/clients-registry.service';
 import { randomUUID } from 'node:crypto';
 
 @WebSocketGateway({ path: '/ws' })
 export class AppGateway implements OnModuleDestroy {
 
   @WebSocketServer()
-  server!: WsServer;
+  private readonly server!: WsServer;
 
-  private readonly allClients: Set<WebSocket> = new Set();
-  private readonly maxClients = 1000;
-
-  constructor(private readonly router: RouterService, private readonly redisService: RedisService) {}
+  constructor(
+    private readonly router: RouterService,
+    private readonly clientsRegistry: ClientsRegistryService,
+  ) {}
 
   afterInit() {
-    // Attach low-level handlers for raw 'ws' messages
     this.server.on('connection', (client: WebSocket) => {
       if (!client) return;
 
-      if (this.allClients.size >= this.maxClients) {
+      if (!this.clientsRegistry.hasSpace) {
         try {
           client.send(JSON.stringify({ clientId: client.id, type: 'error', error: 'Server full' }));
         } finally {
@@ -31,10 +30,10 @@ export class AppGateway implements OnModuleDestroy {
         return;
       }
 
-      if (!this.allClients.has(client)) {
+      if (!this.clientsRegistry.has(client)) {
         client.id = randomUUID() + Date.now().toString();
 
-        this.allClients.add(client);
+        this.clientsRegistry.add(client);
       }
 
       client.on('message', (data) => {
@@ -46,7 +45,7 @@ export class AppGateway implements OnModuleDestroy {
           return;
         }
 
-        void this.router.dispatchMessage(client, msg, this.allClients);
+        void this.router.dispatchMessage(client, msg);
       });
 
       client.on('close', () => {
@@ -63,35 +62,8 @@ export class AppGateway implements OnModuleDestroy {
   }
 
   private async cleanupOnClose(client: WebSocket) {
-    if (this.allClients.has(client)) {
-      this.allClients.delete(client);
-    }
-
-    const clientId = client.id;
-    const sid = client.sid;
-    const instancePath = client.character?.instancePath;
-
-    if (!clientId) return;
-
-    try {
-      const pipeline = this.redisService.client.multi();
-
-      if (instancePath) {
-        pipeline.srem(this.redisService.keys.instanceClients(instancePath), clientId);
-      }
-
-      pipeline.srem(this.redisService.keys.clientSet, clientId);
-
-      if (sid) {
-        pipeline.del(this.redisService.keys.session(sid));
-      }
-
-      pipeline.del(this.redisService.keys.clientCurrentInstance(clientId));
-
-      await pipeline.exec();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Redis error on leaveInstance:', err);
+    if (this.clientsRegistry.has(client)) {
+      this.clientsRegistry.delete(client);
     }
   }
 

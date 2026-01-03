@@ -12,6 +12,7 @@ import { ChatHandler } from '../handlers/chat.handler';
 import { InstanceHandler } from '../handlers/instance.handler';
 import { PingHandler } from '../handlers/ping.handler';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
+import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
 const handlers = [
   AuthHandler,
@@ -30,6 +31,7 @@ const handlers = [
     AppGateway,
     RouterService,
     RedisService,
+    ClientsRegistryService,
     BroadcastHelper,
     ...handlers
   ],

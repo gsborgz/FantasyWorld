@@ -1,16 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
-import { RedisService } from '../core/services/redis.service';
 import { Handler } from '../types/ws.types';
 import { DataSource } from 'typeorm';
 import { Character } from '../core/entities/character.entity';
-import { CharacterResponse, InstanceJoinedResponse, JoinInstanceRequest, UpdatePositionRequest } from '../shared/dtos';
+import { ClientCharacter, JoinInstanceRequest, UpdatePositionRequest } from '../shared/dtos';
+import { BroadcastHelper } from '../helpers/broadcast.helper';
+import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
 @Injectable()
 export class InstanceHandler {
 
-  constructor(private readonly dataSource: DataSource, private readonly redisService: RedisService) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly broadcastHelper: BroadcastHelper,
+    private readonly clientsRegistry: ClientsRegistryService,
+  ) {}
 
   getHandlers() {
     return {
@@ -20,89 +25,86 @@ export class InstanceHandler {
   }
 
   // Handlers
-  private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<JoinInstanceRequest>, ctx: { allClients: Set<WebSocket> }) {
+  private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<JoinInstanceRequest>) {
     const newSenderInstancePath = message.data.instancePath;
     const clientId = sender.id;
     
     if (!clientId) return;
 
-    const previousSenderInstancePath = sender.character?.instancePath;
-
+    this.sendInstanceLeftMessageToPreviousInstance(sender);
+    
     sender.character!.instancePath = newSenderInstancePath;
 
-    if (previousSenderInstancePath) {
-      this.broadcastToInstance(sender, previousSenderInstancePath, {
-        type: WebsocketEvents.INSTANCE_LEFT,
-        data: sender.character as unknown as CharacterResponse,
-      }, ctx.allClients);
-    }
-    
-    const instanceClients = Array.from(ctx.allClients).filter(client => client.character?.instancePath === newSenderInstancePath && client !== sender);
-    const characters = instanceClients.map(client => client.character).filter(Boolean) as unknown as CharacterResponse[];
-    const joinMessage: WebsocketMessage<CharacterResponse> = {
-      clientId: sender.id!,
-      type: WebsocketEvents.JOIN_INSTANCE,
-      data: sender.character as unknown as CharacterResponse,
-    };
-    const joinedMessage: WebsocketMessage<InstanceJoinedResponse> = {
-      clientId: sender.id!,
-      type: WebsocketEvents.INSTANCE_JOINED,
-      data: {
-        clients: characters,
-      }
-    };
-
-    this.broadcastToInstance(sender, newSenderInstancePath, joinMessage, ctx.allClients);
-
-    if (sender.character?.id) {
-      this.broadcastToInstance(sender, newSenderInstancePath, {
-        type: WebsocketEvents.UPDATE_POSITION,
-        data: sender.character as unknown as CharacterResponse,
-      }, ctx.allClients);
-    }
-
-    sender.send(JSON.stringify(joinedMessage));
+    this.sendClientCharacterToInstanceClients(sender);
+    this.sendPreviousCharactersInInstanceToClient(sender);
   }
 
-  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>, ctx: { allClients: Set<WebSocket> }) {
+  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>) {
     const instancePath = client.character?.instancePath;
     const clientId = client.id;
     const data = message.data;
-    
+
     if (!clientId || !instancePath) return;
 
-    this.updateClientPosition(client, data);
+    this.updateClientCharacterPosition(client, data);
 
-    this.broadcastToInstance(client, instancePath, {
-      type: WebsocketEvents.UPDATE_POSITION,
-      data: {
-        clientId: client.id,
-        characterId: client.character?.id,
-        characterName: client.character?.name,
-        x: data.x,
-        y: data.y,
-        direction: data.direction,
-        speed: data.speed
-      },
-    }, ctx.allClients);
+    const newMessage = new WebsocketMessage<ClientCharacter>();
+
+    newMessage.clientId = client.id!;
+    newMessage.type = WebsocketEvents.UPDATE_POSITION;
+    newMessage.data = client.character!;
+
+    this.broadcastHelper.broadcastToInstance(client, instancePath, newMessage);
   }
 
   // Utils
-  private broadcastToInstance(sender: WebSocket, instancePath: string, message: any, allClients: Set<WebSocket>) {
-    for (const client of allClients) {
-      if (client === sender) continue;
+  private sendInstanceLeftMessageToPreviousInstance(sender: WebSocket) {
+    const previousSenderInstancePath = sender.character?.instancePath;
 
-      const clientInstancePath = client.character?.instancePath;
+    if (previousSenderInstancePath) {
+      const message = new WebsocketMessage<ClientCharacter>();
+      
+      message.clientId = sender.id!;
+      message.type = WebsocketEvents.INSTANCE_LEFT;
+      message.data = sender.character!;
 
-      if (clientInstancePath !== instancePath) continue;
-
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ clientId: sender.id, ...message }));
-      }
+      this.broadcastHelper.broadcastToInstance(sender, previousSenderInstancePath, message);
     }
   }
 
-  private updateClientPosition(client: WebSocket, data: UpdatePositionRequest) {
+  private async sendPreviousCharactersInInstanceToClient(sender: WebSocket) {
+    const instanceClients = this.clientsRegistry.getInstanceClients(sender.character!.instancePath!);
+    const characters = instanceClients.map(client => client.character).filter(Boolean) as ClientCharacter[];
+    const chunkSize = 10;
+
+    for (let i = 0; i < characters.length; i += chunkSize) {
+      const chunk = characters.slice(i, i + chunkSize);
+      const message = new WebsocketMessage<ClientCharacter>();
+
+      message.clientId = sender.id!;
+      message.type = WebsocketEvents.UPDATE_POSITION;
+      
+      chunk.forEach(char => {
+        message.data = char;
+
+        sender.send(JSON.stringify(message));
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 100)); // adicionar uma pausa de 100ms entre os envios
+    }
+  }
+
+  private sendClientCharacterToInstanceClients(sender: WebSocket) {
+    const message = new WebsocketMessage<ClientCharacter>();
+
+    message.clientId = sender.id!;
+    message.type = WebsocketEvents.UPDATE_POSITION;
+    message.data = sender.character!;
+    
+    this.broadcastHelper.broadcastToInstance(sender, sender.character!.instancePath!, message);
+  }
+
+  private updateClientCharacterPosition(client: WebSocket, data: UpdatePositionRequest) {
     const x = data.x;
     const y = data.y;
     const direction = data.direction;

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import 'ws';
+import { ClientCharacter } from '../shared/dtos';
 
 declare module 'ws' {
   interface WebSocket {
@@ -9,16 +10,7 @@ declare module 'ws' {
       id: string;
       username: string;
     };
-    character?: {
-      id: string;
-      name: string;
-      instancePath: string;
-      x: number;
-      y: number;
-      direction: number;
-      speed?: number;
-      lastPositionUpdate: number;
-    }
+    character?: ClientCharacter
   }
 }
 

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
-import { RedisService } from '../core/services/redis.service';
 import { Handler } from '../types/ws.types';
 import { LoginRequest } from '../shared/dtos';
 import * as dotenv from 'dotenv';
@@ -11,7 +10,7 @@ dotenv.config();
 @Injectable()
 export class AuthHandler {
 
-  constructor(private readonly redisService: RedisService) {}
+  constructor() {}
 
   getHandlers() {
     return {
@@ -39,22 +38,7 @@ export class AuthHandler {
       username: user.username,
     };
     client.sid = message.data.sid;
-
-    try {
-      await this.redisService.client
-        .multi()
-        .hset(this.redisService.keys.session(message.data.sid), {
-          client_id: client.id,
-          user_id: String(user.id),
-          username: String(user.username),
-        })
-        .sadd(this.redisService.keys.clientSet, client.id!)
-        .exec();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Redis error on login:', err);
-    }
-
+  
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.OK_RESPONSE }));
   }
 }

@@ -2,7 +2,7 @@ import { WebSocket } from 'ws';
 import { WebsocketMessage } from '../shared/ws-utils';
 
 export type HandlerContext = {
-  allClients: Set<WebSocket>;
+  allClients: WebSocket[];
 };
 
 export type Handler = (
