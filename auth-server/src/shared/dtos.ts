@@ -41,6 +41,12 @@ export class SessionData {
 
 }
 
+export class ChatMessage {
+
+  text: string;
+
+}
+
 export class LoginRequest {
 
   sid: string;

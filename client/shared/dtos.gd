@@ -126,6 +126,27 @@ class SessionData:
             return obj
         return null
 
+class ChatMessage:
+    var text: String
+
+    func _init(_text: String = ""):
+        text = _text
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["text"] = text
+        return d
+
+    static func from(value: Variant) -> ChatMessage:
+        if typeof(value) == TYPE_OBJECT and value is ChatMessage:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := ChatMessage.new()
+            obj.text = raw.get("text", "")
+            return obj
+        return null
+
 class LoginRequest:
     var sid: String
 
