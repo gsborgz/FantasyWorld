@@ -367,6 +367,34 @@ class GameServerResponse:
             return obj
         return null
 
+class CharactersListResponse:
+    var characters: Array
+
+    func _init(_characters: Array = []):
+        characters = _characters
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["characters"] = characters
+        return d
+
+    static func from(value: Variant) -> CharactersListResponse:
+        if typeof(value) == TYPE_OBJECT and value is CharactersListResponse:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := CharactersListResponse.new()
+            obj.characters = []
+            if raw.has("characters") and typeof(raw["characters"]) == TYPE_ARRAY:
+                for it in raw["characters"]:
+                    var conv = ClientCharacter.from(it)
+                    if conv != null:
+                        obj.characters.append(conv)
+                    else:
+                        obj.characters.append(it)
+            return obj
+        return null
+
 class ClientCharacter:
     var id: String
     var createdAt: Variant

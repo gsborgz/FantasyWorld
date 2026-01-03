@@ -93,3 +93,8 @@ export class GameServerResponse {
   status?: 'online' | 'offline';
   clientsCount?: number;
 }
+
+export class CharactersListResponse {
+  characters: ClientCharacter[];
+}
+

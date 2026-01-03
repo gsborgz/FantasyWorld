@@ -124,3 +124,9 @@ export class GameServerResponse {
 
 }
 
+export class CharactersListResponse {
+
+  characters: ClientCharacter[];
+
+}
+
