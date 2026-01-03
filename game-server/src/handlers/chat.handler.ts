@@ -15,22 +15,30 @@ export class ChatHandler {
   }
 
   // Handlers
-  private handleGlobalChat(client: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
-    for (const c of ctx.allClients) {
-      if (c.readyState === WebSocket.OPEN) {
-        c.send(JSON.stringify(message));
+  private handleGlobalChat(sender: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
+    message.data.senderName = sender.character?.name || 'Unknown';
+    
+    for (const client of ctx.allClients) {
+      if (client !== sender && client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
       }
     }
   }
 
-  private handleInstanceChat(client: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
-    const instancePath = client.character?.instancePath;
+  private handleInstanceChat(sender: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
+    const senderInstancePath = sender.character?.instancePath;
 
-    for (const c of ctx.allClients) {
-      if (c === client) continue;
-      if ((c as any).instancePath !== instancePath) continue;
-      if (c.readyState === WebSocket.OPEN) {
-        c.send(JSON.stringify(message));
+    if (!senderInstancePath) return;
+
+    message.data.senderName = sender.character?.name || 'Unknown';
+
+    for (const client of ctx.allClients) {
+      const clientInstancePath = client.character?.instancePath;
+      
+      if (client == sender || !clientInstancePath || clientInstancePath !== senderInstancePath) continue;
+      
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
       }
     }
   }
