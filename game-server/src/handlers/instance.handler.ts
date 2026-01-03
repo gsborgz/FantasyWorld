@@ -58,7 +58,7 @@ export class InstanceHandler {
   }
 
   // Utils
-  private sendInstanceLeftMessageToPreviousInstance(sender: WebSocket) {
+  public sendInstanceLeftMessageToPreviousInstance(sender: WebSocket) {
     const previousSenderInstancePath = sender.character?.instancePath;
 
     if (previousSenderInstancePath) {
