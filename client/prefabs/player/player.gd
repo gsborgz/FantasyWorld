@@ -18,6 +18,7 @@ var y: float
 var speed: float
 var direction: _dtos.Direction
 var is_player: bool
+var movement_enabled: bool
 
 var velocity: Vector2
 var radius: float:
@@ -36,6 +37,7 @@ var _last_direction: _dtos.Direction = _dtos.Direction.DOWN
 var _remote_target: Vector2 = Vector2.ZERO
 var _remote_has_target: bool = false
 
+
 @warning_ignore("shadowed_variable")
 static func instantiate(character: _dtos.CharacterResponse, is_player: bool) -> Player:
 	var player := Scene.instantiate() as Player
@@ -45,15 +47,19 @@ static func instantiate(character: _dtos.CharacterResponse, is_player: bool) -> 
 	player.x = character.x
 	player.y = character.y
 	player.speed = 200
+	@warning_ignore("int_as_enum_without_cast")
 	player.direction = character.direction
 	player.is_player = is_player
 
 	return player
 
+
 func _ready():
 	position = Vector2(x, y)
 	_nameplate.text = player_name
 	_camera.enabled = is_player
+	movement_enabled = true
+
 
 func get_input():
 	if !is_player:
@@ -63,10 +69,13 @@ func get_input():
 
 
 func _physics_process(delta: float) -> void:
+	if not movement_enabled:
+		return
+	
 	get_input()
 	_body.move_and_slide()
 	queue_redraw()
-	# Throttle de envio de posição (50ms)
+	
 	_send_accum += delta
 	var moving := _body.velocity != Vector2.ZERO
 	if is_player and moving and _send_accum >= SEND_INTERVAL:
@@ -76,13 +85,11 @@ func _physics_process(delta: float) -> void:
 		_send_accum = 0.0
 		_was_moving = true
 	elif is_player and !moving and _was_moving:
-		# Envia última posição/direção ao parar (fora do throttle)
 		x = _body.global_position.x
 		y = _body.global_position.y
 		_send_update_position_message()
 		_was_moving = false
-
-	# Suaviza players remotos em direção ao último alvo recebido
+	
 	if !is_player and _remote_has_target:
 		var step: float = max(50.0, speed) * delta
 		var new_pos: Vector2 = _body.global_position.move_toward(_remote_target, step)
@@ -94,6 +101,7 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if _body:
 		draw_circle(_body.position, _collision_shape.radius, Color.DARK_ORCHID)
+
 
 func _send_update_position_message():
 	if !is_player:
@@ -128,6 +136,7 @@ func _send_update_position_message():
 
 	WS.send(message)
 
+
 func apply_remote_update(new_x: float, new_y: float, new_direction: _dtos.Direction, new_speed: float) -> void:
 	# Atualiza campos e posiciona o corpo remotamente
 	x = new_x
@@ -137,3 +146,7 @@ func apply_remote_update(new_x: float, new_y: float, new_direction: _dtos.Direct
 	_remote_target = Vector2(new_x, new_y)
 	_remote_has_target = true
 	queue_redraw()
+
+
+func set_movement_enabled(enabled: bool):
+	movement_enabled = enabled

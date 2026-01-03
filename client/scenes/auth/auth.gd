@@ -33,36 +33,14 @@ func _on_register_button_pressed() -> void:
 	Api.post_data("/v1/auth/signup", data, _on_register_request_completed)
 
 
-@warning_ignore("unused_parameter")
-func _on_login_request_completed(result, response_code, headers, body) -> void:
-	print(response_code)
-	var parsed = JSON.parse_string(body.get_string_from_utf8())
-
-	if parsed == null:
-		print("falha ao interpretar resposta")
-		return
-	
-	if response_code == 201:
-		Session.setSid(parsed.token)
+func _on_login_request_completed(response: Api.ResponseData) -> void:
+	print(response.get_code())
+	if response.ok():
+		Session.setSid(response.get_body().token)
 		GameManager.set_scene("server_list")
 	else:
-		if parsed.message:
-			_log.error(parsed.message)
-		else:
-			_log.error("Falha ao realizar login")
+		_log.error(response.get_body().message)
 
 
-@warning_ignore("unused_parameter")
-func _on_register_request_completed(result, response_code, headers, body) -> void:
-	print(result)
-	var parsed = JSON.parse_string(body.get_string_from_utf8())
-
-	if parsed == null:
-		print("falha ao interpretar resposta")
-		return
-
-	if parsed.message:
-		if response_code == 201:
-			_log.info(parsed.message)
-		else:
-			_log.error(parsed.message)
+func _on_register_request_completed(response: Api.ResponseData) -> void:
+	_log.info(response.get_body().message)

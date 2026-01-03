@@ -17,18 +17,11 @@ func _ready() -> void:
 		WS.connection_closed.connect(_on_ws_connection_closed)
 
 
-@warning_ignore("unused_parameter")
-func _on_game_servers_request_completed(result, response_code, headers, body) -> void:
-	var parsed = JSON.parse_string(body.get_string_from_utf8())
-
-	if parsed == null:
-		print("falha ao interpretar resposta de servidores")
-		return
-
-	if response_code == 200 and typeof(parsed) == TYPE_ARRAY:
+func _on_game_servers_request_completed(response: Api.ResponseData) -> void:
+	if response.ok() and typeof(response.get_body()) == TYPE_ARRAY:
 		var servers: Array[_dtos.GameServerResponse] = []
 		
-		for item in parsed:
+		for item in response.get_body():
 			if typeof(item) == TYPE_DICTIONARY:
 				var info := _dtos.GameServerResponse.new(
 					item.get("name", ""),
