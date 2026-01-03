@@ -39,6 +39,7 @@ export class SessionData {
 
 export class ChatMessage {
   text: string;
+  senderName: string;
 }
 
 // Request

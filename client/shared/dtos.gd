@@ -128,13 +128,16 @@ class SessionData:
 
 class ChatMessage:
     var text: String
+    var senderName: String
 
-    func _init(_text: String = ""):
+    func _init(_text: String = "", _senderName: String = ""):
         text = _text
+        senderName = _senderName
 
     func to_dict() -> Dictionary:
         var d: Dictionary = {}
         d["text"] = text
+        d["senderName"] = senderName
         return d
 
     static func from(value: Variant) -> ChatMessage:
@@ -144,6 +147,7 @@ class ChatMessage:
             var raw: Dictionary = value
             var obj := ChatMessage.new()
             obj.text = raw.get("text", "")
+            obj.senderName = raw.get("senderName", "")
             return obj
         return null
 
