@@ -1,333 +1,303 @@
 enum Direction {
-	UP = 0,
-	DOWN = 1,
-	LEFT = 2,
-	RIGHT = 3,
+    UP = 0,
+    DOWN = 1,
+    LEFT = 2,
+    RIGHT = 3,
 }
 
 class LoginData:
-	var username: String
-	var password: String
+    var username: String
+    var password: String
 
-	func _init(_username: String = "", _password: String = ""):
-		username = _username
-		password = _password
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["username"] = username
-		d["password"] = password
-		return d
-
-	static func from(value: Variant) -> LoginData:
-		if typeof(value) == TYPE_OBJECT and value is LoginData:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := LoginData.new()
-			obj.username = raw.get("username", "")
-			obj.password = raw.get("password", "")
-			return obj
-		return null
-
-class RegisterData:
-	var username: String
-	var password: String
-	var passwordConfirmation: String
-
-	func _init(_username: String = "", _password: String = "", _passwordConfirmation: String = ""):
-		username = _username
-		password = _password
-		passwordConfirmation = _passwordConfirmation
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["username"] = username
-		d["password"] = password
-		d["passwordConfirmation"] = passwordConfirmation
-		return d
-
-	static func from(value: Variant) -> RegisterData:
-		if typeof(value) == TYPE_OBJECT and value is RegisterData:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := RegisterData.new()
-			obj.username = raw.get("username", "")
-			obj.password = raw.get("password", "")
-			obj.passwordConfirmation = raw.get("passwordConfirmation", "")
-			return obj
-		return null
-
-class BaseMessage:
-	var message: Variant
-
-	func _init(_message: Variant = null):
-		message = _message
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["message"] = message
-		return d
-
-	static func from(value: Variant) -> BaseMessage:
-		if typeof(value) == TYPE_OBJECT and value is BaseMessage:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := BaseMessage.new()
-			obj.message = raw.get("message", null)
-			return obj
-		return null
-
-class MeResponse:
-	var id: String
-	var username: String
-
-	func _init(_id: String = "", _username: String = ""):
-		id = _id
-		username = _username
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["id"] = id
-		d["username"] = username
-		return d
-
-	static func from(value: Variant) -> MeResponse:
-		if typeof(value) == TYPE_OBJECT and value is MeResponse:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := MeResponse.new()
-			obj.id = raw.get("id", "")
-			obj.username = raw.get("username", "")
-			return obj
-		return null
-
-class SessionData:
-	var token: String
-
-	func _init(_token: String = ""):
-		token = _token
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["token"] = token
-		return d
-
-	static func from(value: Variant) -> SessionData:
-		if typeof(value) == TYPE_OBJECT and value is SessionData:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := SessionData.new()
-			obj.token = raw.get("token", "")
-			return obj
-		return null
-
-class ChatMessage:
-	var text: String
-	var senderName: String
-
-	func _init(_text: String = "", _senderName: String = ""):
-		text = _text
-		senderName = _senderName
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["text"] = text
-		d["senderName"] = senderName
-		return d
-
-	static func from(value: Variant) -> ChatMessage:
-		if typeof(value) == TYPE_OBJECT and value is ChatMessage:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := ChatMessage.new()
-			obj.text = raw.get("text", "")
-			obj.senderName = raw.get("senderName", "")
-			return obj
-		return null
-
-class LoginRequest:
-	var sid: String
-
-	func _init(_sid: String = ""):
-		sid = _sid
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["sid"] = sid
-		return d
-
-	static func from(value: Variant) -> LoginRequest:
-		if typeof(value) == TYPE_OBJECT and value is LoginRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := LoginRequest.new()
-			obj.sid = raw.get("sid", "")
-			return obj
-		return null
-
-class SelectCharacterRequest:
-	var characterId: String
-
-	func _init(_characterId: String = ""):
-		characterId = _characterId
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["characterId"] = characterId
-		return d
-
-	static func from(value: Variant) -> SelectCharacterRequest:
-		if typeof(value) == TYPE_OBJECT and value is SelectCharacterRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := SelectCharacterRequest.new()
-			obj.characterId = raw.get("characterId", "")
-			return obj
-		return null
-
-class UpdatePositionRequest:
-	var x: float
-	var y: float
-	var direction: int
-	var speed: float
-
-	func _init(_x: float = 0.0, _y: float = 0.0, _direction: int = 0, _speed: float = 0.0):
-		x = _x
-		y = _y
-		direction = _direction
-		speed = _speed
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["x"] = x
-		d["y"] = y
-		d["direction"] = direction
-		d["speed"] = speed
-		return d
-
-	static func from(value: Variant) -> UpdatePositionRequest:
-		if typeof(value) == TYPE_OBJECT and value is UpdatePositionRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := UpdatePositionRequest.new()
-			obj.x = raw.get("x", 0.0)
-			obj.y = raw.get("y", 0.0)
-			obj.direction = raw.get("direction", 0)
-			obj.speed = raw.get("speed", 0.0)
-			return obj
-		return null
-
-class DeleteCharacterRequest:
-	var characterId: String
-
-	func _init(_characterId: String = ""):
-		characterId = _characterId
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["characterId"] = characterId
-		return d
-
-	static func from(value: Variant) -> DeleteCharacterRequest:
-		if typeof(value) == TYPE_OBJECT and value is DeleteCharacterRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := DeleteCharacterRequest.new()
-			obj.characterId = raw.get("characterId", "")
-			return obj
-		return null
-
-class AddCharacterRequest:
-	var name: String
-
-	func _init(_name: String = ""):
-		name = _name
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["name"] = name
-		return d
-
-	static func from(value: Variant) -> AddCharacterRequest:
-		if typeof(value) == TYPE_OBJECT and value is AddCharacterRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := AddCharacterRequest.new()
-			obj.name = raw.get("name", "")
-			return obj
-		return null
-
-class JoinInstanceRequest:
-	var instancePath: String
-
-	func _init(_instancePath: String = ""):
-		instancePath = _instancePath
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["instancePath"] = instancePath
-		return d
-
-	static func from(value: Variant) -> JoinInstanceRequest:
-		if typeof(value) == TYPE_OBJECT and value is JoinInstanceRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := JoinInstanceRequest.new()
-			obj.instancePath = raw.get("instancePath", "")
-			return obj
-		return null
-
-class InstanceJoinedResponse:
-    var clients: Array
-
-    func _init(_clients: Array = []):
-        clients = _clients
+    func _init(_username: String = "", _password: String = ""):
+        username = _username
+        password = _password
 
     func to_dict() -> Dictionary:
         var d: Dictionary = {}
-        d["clients"] = clients
+        d["username"] = username
+        d["password"] = password
         return d
 
-    static func from(value: Variant) -> InstanceJoinedResponse:
-        if typeof(value) == TYPE_OBJECT and value is InstanceJoinedResponse:
+    static func from(value: Variant) -> LoginData:
+        if typeof(value) == TYPE_OBJECT and value is LoginData:
             return value
         if typeof(value) == TYPE_DICTIONARY:
             var raw: Dictionary = value
-            var obj := InstanceJoinedResponse.new()
-            obj.clients = []
-            if raw.has("clients") and typeof(raw["clients"]) == TYPE_ARRAY:
-                for it in raw["clients"]:
-                    var conv = InstanceClientResponse.from(it)
-                    if conv != null:
-                        obj.clients.append(conv)
-                    else:
-                        obj.clients.append(it)
+            var obj := LoginData.new()
+            obj.username = raw.get("username", "")
+            obj.password = raw.get("password", "")
             return obj
         return null
 
-class InstanceClientResponse:
-    var clientId: String
+class RegisterData:
+    var username: String
+    var password: String
+    var passwordConfirmation: String
+
+    func _init(_username: String = "", _password: String = "", _passwordConfirmation: String = ""):
+        username = _username
+        password = _password
+        passwordConfirmation = _passwordConfirmation
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["username"] = username
+        d["password"] = password
+        d["passwordConfirmation"] = passwordConfirmation
+        return d
+
+    static func from(value: Variant) -> RegisterData:
+        if typeof(value) == TYPE_OBJECT and value is RegisterData:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := RegisterData.new()
+            obj.username = raw.get("username", "")
+            obj.password = raw.get("password", "")
+            obj.passwordConfirmation = raw.get("passwordConfirmation", "")
+            return obj
+        return null
+
+class BaseMessage:
+    var message: Variant
+
+    func _init(_message: Variant = null):
+        message = _message
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["message"] = message
+        return d
+
+    static func from(value: Variant) -> BaseMessage:
+        if typeof(value) == TYPE_OBJECT and value is BaseMessage:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := BaseMessage.new()
+            obj.message = raw.get("message", null)
+            return obj
+        return null
+
+class MeResponse:
+    var id: String
+    var username: String
+
+    func _init(_id: String = "", _username: String = ""):
+        id = _id
+        username = _username
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["id"] = id
+        d["username"] = username
+        return d
+
+    static func from(value: Variant) -> MeResponse:
+        if typeof(value) == TYPE_OBJECT and value is MeResponse:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := MeResponse.new()
+            obj.id = raw.get("id", "")
+            obj.username = raw.get("username", "")
+            return obj
+        return null
+
+class SessionData:
+    var token: String
+
+    func _init(_token: String = ""):
+        token = _token
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["token"] = token
+        return d
+
+    static func from(value: Variant) -> SessionData:
+        if typeof(value) == TYPE_OBJECT and value is SessionData:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := SessionData.new()
+            obj.token = raw.get("token", "")
+            return obj
+        return null
+
+class ChatMessage:
+    var text: String
+    var senderName: String
+
+    func _init(_text: String = "", _senderName: String = ""):
+        text = _text
+        senderName = _senderName
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["text"] = text
+        d["senderName"] = senderName
+        return d
+
+    static func from(value: Variant) -> ChatMessage:
+        if typeof(value) == TYPE_OBJECT and value is ChatMessage:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := ChatMessage.new()
+            obj.text = raw.get("text", "")
+            obj.senderName = raw.get("senderName", "")
+            return obj
+        return null
+
+class LoginRequest:
+    var sid: String
+
+    func _init(_sid: String = ""):
+        sid = _sid
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["sid"] = sid
+        return d
+
+    static func from(value: Variant) -> LoginRequest:
+        if typeof(value) == TYPE_OBJECT and value is LoginRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := LoginRequest.new()
+            obj.sid = raw.get("sid", "")
+            return obj
+        return null
+
+class SelectCharacterRequest:
+    var characterId: String
+
+    func _init(_characterId: String = ""):
+        characterId = _characterId
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["characterId"] = characterId
+        return d
+
+    static func from(value: Variant) -> SelectCharacterRequest:
+        if typeof(value) == TYPE_OBJECT and value is SelectCharacterRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := SelectCharacterRequest.new()
+            obj.characterId = raw.get("characterId", "")
+            return obj
+        return null
+
+class UpdatePositionRequest:
+    var x: float
+    var y: float
+    var direction: int
+    var speed: float
+
+    func _init(_x: float = 0.0, _y: float = 0.0, _direction: int = 0, _speed: float = 0.0):
+        x = _x
+        y = _y
+        direction = _direction
+        speed = _speed
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["x"] = x
+        d["y"] = y
+        d["direction"] = direction
+        d["speed"] = speed
+        return d
+
+    static func from(value: Variant) -> UpdatePositionRequest:
+        if typeof(value) == TYPE_OBJECT and value is UpdatePositionRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := UpdatePositionRequest.new()
+            obj.x = raw.get("x", 0.0)
+            obj.y = raw.get("y", 0.0)
+            obj.direction = raw.get("direction", 0)
+            obj.speed = raw.get("speed", 0.0)
+            return obj
+        return null
+
+class DeleteCharacterRequest:
+    var characterId: String
+
+    func _init(_characterId: String = ""):
+        characterId = _characterId
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["characterId"] = characterId
+        return d
+
+    static func from(value: Variant) -> DeleteCharacterRequest:
+        if typeof(value) == TYPE_OBJECT and value is DeleteCharacterRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := DeleteCharacterRequest.new()
+            obj.characterId = raw.get("characterId", "")
+            return obj
+        return null
+
+class AddCharacterRequest:
+    var name: String
+
+    func _init(_name: String = ""):
+        name = _name
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["name"] = name
+        return d
+
+    static func from(value: Variant) -> AddCharacterRequest:
+        if typeof(value) == TYPE_OBJECT and value is AddCharacterRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := AddCharacterRequest.new()
+            obj.name = raw.get("name", "")
+            return obj
+        return null
+
+class JoinInstanceRequest:
+    var instancePath: String
+
+    func _init(_instancePath: String = ""):
+        instancePath = _instancePath
+
+    func to_dict() -> Dictionary:
+        var d: Dictionary = {}
+        d["instancePath"] = instancePath
+        return d
+
+    static func from(value: Variant) -> JoinInstanceRequest:
+        if typeof(value) == TYPE_OBJECT and value is JoinInstanceRequest:
+            return value
+        if typeof(value) == TYPE_DICTIONARY:
+            var raw: Dictionary = value
+            var obj := JoinInstanceRequest.new()
+            obj.instancePath = raw.get("instancePath", "")
+            return obj
+        return null
+
+class UpdatePositionResponse:
     var characterId: String
     var characterName: String
     var x: float
     var y: float
-    var direction: float
+    var direction: int
     var speed: float
 
-    func _init(_clientId: String = "", _characterId: String = "", _characterName: String = "", _x: float = 0.0, _y: float = 0.0, _direction: float = 0.0, _speed: float = 0.0):
-        clientId = _clientId
+    func _init(_characterId: String = "", _characterName: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0, _speed: float = 0.0):
         characterId = _characterId
         characterName = _characterName
         x = _x
@@ -337,7 +307,6 @@ class InstanceClientResponse:
 
     func to_dict() -> Dictionary:
         var d: Dictionary = {}
-        d["clientId"] = clientId
         d["characterId"] = characterId
         d["characterName"] = characterName
         d["x"] = x
@@ -346,129 +315,59 @@ class InstanceClientResponse:
         d["speed"] = speed
         return d
 
-    static func from(value: Variant) -> InstanceClientResponse:
-        if typeof(value) == TYPE_OBJECT and value is InstanceClientResponse:
+    static func from(value: Variant) -> UpdatePositionResponse:
+        if typeof(value) == TYPE_OBJECT and value is UpdatePositionResponse:
             return value
         if typeof(value) == TYPE_DICTIONARY:
             var raw: Dictionary = value
-            var obj := InstanceClientResponse.new()
-            obj.clientId = raw.get("clientId", "")
+            var obj := UpdatePositionResponse.new()
             obj.characterId = raw.get("characterId", "")
             obj.characterName = raw.get("characterName", "")
             obj.x = raw.get("x", 0.0)
             obj.y = raw.get("y", 0.0)
-            obj.direction = raw.get("direction", 0.0)
+            obj.direction = raw.get("direction", 0)
             obj.speed = raw.get("speed", 0.0)
             return obj
         return null
 
-class UpdatePositionResponse:
-	var characterId: String
-	var characterName: String
-	var x: float
-	var y: float
-	var direction: int
-	var speed: float
-
-	func _init(_characterId: String = "", _characterName: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0, _speed: float = 0.0):
-		characterId = _characterId
-		characterName = _characterName
-		x = _x
-		y = _y
-		direction = _direction
-		speed = _speed
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["characterId"] = characterId
-		d["characterName"] = characterName
-		d["x"] = x
-		d["y"] = y
-		d["direction"] = direction
-		d["speed"] = speed
-		return d
-
-	static func from(value: Variant) -> UpdatePositionResponse:
-		if typeof(value) == TYPE_OBJECT and value is UpdatePositionResponse:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := UpdatePositionResponse.new()
-			obj.characterId = raw.get("characterId", "")
-			obj.characterName = raw.get("characterName", "")
-			obj.x = raw.get("x", 0.0)
-			obj.y = raw.get("y", 0.0)
-			obj.direction = raw.get("direction", 0)
-			obj.speed = raw.get("speed", 0.0)
-			return obj
-		return null
-
 class GameServerResponse:
-	var name: String
-	var location: String
-	var url: String
-	var status: Variant
-	var clientsCount: float
+    var name: String
+    var location: String
+    var url: String
+    var status: Variant
+    var clientsCount: float
 
-	func _init(_name: String = "", _location: String = "", _url: String = "", _status: Variant = null, _clientsCount: float = 0.0):
-		name = _name
-		location = _location
-		url = _url
-		status = _status
-		clientsCount = _clientsCount
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["name"] = name
-		d["location"] = location
-		d["url"] = url
-		d["status"] = status
-		d["clientsCount"] = clientsCount
-		return d
-
-	static func from(value: Variant) -> GameServerResponse:
-		if typeof(value) == TYPE_OBJECT and value is GameServerResponse:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := GameServerResponse.new()
-			obj.name = raw.get("name", "")
-			obj.location = raw.get("location", "")
-			obj.url = raw.get("url", "")
-			obj.status = raw.get("status", null)
-			obj.clientsCount = raw.get("clientsCount", 0.0)
-			return obj
-		return null
-
-class CharactersListResponse:
-    var characters: Array
-
-    func _init(_characters: Array = []):
-        characters = _characters
+    func _init(_name: String = "", _location: String = "", _url: String = "", _status: Variant = null, _clientsCount: float = 0.0):
+        name = _name
+        location = _location
+        url = _url
+        status = _status
+        clientsCount = _clientsCount
 
     func to_dict() -> Dictionary:
         var d: Dictionary = {}
-        d["characters"] = characters
+        d["name"] = name
+        d["location"] = location
+        d["url"] = url
+        d["status"] = status
+        d["clientsCount"] = clientsCount
         return d
 
-    static func from(value: Variant) -> CharactersListResponse:
-        if typeof(value) == TYPE_OBJECT and value is CharactersListResponse:
+    static func from(value: Variant) -> GameServerResponse:
+        if typeof(value) == TYPE_OBJECT and value is GameServerResponse:
             return value
         if typeof(value) == TYPE_DICTIONARY:
             var raw: Dictionary = value
-            var obj := CharactersListResponse.new()
-            obj.characters = []
-            if raw.has("characters") and typeof(raw["characters"]) == TYPE_ARRAY:
-                for it in raw["characters"]:
-                    var conv = CharacterResponse.from(it)
-                    if conv != null:
-                        obj.characters.append(conv)
-                    else:
-                        obj.characters.append(it)
+            var obj := GameServerResponse.new()
+            obj.name = raw.get("name", "")
+            obj.location = raw.get("location", "")
+            obj.url = raw.get("url", "")
+            obj.status = raw.get("status", null)
+            obj.clientsCount = raw.get("clientsCount", 0.0)
             return obj
         return null
 
-class CharacterResponse:
+class ClientCharacter:
     var id: String
     var createdAt: Variant
     var updatedAt: Variant
@@ -478,8 +377,10 @@ class CharacterResponse:
     var y: float
     var direction: int
     var userId: String
+    var speed: float
+    var lastPositionUpdate: float
 
-    func _init(_id: String = "", _createdAt: Variant = null, _updatedAt: Variant = null, _name: String = "", _instancePath: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0, _userId: String = ""):
+    func _init(_id: String = "", _createdAt: Variant = null, _updatedAt: Variant = null, _name: String = "", _instancePath: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0, _userId: String = "", _speed: float = 0.0, _lastPositionUpdate: float = 0.0):
         id = _id
         createdAt = _createdAt
         updatedAt = _updatedAt
@@ -489,6 +390,8 @@ class CharacterResponse:
         y = _y
         direction = _direction
         userId = _userId
+        speed = _speed
+        lastPositionUpdate = _lastPositionUpdate
 
     func to_dict() -> Dictionary:
         var d: Dictionary = {}
@@ -501,22 +404,26 @@ class CharacterResponse:
         d["y"] = y
         d["direction"] = direction
         d["userId"] = userId
+        d["speed"] = speed
+        d["lastPositionUpdate"] = lastPositionUpdate
         return d
 
-    static func from(value: Variant) -> CharacterResponse:
-        if typeof(value) == TYPE_OBJECT and value is CharacterResponse:
+    static func from(value: Variant) -> ClientCharacter:
+        if typeof(value) == TYPE_OBJECT and value is ClientCharacter:
             return value
         if typeof(value) == TYPE_DICTIONARY:
             var raw: Dictionary = value
-            var obj := CharacterResponse.new()
+            var obj := ClientCharacter.new()
             obj.id = raw.get("id", "")
             obj.createdAt = raw.get("createdAt", null)
             obj.updatedAt = raw.get("updatedAt", null)
             obj.name = raw.get("name", "")
-            obj.instancePath = raw.get("instancePath", raw.get("instance", ""))
+            obj.instancePath = raw.get("instancePath", "")
             obj.x = raw.get("x", 0.0)
             obj.y = raw.get("y", 0.0)
             obj.direction = raw.get("direction", 0)
             obj.userId = raw.get("userId", "")
+            obj.speed = raw.get("speed", 0.0)
+            obj.lastPositionUpdate = raw.get("lastPositionUpdate", 0.0)
             return obj
         return null
