@@ -4,6 +4,9 @@ import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { RedisService } from '../core/services/redis.service';
 import { Handler } from '../types/ws.types';
 import { LoginRequest } from '../shared/dtos';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class AuthHandler {
@@ -18,7 +21,7 @@ export class AuthHandler {
 
   // Handlers
   private async handleLogin(client: WebSocket, message: WebsocketMessage<LoginRequest>) {
-    const res = await fetch('http://localhost:3000/v1/auth/me', {
+    const res = await fetch(`${process.env.AUTH_SERVER_URL}/v1/auth/me`, {
       headers: {
         Cookie: `sid=${message.data.sid}`,
       },

@@ -24,8 +24,12 @@ const handlers = [
   imports: [
     TypeOrmModule.forRoot(PostgresConfig),
     RedisModule.forRoot(RedisConfig),
-    ...handlers,
   ],
-  providers: [AppGateway, RouterService, RedisService],
+  providers: [
+    AppGateway,
+    RouterService,
+    RedisService,
+    ...handlers
+  ],
 })
 export class AppModule {}
