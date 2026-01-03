@@ -87,21 +87,19 @@ export class JoinInstanceRequest {
 
 }
 
-export class InstanceJoinedResponse {
+export class ClientCharacter {
 
-  clients: InstanceClientResponse[];
-
-}
-
-export class InstanceClientResponse {
-
-  clientId: string;
-  characterId: string;
-  characterName: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string;
+  instancePath: string;
   x: number;
   y: number;
-  direction: number;
+  direction: Direction;
+  userId: string;
   speed: number;
+  lastPositionUpdate: number;
 
 }
 
@@ -123,26 +121,6 @@ export class GameServerResponse {
   url: string;
   status?: 'online' | 'offline';
   clientsCount?: number;
-
-}
-
-export class CharacterResponse {
-
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string;
-  instancePath: string;
-  x: number;
-  y: number;
-  direction: Direction;
-  userId: string;
-
-}
-
-export class CharactersListResponse {
-
-  characters: CharacterResponse[];
 
 }
 

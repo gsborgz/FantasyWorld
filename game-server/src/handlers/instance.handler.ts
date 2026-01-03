@@ -5,7 +5,7 @@ import { RedisService } from '../core/services/redis.service';
 import { Handler } from '../types/ws.types';
 import { DataSource } from 'typeorm';
 import { Character } from '../core/entities/character.entity';
-import { UpdatePositionRequest } from '../shared/dtos';
+import { CharacterResponse, InstanceJoinedResponse, JoinInstanceRequest, UpdatePositionRequest } from '../shared/dtos';
 
 @Injectable()
 export class InstanceHandler {
@@ -20,67 +20,48 @@ export class InstanceHandler {
   }
 
   // Handlers
-  private async handleJoinInstance(client: WebSocket, message: WebsocketMessage<any>, ctx: { allClients: Set<WebSocket> }) {
-    const instancePath = (message.data.instance as string) ?? (message.data.instancePath as string);
-    const clientId = client.id;
+  private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<JoinInstanceRequest>, ctx: { allClients: Set<WebSocket> }) {
+    const newSenderInstancePath = message.data.instancePath;
+    const clientId = sender.id;
     
     if (!clientId) return;
 
-    const previousInstancePath = client.character?.instancePath;
+    const previousSenderInstancePath = sender.character?.instancePath;
 
-    try {
-      const pipeline = this.redisService.client.multi();
-      
-      if (previousInstancePath) {
-        pipeline.srem(this.redisService.keys.instanceClients(previousInstancePath), clientId);
-      }
+    sender.character!.instancePath = newSenderInstancePath;
 
-      pipeline.sadd(this.redisService.keys.instanceClients(instancePath), clientId);
-      pipeline.set(this.redisService.keys.clientCurrentInstance(clientId), instancePath);
-      await pipeline.exec();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Redis error on joinInstance:', err);
-    }
-
-    client.character!.instancePath = instancePath;
-
-    if (previousInstancePath) {
-      this.broadcastToInstance(client, previousInstancePath, {
+    if (previousSenderInstancePath) {
+      this.broadcastToInstance(sender, previousSenderInstancePath, {
         type: WebsocketEvents.INSTANCE_LEFT,
-        data: { clientId },
+        data: sender.character as unknown as CharacterResponse,
       }, ctx.allClients);
     }
-
-    this.broadcastToInstance(client, instancePath, {
+    
+    const instanceClients = Array.from(ctx.allClients).filter(client => client.character?.instancePath === newSenderInstancePath && client !== sender);
+    const characters = instanceClients.map(client => client.character).filter(Boolean) as unknown as CharacterResponse[];
+    const joinMessage: WebsocketMessage<CharacterResponse> = {
+      clientId: sender.id!,
       type: WebsocketEvents.JOIN_INSTANCE,
+      data: sender.character as unknown as CharacterResponse,
+    };
+    const joinedMessage: WebsocketMessage<InstanceJoinedResponse> = {
+      clientId: sender.id!,
+      type: WebsocketEvents.INSTANCE_JOINED,
       data: {
-        clientId,
-        characterId: client.character?.id,
-        characterName: (client.character as any)?.name ?? (client as any).user?.username ?? "",
-        x: (client.character as any)?.x,
-        y: (client.character as any)?.y,
-        direction: (client.character as any)?.direction,
-        speed: (client.character as any)?.speed ?? 200,
-      },
-    }, ctx.allClients);
+        clients: characters,
+      }
+    };
 
-    // Envia imediatamente um UPDATE_POSITION para que clientes já presentes
-    // possam instanciar o novo player sem depender do primeiro movimento
-    if (client.character?.id) {
-      this.broadcastToInstance(client, instancePath, {
+    this.broadcastToInstance(sender, newSenderInstancePath, joinMessage, ctx.allClients);
+
+    if (sender.character?.id) {
+      this.broadcastToInstance(sender, newSenderInstancePath, {
         type: WebsocketEvents.UPDATE_POSITION,
-        data: {
-          clientId: client.id,
-          characterId: client.character.id,
-          characterName: client.character.name,
-          x: client.character.x,
-          y: client.character.y,
-          direction: client.character.direction,
-          speed: client.character?.speed ?? 200,
-        },
+        data: sender.character as unknown as CharacterResponse,
       }, ctx.allClients);
     }
+
+    sender.send(JSON.stringify(joinedMessage));
   }
 
   private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>, ctx: { allClients: Set<WebSocket> }) {

@@ -70,22 +70,13 @@ export class JoinInstanceRequest {
   instancePath: string;
 }
 
+export type ClientCharacter = Character & {
+  speed: number;
+  lastPositionUpdate: number;
+};
+
 
 // Response
-export class InstanceJoinedResponse {
-  clients: InstanceClientResponse[];
-}
-
-export class InstanceClientResponse {
-  clientId: string;
-  characterId: string;
-  characterName: string;
-  x: number;
-  y: number;
-  direction: number;
-  speed: number;
-}
-
 export class UpdatePositionResponse {
   characterId: string;
   characterName: string;
@@ -102,10 +93,3 @@ export class GameServerResponse {
   status?: 'online' | 'offline';
   clientsCount?: number;
 }
-
-export type CharacterResponse = Character;
-
-export class CharactersListResponse {
-  characters: CharacterResponse[];
-}
-

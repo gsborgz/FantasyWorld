@@ -5,12 +5,16 @@ import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
 import { WorldInstancePath } from '../shared/world-instances';
-import { AddCharacterRequest, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
+import { AddCharacterRequest, CharacterResponse, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
+import { BroadcastHelper } from '../helpers/broadcast.helper';
 
 @Injectable()
 export class CharacterHandler {
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly broadcastHelper: BroadcastHelper
+  ) {}
 
   getHandlers() {
     return {
@@ -56,23 +60,23 @@ export class CharacterHandler {
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_ADDED }));
   }
 
-  private async handleCharacterSelect(client: WebSocket, message: WebsocketMessage<SelectCharacterRequest>) {
-    if (!client.user?.id) {
-      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
+  private async handleCharacterSelect(sender: WebSocket, message: WebsocketMessage<SelectCharacterRequest>, ctx: { allClients: Set<WebSocket> }) {
+    if (!sender.user?.id) {
+      sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
     
     const characterId = message.data.characterId as string;
     const character = await this.dataSource.getRepository(Character).findOne({
-      where: { id: characterId, userId: client.user.id },
+      where: { id: characterId, userId: sender.user.id },
     });
 
     if (!character) {
-      client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.DENY_RESPONSE }));
+      sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.DENY_RESPONSE }));
       return;
     }
 
-    client.character = {
+    sender.character = {
       id: character.id,
       name: character.name,
       instancePath: character.instancePath,
@@ -81,8 +85,15 @@ export class CharacterHandler {
       direction: character.direction,
       lastPositionUpdate: Date.now(),
     };
-
-    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
+    
+    const joinMessage: WebsocketMessage<CharacterResponse> = {
+      clientId: sender.id!,
+      type: WebsocketEvents.JOIN_INSTANCE,
+      data: sender.character as unknown as CharacterResponse,
+    };
+    
+    this.broadcastHelper.broadcastToInstance(sender, joinMessage, ctx.allClients);
+    sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
   }
 
   private async handleCharacterDelete(client: WebSocket, message: WebsocketMessage<DeleteCharacterRequest>) {    

@@ -11,6 +11,7 @@ import { CharacterHandler } from '../handlers/character.handler';
 import { ChatHandler } from '../handlers/chat.handler';
 import { InstanceHandler } from '../handlers/instance.handler';
 import { PingHandler } from '../handlers/ping.handler';
+import { BroadcastHelper } from '../helpers/broadcast.helper';
 
 const handlers = [
   AuthHandler,
@@ -29,6 +30,7 @@ const handlers = [
     AppGateway,
     RouterService,
     RedisService,
+    BroadcastHelper,
     ...handlers
   ],
 })
