@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bmyb7tddtpos8"]
 
 [ext_resource type="Script" uid="uid://vgxgwc4e5ho5" path="res://scenes/auth/auth.gd" id="1_7gy5t"]
-[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://classes/log/log.gd" id="2_p2b5a"]
+[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="2_p2b5a"]
 
 [node name="Auth" type="Node"]
 script = ExtResource("1_7gy5t")

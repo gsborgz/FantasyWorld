@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d1umfqgyal7kv"]
 
-[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://classes/log/log.gd" id="1_cs1qp"]
+[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="1_cs1qp"]
 
 [node name="Log" type="RichTextLabel"]
 script = ExtResource("1_cs1qp")

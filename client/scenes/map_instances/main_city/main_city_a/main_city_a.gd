@@ -11,10 +11,14 @@ var _players: Dictionary[String, Player] = {}
 
 func _ready() -> void:
 	_add_player(Session.getCharacter())
+	
 	WS.message_received.connect(_on_ws_message_received)
+	
 	_line_edit.text_submitted.connect(_on_line_edit_text_submitted)
 	_line_edit.focus_entered.connect(_disable_player_movement)
 	_line_edit.focus_exited.connect(_enable_player_movement)
+
+	_join_instance()
 
 
 func _on_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
@@ -45,6 +49,18 @@ func _enable_player_movement():
 	player.set_movement_enabled(true)
 
 
+func _join_instance() -> void:
+	var message := _ws_utils.WebsocketMessage.new()
+	var data := _dtos.JoinInstanceRequest.new()
+	
+	data.instancePath = Session.getCharacter().instancePath
+	
+	message.type = _ws_utils.WebsocketEvents.JOIN_INSTANCE
+	message.data = data
+	
+	WS.send(message)
+
+
 func _add_player(character: _dtos.ClientCharacter) -> void:
 	if _players.has(character.id):
 		return
@@ -62,7 +78,7 @@ func _update_player(character: _dtos.ClientCharacter) -> void:
 	if player == null:
 		_add_player(character)
 	else:
-		player.apply_remote_update(character.x, character.y, character.direction, character.speed)
+		player.apply_remote_update(character)
 
 
 func _remove_player(message: _ws_utils.WebsocketMessage) -> void:

@@ -95,7 +95,7 @@ export class CharacterHandler {
     
     this.broadcastHelper.broadcastToInstance(sender, sender.character?.instancePath, joinMessage);
 
-    sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.CHARACTER_SELECTED, data: character }));
+    sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.CHARACTER_SELECTED, data: sender.character }));
   }
 
   private async handleCharacterDelete(client: WebSocket, message: WebsocketMessage<DeleteCharacterRequest>) {    

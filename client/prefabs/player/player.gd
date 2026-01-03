@@ -137,13 +137,13 @@ func _send_update_position_message():
 	WS.send(message)
 
 
-func apply_remote_update(new_x: float, new_y: float, new_direction: _dtos.Direction, new_speed: float) -> void:
-	# Atualiza campos e posiciona o corpo remotamente
-	x = new_x
-	y = new_y
-	direction = new_direction
-	speed = new_speed
-	_remote_target = Vector2(new_x, new_y)
+func apply_remote_update(character: _dtos.ClientCharacter) -> void:
+	x = character.x
+	y = character.y
+	@warning_ignore("int_as_enum_without_cast")
+	direction = character.direction
+	speed = character.speed
+	_remote_target = Vector2(character.x, character.y)
 	_remote_has_target = true
 	queue_redraw()
 
