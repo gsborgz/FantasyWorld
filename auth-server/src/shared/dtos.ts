@@ -119,8 +119,9 @@ export class GameServerResponse {
   name: string;
   location: string;
   url: string;
-  status?: 'online' | 'offline';
-  clientsCount?: number;
+  status: 'online' | 'offline';
+  clientsCount: number;
+  maxClients: number;
 
 }
 

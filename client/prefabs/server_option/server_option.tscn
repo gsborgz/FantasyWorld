@@ -5,11 +5,19 @@
 [node name="ServerOption" type="BoxContainer"]
 script = ExtResource("1_lgomu")
 
-[node name="SeverName" type="Label" parent="."]
+[node name="Name" type="Label" parent="."]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
-[node name="ServerStatus" type="Label" parent="."]
+[node name="Region" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Status" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="ClientsCount" type="Label" parent="."]
 custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 

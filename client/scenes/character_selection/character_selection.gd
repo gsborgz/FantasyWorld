@@ -6,12 +6,14 @@ const _dtos := preload("res://shared/dtos.gd")
 const CharacterOption := preload("res://prefabs/character_option/character_option.gd")
 
 @onready var h_box_container: HBoxContainer = $UI/HBoxContainer
-@onready var _new_character_button: Button = $UI/NewCharacterButton
+@onready var _new_character_button: Button = $UI/Buttons/NewCharacterButton
+@onready var _exit_button: Button = $UI/Buttons/ExitButton
 
 
 func _ready() -> void:
 	WS.message_received.connect(_on_ws_message_received)
 	_new_character_button.pressed.connect(_on_new_character_button_pressed)
+	_exit_button.pressed.connect(_on_exit_button_pressed)
 	_get_characters()
 
 
@@ -42,5 +44,10 @@ func _list_characters(data: _dtos.CharactersListResponse) -> void:
 		h_box_container.add_child(option)
 
 
-func _on_new_character_button_pressed():
+func _on_new_character_button_pressed() -> void:
 	GameManager.set_scene("character_creation")
+
+
+func _on_exit_button_pressed() -> void:
+	WS.close()
+	GameManager.set_scene("server_list")

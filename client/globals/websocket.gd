@@ -29,17 +29,6 @@ func connect_to_url(url: String) -> int:
 	return OK
 
 
-func join_instance(instancePath: String) -> int:
-	var join_msg = _ws_utils.WebsocketMessage.new()
-	var data := _dtos.JoinInstanceRequest.new()
-
-	data.instancePath = instancePath
-	join_msg.type = _ws_utils.WebsocketEvents.JOIN_INSTANCE
-	join_msg.data = data
-
-	return WS.send(join_msg)
-
-
 func send(msg: _ws_utils.WebsocketMessage) -> int:
 	# Serializa uma representação em Dictionary do objeto
 	var payload_data = msg.data

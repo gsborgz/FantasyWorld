@@ -22,12 +22,13 @@ export class GameServerService {
     const servers = process.env.GAME_SERVERS ? process.env.GAME_SERVERS.split(';') || [] : [];
     const serversInfos: GameServerResponse[] = servers.map((serverString) => {
       const [name, location, url] = serverString.split(',');
+      const serverInfo = new GameServerResponse();
   
-      return {
-        name: name || 'Unknown',
-        location: location || 'Unknown',
-        url: url || '',
-      };
+      serverInfo.name = name || 'Unknown';
+      serverInfo.location = location || 'Unknown';
+      serverInfo.url = url || '';
+
+      return serverInfo;
     });
 
     return serversInfos;
@@ -43,8 +44,17 @@ export class GameServerService {
     const timeoutMs = 2000;
     const result = await this.wsService.ping(server.url, timeoutMs);
 
-    server.status = result.ok ? 'online' : 'offline';
-    server.clientsCount = result.ok ? result.message?.data?.clientsCount || 0 : 0;
+    if (result.ok) {
+      const data: GameServerResponse = result.message?.data;
+
+      server.status = 'online';
+      server.clientsCount = Math.max(0, data.clientsCount - 1); // Exclude the ping client
+      server.maxClients = data.maxClients;
+    } else {
+      server.status = 'offline';
+      server.clientsCount = 0;
+      server.maxClients = 0;
+    }
 
     return server;
   }

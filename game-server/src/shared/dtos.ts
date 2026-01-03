@@ -52,10 +52,10 @@ export class SelectCharacterRequest {
 }
 
 export class UpdatePositionRequest {
-  x: number;
-  y: number;
+  x: number; // Float
+  y: number; // Float
   direction: Direction;
-  speed: number;
+  speed: number; // Float
 }
 
 export class DeleteCharacterRequest {
@@ -71,8 +71,8 @@ export class JoinInstanceRequest {
 }
 
 export type ClientCharacter = Character & {
-  speed: number;
-  lastPositionUpdate: number;
+  speed: number; // Float
+  lastPositionUpdate: number; // Integer
 };
 
 
@@ -80,10 +80,10 @@ export type ClientCharacter = Character & {
 export class UpdatePositionResponse {
   characterId: string;
   characterName: string;
-  x: number;
-  y: number;
+  x: number; // Float
+  y: number; // Float
   direction: Direction;
-  speed: number;
+  speed: number; // Float
 }
 
 export class GameServerResponse {
@@ -91,7 +91,8 @@ export class GameServerResponse {
   location: string;
   url: string;
   status?: 'online' | 'offline';
-  clientsCount?: number;
+  clientsCount?: number; // Integer
+  maxClients?: number; // Integer
 }
 
 export class CharactersListResponse {

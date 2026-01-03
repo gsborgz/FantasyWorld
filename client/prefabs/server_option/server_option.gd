@@ -6,31 +6,38 @@ const _dtos := preload("res://shared/dtos.gd")
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
 const Scene := preload("res://prefabs/server_option/server_option.tscn")
 
-@onready var _sever_name: Label = $SeverName
+@onready var _name: Label = $Name
+@onready var _region: Label = $Region
+@onready var _status: Label = $Status
+@onready var _clients_count: Label = $ClientsCount
 @onready var _enter_button: Button = $EnterButton
-@onready var _server_status: Label = $ServerStatus
 
 var server_name: String
-var server_location: String
+var server_region: String
+var server_clients_count: int
+var server_max_clients: int
 var server_url: String
 var server_status: String
 
 
-@warning_ignore("shadowed_variable")
-static func instantiate(server_name: String, server_location: String, server_status: String, server_url: String) -> ServerOption:
+static func instantiate(server: _dtos.GameServerResponse) -> ServerOption:
 	var server_option := Scene.instantiate()
 	
-	server_option.server_name = server_name
-	server_option.server_location = server_location
-	server_option.server_status = server_status
-	server_option.server_url = server_url
+	server_option.server_name = server.name
+	server_option.server_region = server.location
+	server_option.server_clients_count = server.clientsCount
+	server_option.server_max_clients = server.maxClients
+	server_option.server_status = server.status
+	server_option.server_url = server.url
 	
 	return server_option
 
 
 func _ready() -> void:
-	_sever_name.text = server_name
-	_server_status.text = server_status
+	_name.text = server_name
+	_status.text = server_status
+	_region.text = server_region
+	_clients_count.text = str(server_clients_count) + "/" + str(server_max_clients)
 	
 	if server_status == 'offline':
 		_enter_button.disabled = true

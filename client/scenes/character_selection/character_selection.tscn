@@ -7,14 +7,21 @@ script = ExtResource("1_2gb4e")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="NewCharacterButton" type="Button" parent="UI"]
-offset_left = 129.0
-offset_top = 101.0
-offset_right = 172.0
-offset_bottom = 132.0
+[node name="Buttons" type="HBoxContainer" parent="UI"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="NewCharacterButton" type="Button" parent="UI/Buttons"]
+layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 text = "New"
+
+[node name="ExitButton" type="Button" parent="UI/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Exit"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI"]
 anchors_preset = 8

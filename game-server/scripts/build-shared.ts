@@ -176,7 +176,7 @@ function tsEnumToGdscriptEnum(ts: string, name: string): string {
   return gd;
 }
 
-type Prop = { name: string; type: string; tsType?: string };
+type Prop = { name: string; type: string; tsType?: string; numHint?: 'int' | 'float' };
 
 function generateGdClass(name: string, props: Prop[]): string {
   let gd = `class ${name}:\n`;
@@ -269,7 +269,7 @@ function collectClassPropsFromContent(ts: string, className: string, filePath: s
   const declRegex2 = new RegExp(`(^|\n)class\\s+${className}([^\\{]*)\\{`);
   const declMatch = ts.match(declRegex1) || ts.match(declRegex2);
   const body = getClassBody(ts, className) ?? '';
-  const own = extractTsProps(body).map(p => ({ name: p.name, type: tsTypeToGdType(p.type), tsType: p.type }));
+  const own = extractTsProps(body).map(p => ({ name: p.name, type: tsTypeToGdType(p.type, p.numericHint), tsType: p.type, numHint: p.numericHint }));
   let merged: Prop[] = [...own];
   if (declMatch) {
     const declTail = declMatch[1];
@@ -288,10 +288,10 @@ function collectClassPropsFromContent(ts: string, className: string, filePath: s
         // Base na mesma unidade
         baseProps = collectClassPropsFromContent(ts, baseName, filePath, seen);
       }
-      const map = new Map<string, { type: string; tsType?: string }>();
-      for (const p of baseProps) map.set(p.name, { type: p.type, tsType: p.tsType });
-      for (const p of merged) map.set(p.name, { type: p.type, tsType: p.tsType });
-      merged = Array.from(map.entries()).map(([name, v]) => ({ name, type: v.type, tsType: v.tsType }));
+      const map = new Map<string, { type: string; tsType?: string; numHint?: 'int'|'float' }>();
+      for (const p of baseProps) map.set(p.name, { type: p.type, tsType: p.tsType, numHint: p.numHint });
+      for (const p of merged) map.set(p.name, { type: p.type, tsType: p.tsType, numHint: p.numHint });
+      merged = Array.from(map.entries()).map(([name, v]) => ({ name, type: v.type, tsType: v.tsType, numHint: v.numHint }));
     }
   }
   return merged;
@@ -351,9 +351,9 @@ function getClassBody(ts: string, className: string): string | null {
   return ts.slice(openIdx + 1, i);
 }
 
-function tsTypeToGdType(type: string): string {
+function tsTypeToGdType(type: string, hint?: 'int' | 'float'): string {
   switch (type) {
-    case 'number': return 'float';
+    case 'number': return hint ?? 'float';
     case 'string': return 'String';
     case 'boolean': return 'bool';
     case 'any': return 'Variant';
@@ -448,16 +448,25 @@ function flattenExtendedClasses(ts: string, filePath: string): string {
   return out;
 }
 
-function extractTsProps(body: string): Array<{ name: string; type: string; optional: boolean }> {
-  const lines = body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const result: Array<{ name: string; type: string; optional: boolean }> = [];
-  for (const line of lines) {
+function extractTsProps(body: string): Array<{ name: string; type: string; optional: boolean; numericHint?: 'int' | 'float' }> {
+  const lines = body.split(/\r?\n/).filter(l => l.trim().length > 0);
+  const result: Array<{ name: string; type: string; optional: boolean; numericHint?: 'int' | 'float' }> = [];
+  for (const rawLine of lines) {
+    // Preserve inline comments for numeric hint detection
+    const line = rawLine.trim();
     const propMatch = line.match(/^(?:public|private|protected|readonly)?\s*(\w+)(\??)\s*:\s*([^;]+);/);
     if (propMatch) {
       const name = propMatch[1];
       const optional = propMatch[2] === '?';
       const type = propMatch[3].trim();
-      result.push({ name, type, optional });
+      let numericHint: 'int' | 'float' | undefined;
+      const commentMatch = line.match(/\/\/\s*(Float|Integer)/i);
+      if (commentMatch) {
+        const val = commentMatch[1].toLowerCase();
+        if (val === 'float') numericHint = 'float';
+        if (val === 'integer') numericHint = 'int';
+      }
+      result.push({ name, type, optional, numericHint });
     }
   }
   return result;
@@ -698,7 +707,7 @@ function tsIntersectionAliasToGdscriptClass(ts: string, aliasName: string, targe
       }
     }
   }
-  const extraTsProps = extractTsProps(inlineBody).map(p => ({ name: p.name, type: tsTypeToGdType(p.type), tsType: p.type }));
+  const extraTsProps = extractTsProps(inlineBody).map(p => ({ name: p.name, type: tsTypeToGdType(p.type, p.numericHint), tsType: p.type, numHint: p.numericHint }));
   const mergedMap = new Map<string, Prop>();
   for (const p of targetProps) mergedMap.set(p.name, p);
   for (const p of extraTsProps) mergedMap.set(p.name, p);
@@ -740,9 +749,9 @@ function processFile(file: string) {
   // Classes (suporta genéricos e qualquer conteúdo entre o nome e '{')
   const classRegex = /export\s+class\s+(\w+)[^{]*{([\s\S]*?)}/g;
   let classMatch;
-  while ((classMatch = classRegex.exec(content)) !== null) {
+  while ((classMatch = classRegex.exec(contentRaw)) !== null) {
     const name = classMatch[1];
-    output += tsClassToGdscriptClass(content, name, file) + '\n';
+    output += tsClassToGdscriptClass(contentRaw, name, file) + '\n';
   }
 
   // Funções
@@ -756,20 +765,20 @@ function processFile(file: string) {
   // Type aliases simples: export type A = B;
   const typeAliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*;/g;
   let aliasMatch: RegExpExecArray | null;
-  while ((aliasMatch = typeAliasRegex.exec(content)) !== null) {
+  while ((aliasMatch = typeAliasRegex.exec(contentRaw)) !== null) {
     const aliasName = aliasMatch[1];
     const targetName = aliasMatch[2];
-    const aliasOut = tsTypeAliasToGdscriptClass(content, aliasName, targetName, file);
+    const aliasOut = tsTypeAliasToGdscriptClass(contentRaw, aliasName, targetName, file);
     if (aliasOut) output += aliasOut + '\n';
   }
 
   // Type aliases com interseção: export type A = B & { ... };
   const intersectionAliasRegex2 = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*&\s*{([\s\S]*?)}\s*;/g;
-  while ((aliasMatch = intersectionAliasRegex2.exec(content)) !== null) {
+  while ((aliasMatch = intersectionAliasRegex2.exec(contentRaw)) !== null) {
     const aliasName = aliasMatch[1];
     const targetName = aliasMatch[2];
     const inlineBody = aliasMatch[3];
-    const aliasOut = tsIntersectionAliasToGdscriptClass(content, aliasName, targetName, inlineBody, file);
+    const aliasOut = tsIntersectionAliasToGdscriptClass(contentRaw, aliasName, targetName, inlineBody, file);
     if (aliasOut) output += aliasOut + '\n';
   }
 

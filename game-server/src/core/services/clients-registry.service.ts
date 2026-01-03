@@ -15,6 +15,10 @@ export class ClientsRegistryService {
     return this.allClients.size < this._maxClients;
   }
 
+  public get maxClients(): number {
+    return this._maxClients;
+  }
+
   public getAllClients(): WebSocket[] {
     return Array.from(this.allClients);
   }
