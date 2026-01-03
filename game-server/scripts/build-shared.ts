@@ -78,15 +78,16 @@ function collectTsClassProps(ts: string, className: string, filePath: string, se
 }
 
 function transformTypeAliasesToClassesForAuth(ts: string, filePath: string): string {
-  // Procura aliases simples e cria classes com props coletadas da classe alvo.
-  const aliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*;/g;
-  let match: RegExpExecArray | null;
+  // Converte aliases simples e interseções (Target & { props }) em classes exportadas.
   let out = ts;
   const replacements: Array<{ start: number; end: number; text: string }> = [];
   const importsToRemove: Array<{ targetName: string; importRel: string }> = [];
   const importMap = buildImportMap(ts);
 
-  while ((match = aliasRegex.exec(ts)) !== null) {
+  // Aliases simples: export type A = B;
+  const simpleAliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*;/g;
+  let match: RegExpExecArray | null;
+  while ((match = simpleAliasRegex.exec(ts)) !== null) {
     const full = match[0];
     const aliasName = match[1];
     const targetName = match[2];
@@ -98,38 +99,58 @@ function transformTypeAliasesToClassesForAuth(ts: string, filePath: string): str
         const targetContent = fs.readFileSync(resolved, 'utf-8');
         props = collectTsClassProps(targetContent, targetName, resolved);
       }
-      // Marcar import para remoção, pois substituímos pelo corpo
       importsToRemove.push({ targetName, importRel });
     } else {
-      // Tenta encontrar classe alvo no mesmo arquivo
       const body = getClassBody(ts, targetName);
       if (body) props = collectTsClassProps(ts, targetName, filePath);
     }
-
     if (props.length === 0) continue;
     let classText = `export class ${aliasName} {\n`;
-    for (const p of props) {
-      classText += `  ${p.name}${p.optional ? '?' : ''}: ${p.type};\n`;
-    }
+    for (const p of props) classText += `  ${p.name}${p.optional ? '?' : ''}: ${p.type};\n`;
     classText += `}`;
-    const start = match.index;
-    const end = match.index + full.length;
-    replacements.push({ start, end, text: classText });
+    replacements.push({ start: match.index, end: match.index + full.length, text: classText });
+  }
+
+  // Aliases com interseção: export type A = B & { ... };
+  const intersectionAliasRegex = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*&\s*{([\s\S]*?)}\s*;/g;
+  while ((match = intersectionAliasRegex.exec(ts)) !== null) {
+    const full = match[0];
+    const aliasName = match[1];
+    const targetName = match[2];
+    const inlineBody = match[3];
+    const importRel = importMap.get(targetName);
+    let targetProps: Array<{ name: string; type: string; optional: boolean }> = [];
+    if (importRel) {
+      const resolved = path.resolve(path.dirname(filePath), importRel.endsWith('.ts') ? importRel : importRel + '.ts');
+      if (fs.existsSync(resolved)) {
+        const targetContent = fs.readFileSync(resolved, 'utf-8');
+        targetProps = collectTsClassProps(targetContent, targetName, resolved);
+      }
+      importsToRemove.push({ targetName, importRel });
+    } else {
+      const body = getClassBody(ts, targetName);
+      if (body) targetProps = collectTsClassProps(ts, targetName, filePath);
+    }
+    const extraProps = extractTsProps(inlineBody);
+    const mergedMap = new Map<string, { type: string; optional: boolean }>();
+    for (const p of targetProps) mergedMap.set(p.name, { type: p.type, optional: p.optional });
+    for (const p of extraProps) mergedMap.set(p.name, { type: p.type, optional: p.optional });
+    const merged = Array.from(mergedMap.entries()).map(([name, v]) => ({ name, type: v.type, optional: v.optional }));
+    if (merged.length === 0) continue;
+    let classText = `export class ${aliasName} {\n`;
+    for (const p of merged) classText += `  ${p.name}${p.optional ? '?' : ''}: ${p.type};\n`;
+    classText += `}`;
+    replacements.push({ start: match.index, end: match.index + full.length, text: classText });
   }
 
   if (replacements.length > 0) {
     replacements.sort((a, b) => b.start - a.start);
-    for (const r of replacements) {
-      out = out.slice(0, r.start) + r.text + out.slice(r.end);
-    }
+    for (const r of replacements) out = out.slice(0, r.start) + r.text + out.slice(r.end);
   }
-
-  // Remover imports das classes alvo convertidas
   for (const ir of importsToRemove) {
     const importLineRegex = new RegExp(`\n?import\\s+(?:type\\s+)?\\{[^}]*\\b${escapeRegExp(ir.targetName)}\\b[^}]*\\}\\s*from\\s*['\"]${escapeRegExp(ir.importRel)}['\"];?\n?`, 'g');
     out = out.replace(importLineRegex, '\n');
   }
-
   return out;
 }
 
@@ -642,13 +663,11 @@ function tsFunctionToGdscriptFunction(ts: string, name: string): string {
 }
 
 function tsTypeAliasToGdscriptClass(ts: string, aliasName: string, targetName: string, filePath: string): string {
-  // Tenta encontrar a classe alvo no próprio arquivo
   let props: Prop[] = [];
   const targetDeclRegex = new RegExp(`export\\s+class\\s+${targetName}\\b|(^|\\n)class\\s+${targetName}\\b`);
   if (targetDeclRegex.test(ts)) {
     props = collectClassPropsFromContent(ts, targetName, filePath);
   } else {
-    // Tenta resolver via import
     const importMap = buildImportMap(ts);
     const rel = importMap.get(targetName);
     if (rel) {
@@ -660,6 +679,31 @@ function tsTypeAliasToGdscriptClass(ts: string, aliasName: string, targetName: s
     }
   }
   return generateGdClass(aliasName, props);
+}
+
+function tsIntersectionAliasToGdscriptClass(ts: string, aliasName: string, targetName: string, inlineBody: string, filePath: string): string {
+  // Coleta props da classe alvo + props do objeto inline
+  let targetProps: Prop[] = [];
+  const targetDeclRegex = new RegExp(`export\\s+class\\s+${targetName}\\b|(^|\\n)class\\s+${targetName}\\b`);
+  if (targetDeclRegex.test(ts)) {
+    targetProps = collectClassPropsFromContent(ts, targetName, filePath);
+  } else {
+    const importMap = buildImportMap(ts);
+    const rel = importMap.get(targetName);
+    if (rel) {
+      const resolved = path.resolve(path.dirname(filePath), rel.endsWith('.ts') ? rel : rel + '.ts');
+      if (fs.existsSync(resolved)) {
+        const targetContent = fs.readFileSync(resolved, 'utf-8');
+        targetProps = collectClassPropsFromContent(targetContent, targetName, resolved);
+      }
+    }
+  }
+  const extraTsProps = extractTsProps(inlineBody).map(p => ({ name: p.name, type: tsTypeToGdType(p.type), tsType: p.type }));
+  const mergedMap = new Map<string, Prop>();
+  for (const p of targetProps) mergedMap.set(p.name, p);
+  for (const p of extraTsProps) mergedMap.set(p.name, p);
+  const merged = Array.from(mergedMap.values());
+  return generateGdClass(aliasName, merged);
 }
 
 function processFile(file: string) {
@@ -716,7 +760,17 @@ function processFile(file: string) {
     const aliasName = aliasMatch[1];
     const targetName = aliasMatch[2];
     const aliasOut = tsTypeAliasToGdscriptClass(content, aliasName, targetName, file);
-    output += aliasOut + '\n';
+    if (aliasOut) output += aliasOut + '\n';
+  }
+
+  // Type aliases com interseção: export type A = B & { ... };
+  const intersectionAliasRegex2 = /export\s+type\s+(\w+)\s*=\s*(\w+)\s*&\s*{([\s\S]*?)}\s*;/g;
+  while ((aliasMatch = intersectionAliasRegex2.exec(content)) !== null) {
+    const aliasName = aliasMatch[1];
+    const targetName = aliasMatch[2];
+    const inlineBody = aliasMatch[3];
+    const aliasOut = tsIntersectionAliasToGdscriptClass(content, aliasName, targetName, inlineBody, file);
+    if (aliasOut) output += aliasOut + '\n';
   }
 
   if (output.trim().length > 0) {
