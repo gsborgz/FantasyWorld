@@ -12,6 +12,7 @@ const _dtos := preload("res://shared/dtos.gd")
 func _ready() -> void:
 	_login_button.pressed.connect(_on_login_button_pressed)
 	_register_button.pressed.connect(_on_register_button_pressed)
+	_password_field.secret = true
 
 
 func _on_login_button_pressed() -> void:
