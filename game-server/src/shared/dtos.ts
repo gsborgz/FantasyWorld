@@ -72,7 +72,11 @@ export class JoinInstanceRequest {
 
 
 // Response
-export class JoinInstanceResponse {
+export class InstanceJoinedResponse {
+  clients: InstanceClientResponse[];
+}
+
+export class InstanceClientResponse {
   clientId: string;
   characterId: string;
   characterName: string;
