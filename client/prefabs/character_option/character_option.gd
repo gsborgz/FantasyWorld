@@ -34,7 +34,7 @@ func _ready() -> void:
 
 func _on_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
 	if message.type == _ws_utils.WebsocketEvents.CHARACTER_SELECTED:
-		_on_character_selected(_dtos.CharacterResponse.from(message.data))
+		_on_character_selected(_dtos.ClientCharacter.from(message.data))
 	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
 		pass
 
@@ -63,7 +63,7 @@ func _on_character_delete() -> void:
 	WS.send(message)
 
 
-func _on_character_selected(data: _dtos.CharacterResponse) -> void:
+func _on_character_selected(data: _dtos.ClientCharacter) -> void:
 	if data.id == character_id:
 		Session.setCharacter(data)
 		GameManager.set_scene("map_instances/" + data.instancePath)

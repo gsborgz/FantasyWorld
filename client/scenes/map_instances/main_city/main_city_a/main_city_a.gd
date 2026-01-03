@@ -19,13 +19,11 @@ func _ready() -> void:
 
 func _on_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
 	if message.type == _ws_utils.WebsocketEvents.UPDATE_POSITION:
-		_update_player(message)
+		var character = _dtos.ClientCharacter.from(message.data)
+		
+		_update_player(character)
 	elif message.type == _ws_utils.WebsocketEvents.INSTANCE_LEFT:
 		_remove_player(message)
-	elif message.type == _ws_utils.WebsocketEvents.JOIN_INSTANCE:
-		_join_instance(message)
-	elif message.type == _ws_utils.WebsocketEvents.INSTANCE_JOINED:
-		_instance_joined(message)
 	elif message.type == _ws_utils.WebsocketEvents.INSTANCE_CHAT_MESSAGE:
 		_on_instance_chat_message_received(message)
 
@@ -47,7 +45,10 @@ func _enable_player_movement():
 	player.set_movement_enabled(true)
 
 
-func _add_player(character: _dtos.CharacterResponse) -> void:
+func _add_player(character: _dtos.ClientCharacter) -> void:
+	if _players.has(character.id):
+		return
+	
 	var is_player := Session.getCharacter().id == character.id
 	var player: Player = Player.instantiate(character, is_player)
 	
@@ -55,63 +56,23 @@ func _add_player(character: _dtos.CharacterResponse) -> void:
 	_world.add_child(player)
 
 
+func _update_player(character: _dtos.ClientCharacter) -> void:
+	var player: Player = _players.get(character.id)
+	
+	if player == null:
+		_add_player(character)
+	else:
+		player.apply_remote_update(character.x, character.y, character.direction, character.speed)
+
+
 func _remove_player(message: _ws_utils.WebsocketMessage) -> void:
-	var character = _dtos.CharacterResponse.from(message.data)
+	var character = _dtos.ClientCharacter.from(message.data)
 	var player: Player = _players.get(character.id)
 	
 	if player != null:
 		_players.erase(player.player_id)
 		player.queue_free()
 
-
-func _update_player(message: _ws_utils.WebsocketMessage) -> void:
-	var data = _dtos.UpdatePositionResponse.from(message.data)
-	var character_id = data.characterId
-	var character_name = data.characterName
-	var x = data.x
-	var y = data.y
-	var direction = data.direction
-	var speed = data.speed
-	
-	var player: Player = _players.get(character_id)
-	
-	if player == null:
-		var character := _dtos.CharacterResponse.new()
-		
-		character.id = character_id
-		character.name = character_name
-		character.x = x
-		character.y = y
-		character.direction = direction
-		
-		var is_player = Session.getCharacter().id == character_id
-		
-		player = Player.instantiate(character, is_player)
-		
-		_players[character_id] = player
-		_world.add_child(player)
-	else:
-		player.apply_remote_update(x, y, direction, speed)
-
-
-func _join_instance(message: _ws_utils.WebsocketMessage) -> void:
-	var character = _dtos.CharacterResponse.from(message.data)
-	
-	if _players.has(character.id):
-		return
-	
-	var is_player = Session.getCharacter().id == character.id
-	var player: Player = Player.instantiate(character, is_player)
-	
-	_players[character.id] = player
-	_world.add_child(player)
-
-
-func _instance_joined(message: _ws_utils.WebsocketMessage) -> void:
-	var data = _dtos.InstanceJoinedResponse.from(message.data)
-	
-	for character in data.clients:
-		_add_player(character)
 
 func _on_line_edit_text_submitted(new_text: String) -> void:
 	if not new_text:

@@ -39,14 +39,14 @@ var _remote_has_target: bool = false
 
 
 @warning_ignore("shadowed_variable")
-static func instantiate(character: _dtos.CharacterResponse, is_player: bool) -> Player:
+static func instantiate(character: _dtos.ClientCharacter, is_player: bool) -> Player:
 	var player := Scene.instantiate() as Player
 	
 	player.player_id = character.id
 	player.player_name = character.name
 	player.x = character.x
 	player.y = character.y
-	player.speed = 200
+	player.speed = character.speed
 	@warning_ignore("int_as_enum_without_cast")
 	player.direction = character.direction
 	player.is_player = is_player

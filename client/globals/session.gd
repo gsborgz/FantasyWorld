@@ -3,7 +3,7 @@ extends Node
 const _dtos := preload("res://shared/dtos.gd")
 
 var _sid: String
-var _character: _dtos.CharacterResponse
+var _character: _dtos.ClientCharacter
 var _client_id: String
 
 
@@ -15,11 +15,11 @@ func getSid() -> String:
 	return _sid
 
 
-func setCharacter(character: _dtos.CharacterResponse) -> void:
+func setCharacter(character: _dtos.ClientCharacter) -> void:
 	_character = character
 
 
-func getCharacter() -> _dtos.CharacterResponse:
+func getCharacter() -> _dtos.ClientCharacter:
 	return _character
 
 func setClientId(client_id: String) -> void:
