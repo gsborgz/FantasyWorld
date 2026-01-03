@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
+import { ChatMessage } from '../shared/dtos';
 
 @Injectable()
 export class ChatHandler {
@@ -14,7 +15,7 @@ export class ChatHandler {
   }
 
   // Handlers
-  private handleGlobalChat(client: WebSocket, message: WebsocketMessage<any>, ctx: { allClients: Set<WebSocket> }) {
+  private handleGlobalChat(client: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
     for (const c of ctx.allClients) {
       if (c.readyState === WebSocket.OPEN) {
         c.send(JSON.stringify(message));
@@ -22,8 +23,8 @@ export class ChatHandler {
     }
   }
 
-  private handleInstanceChat(client: WebSocket, message: WebsocketMessage<any>, ctx: { allClients: Set<WebSocket> }) {
-    const instancePath = message.data.instance as string;
+  private handleInstanceChat(client: WebSocket, message: WebsocketMessage<ChatMessage>, ctx: { allClients: Set<WebSocket> }) {
+    const instancePath = client.character?.instancePath;
 
     for (const c of ctx.allClients) {
       if (c === client) continue;
