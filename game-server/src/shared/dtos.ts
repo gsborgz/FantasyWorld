@@ -73,17 +73,7 @@ export class JoinInstanceRequest {
 
 // Response
 export class InstanceJoinedResponse {
-  clients: InstanceClientResponse[];
-}
-
-export class InstanceClientResponse {
-  clientId: string;
-  characterId: string;
-  characterName: string;
-  x: number;
-  y: number;
-  direction: number;
-  speed: number;
+  clients: CharacterResponse[];
 }
 
 export class UpdatePositionResponse {
