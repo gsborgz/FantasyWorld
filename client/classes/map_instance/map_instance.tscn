@@ -1,13 +1,18 @@
-[gd_scene load_steps=3 format=3 uid="uid://b3o5o4mopunyd"]
+[gd_scene load_steps=2 format=3 uid="uid://b3o5o4mopunyd"]
 
-[ext_resource type="Script" uid="uid://cfxefs7oquj36" path="res://scenes/map_instances/main_city/main_city_a/main_city_a.gd" id="1_bs2ol"]
-[ext_resource type="PackedScene" uid="uid://cijpvfr7wydpq" path="res://prefabs/chat/chat.tscn" id="3_dvsuu"]
+[sub_resource type="GDScript" id="GDScript_8t2sn"]
+script/source = "extends MapInstance
 
-[node name="MainCityA" type="Node"]
-script = ExtResource("1_bs2ol")
 
-[node name="World" type="Node2D" parent="."]
+func _ready() -> void:
+	init_instance()
 
-[node name="UI" type="CanvasLayer" parent="."]
 
-[node name="Chat" parent="UI" instance=ExtResource("3_dvsuu")]
+# Handlers
+@warning_ignore(\"unused_parameter\")
+func _handle_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
+	pass
+"
+
+[node name="MapInstance" type="Node2D"]
+script = SubResource("GDScript_8t2sn")

@@ -51,8 +51,8 @@ export class CharacterHandler {
     character.userId = client.user.id;
     character.name = data.name;
     character.instancePath = WorldInstancePath.MainCity.MainCityA;
-    character.x = 100;
-    character.y = 100;
+    character.x = 0;
+    character.y = 0;
     character.direction = Direction.DOWN;
     
     await this.dataSource.getRepository(Character).save(character);

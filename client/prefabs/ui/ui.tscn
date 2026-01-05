@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://br7cw1356bnxv"]
+
+[ext_resource type="Script" uid="uid://bchbw0yxvr77v" path="res://prefabs/ui/ui.gd" id="1_70ykp"]
+[ext_resource type="PackedScene" uid="uid://cijpvfr7wydpq" path="res://prefabs/chat/chat.tscn" id="1_tlstp"]
+
+[node name="Ui" type="CanvasLayer"]
+script = ExtResource("1_70ykp")
+
+[node name="Chat" parent="." instance=ExtResource("1_tlstp")]

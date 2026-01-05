@@ -1,11 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://h6xkymx6yih0"]
+[gd_scene load_steps=6 format=3 uid="uid://bkvu300k1lwj0"]
 
-[ext_resource type="Texture2D" uid="uid://ct3es4to8q7jm" path="res://assets/tilesets/Solaria Demo Tiles.png" id="1_5bxbm"]
-[ext_resource type="Script" uid="uid://c6wq10aveqju0" path="res://scenes/map_instances/forest/forest_a/forest_a.gd" id="1_gjfah"]
-[ext_resource type="PackedScene" uid="uid://br7cw1356bnxv" path="res://prefabs/ui/ui.tscn" id="2_1j8pb"]
+[ext_resource type="Script" uid="uid://er8qmqw13n8l" path="res://examples/map_instance/map_instance_example.gd" id="1_r6c2l"]
+[ext_resource type="Texture2D" uid="uid://ct3es4to8q7jm" path="res://assets/tilesets/Solaria Demo Tiles.png" id="2_1j3n7"]
+[ext_resource type="PackedScene" uid="uid://br7cw1356bnxv" path="res://prefabs/ui/ui.tscn" id="3_yayx7"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pbq8e"]
-texture = ExtResource("1_5bxbm")
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_k1nvs"]
+texture = ExtResource("2_1j3n7")
 0:0/0 = 0
 1:0/0 = 0
 2:0/0 = 0
@@ -335,30 +335,30 @@ texture = ExtResource("1_5bxbm")
 7:5/size_in_atlas = Vector2i(2, 2)
 7:5/0 = 0
 
-[sub_resource type="TileSet" id="TileSet_rurcb"]
-sources/0 = SubResource("TileSetAtlasSource_pbq8e")
+[sub_resource type="TileSet" id="TileSet_14blg"]
+sources/0 = SubResource("TileSetAtlasSource_k1nvs")
 
-[node name="ForestA" type="Node2D"]
-script = ExtResource("1_gjfah")
+[node name="Example" type="Node2D"]
+script = ExtResource("1_r6c2l")
 
 [node name="World" type="Node2D" parent="."]
 
 [node name="Ground Botton" type="TileMapLayer" parent="World"]
 use_parent_material = true
 rotation = 6.2831855
-tile_set = SubResource("TileSet_rurcb")
+tile_set = SubResource("TileSet_14blg")
 
 [node name="Ground Top" type="TileMapLayer" parent="World/Ground Botton"]
 use_parent_material = true
-tile_set = SubResource("TileSet_rurcb")
+tile_set = SubResource("TileSet_14blg")
 
 [node name="Decoration" type="TileMapLayer" parent="World/Ground Botton/Ground Top"]
 z_index = 10
 use_parent_material = true
-tile_set = SubResource("TileSet_rurcb")
+tile_set = SubResource("TileSet_14blg")
 
 [node name="Top Elements" type="TileMapLayer" parent="World/Ground Botton/Ground Top/Decoration"]
 use_parent_material = true
-tile_set = SubResource("TileSet_rurcb")
+tile_set = SubResource("TileSet_14blg")
 
-[node name="Ui" parent="." instance=ExtResource("2_1j8pb")]
+[node name="Ui" parent="." instance=ExtResource("3_yayx7")]

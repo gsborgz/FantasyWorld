@@ -1,20 +1,27 @@
 class_name MapInstance
-extends Node
+extends Node2D
 
 const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
-@onready var _chat: Chat = $UI/Chat
-@onready var _world: Node2D = $World
-
+var _ui: UI
+var _world: Node2D
 var _players: Dictionary[String, Player] = {}
 
 
 # Functions
+func set_ui(ui: UI) -> void:
+	_ui = ui
+
+
+func set_world(world: Node2D) -> void:
+	_world = world
+
+
 func init_instance() -> void:
 	WS.message_received.connect(_main_handle_ws_message_received)
 	
-	_set_chat_players()
+	_ui.setChatPlayers(_players)
 	_add_player(Session.getCharacter())
 	_join_instance()
 
@@ -39,9 +46,9 @@ func _add_player(character: _dtos.ClientCharacter) -> void:
 	var player: Player = Player.instantiate(character, is_player)
 	
 	_players[player.player_id] = player
-	_world.add_child(player)
 	
-	_set_chat_players()
+	_world.add_child(player)
+	_ui.setChatPlayers(_players)
 
 
 func _update_player(character: _dtos.ClientCharacter) -> void:
@@ -60,11 +67,7 @@ func _remove_player(character: _dtos.ClientCharacter) -> void:
 		_players.erase(player.player_id)
 		player.queue_free()
 	
-	_set_chat_players()
-
-
-func _set_chat_players() -> void:
-	_chat.players = _players
+	_ui.setChatPlayers(_players)
 
 
 # Handlers
