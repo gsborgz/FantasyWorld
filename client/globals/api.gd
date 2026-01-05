@@ -1,7 +1,7 @@
 extends HTTPRequest
 
-# const BASE_URL := "http://localhost:3000"
-const BASE_URL := "https://animated-telegram-pgjwjjgrgp6c7rgq-3003.app.github.dev"
+const BASE_URL := "http://localhost:3000"
+#const BASE_URL := "https://animated-telegram-pgjwjjgrgp6c7rgq-3003.app.github.dev"
 var _current_on_complete: Callable
 
 class ResponseData:

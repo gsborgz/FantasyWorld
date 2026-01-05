@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://cijpvfr7wydpq"]
+
+[ext_resource type="Script" uid="uid://b4avjyhvly88d" path="res://prefabs/chat/chat.gd" id="1_lx5xn"]
+[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="2_hij43"]
+
+[node name="Chat" type="VBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -185.0
+offset_right = 300.0
+grow_vertical = 0
+script = ExtResource("1_lx5xn")
+
+[node name="Log" type="RichTextLabel" parent="."]
+custom_minimum_size = Vector2(300, 150)
+layout_mode = 2
+size_flags_vertical = 8
+scroll_following = true
+tab_size = 5
+vertical_alignment = 2
+script = ExtResource("2_hij43")
+metadata/_custom_type_script = "uid://cjt7e0nevedq5"
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 2

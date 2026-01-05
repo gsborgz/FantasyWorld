@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cfxefs7oquj36" path="res://scenes/map_instances/main_city/main_city_a/main_city_a.gd" id="1_nxpq1"]
 [ext_resource type="Texture2D" uid="uid://ls6ylt8e785g" path="res://assets/floor.svg" id="2_jgqrb"]
-[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="3_x25uj"]
+[ext_resource type="PackedScene" uid="uid://cijpvfr7wydpq" path="res://prefabs/chat/chat.tscn" id="3_x25uj"]
 
 [node name="MainCityA" type="Node"]
 script = ExtResource("1_nxpq1")
@@ -18,24 +18,4 @@ region_rect = Rect2(0, 0, 10000, 10000)
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
-custom_minimum_size = Vector2(300, 150)
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -150.0
-offset_right = 403.0
-grow_vertical = 0
-
-[node name="Log" type="RichTextLabel" parent="UI/VBoxContainer"]
-custom_minimum_size = Vector2(300, 150)
-layout_mode = 2
-size_flags_vertical = 8
-scroll_following = true
-tab_size = 5
-vertical_alignment = 2
-script = ExtResource("3_x25uj")
-metadata/_custom_type_script = "uid://cjt7e0nevedq5"
-
-[node name="LineEdit" type="LineEdit" parent="UI/VBoxContainer"]
-layout_mode = 2
+[node name="Chat" parent="UI" instance=ExtResource("3_x25uj")]

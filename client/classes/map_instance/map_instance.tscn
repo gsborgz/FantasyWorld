@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://b3o5o4mopunyd"]
+
+[ext_resource type="Script" uid="uid://cfxefs7oquj36" path="res://scenes/map_instances/main_city/main_city_a/main_city_a.gd" id="1_bs2ol"]
+[ext_resource type="PackedScene" uid="uid://cijpvfr7wydpq" path="res://prefabs/chat/chat.tscn" id="3_dvsuu"]
+
+[node name="MainCityA" type="Node"]
+script = ExtResource("1_bs2ol")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Chat" parent="UI" instance=ExtResource("3_dvsuu")]
