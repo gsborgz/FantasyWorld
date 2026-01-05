@@ -24,7 +24,7 @@ static func instantiate(server: _dtos.GameServerResponse) -> ServerOption:
 	var server_option := Scene.instantiate()
 	
 	server_option.server_name = server.name
-	server_option.server_region = server.location
+	server_option.server_region = server.region
 	server_option.server_clients_count = server.clientsCount
 	server_option.server_max_clients = server.maxClients
 	server_option.server_status = server.status

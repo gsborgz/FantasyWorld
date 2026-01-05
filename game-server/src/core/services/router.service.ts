@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
-import { Handler, HandlerContext } from '../../types/ws.types';
+import { Handler } from '../../types/ws.types';
 import { AuthHandler } from '../../handlers/auth.handler';
 import { PingHandler } from '../../handlers/ping.handler';
 import { ChatHandler } from '../../handlers/chat.handler';
 import { InstanceHandler } from '../../handlers/instance.handler';
 import { CharacterHandler } from '../../handlers/character.handler';
-import { ClientsRegistryService } from './clients-registry.service';
 
 @Injectable()
 export class RouterService {
+
   private handlers: Partial<Record<WebsocketEvents, Handler>> = {};
 
   constructor(
@@ -18,8 +18,7 @@ export class RouterService {
     private readonly ping: PingHandler,
     private readonly chat: ChatHandler,
     private readonly instance: InstanceHandler,
-    private readonly character: CharacterHandler,
-    private readonly clientsRegistry: ClientsRegistryService
+    private readonly character: CharacterHandler
   ) {
     this.handlers = {
       ...this.auth.getHandlers(),
@@ -30,13 +29,15 @@ export class RouterService {
     };
   }
 
-  dispatchMessage(client: WebSocket, message: WebsocketMessage<any>) {
+  public dispatchMessage(client: WebSocket, message: WebsocketMessage<any>) {
     const handler = this.handlers[message.type as WebsocketEvents];
+
     if (!handler) {
       client.send(JSON.stringify({ clientId: client.id, type: 'echo' }));
       return;
     }
-    const ctx: HandlerContext = { allClients: this.clientsRegistry.getAllClients() };
-    return handler(client, message, ctx);
+
+    return handler(client, message);
   }
+
 }

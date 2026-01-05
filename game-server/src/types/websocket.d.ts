@@ -4,13 +4,14 @@ import { ClientCharacter } from '../shared/dtos';
 
 declare module 'ws' {
   interface WebSocket {
-    id?: string;
-    sid?: string;
-    user?: {
+    id: string;
+    isProbe: boolean;
+    sid: string;
+    user: {
       id: string;
       username: string;
     };
-    character?: ClientCharacter
+    character: ClientCharacter
   }
 }
 

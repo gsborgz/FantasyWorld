@@ -3,6 +3,7 @@ import { WebSocket } from 'ws';
 import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
+import { GameServerResponse } from '../shared/dtos';
 
 @Injectable()
 export class PingHandler {
@@ -16,13 +17,23 @@ export class PingHandler {
   }
 
   // Handlers
-  private handlePing(client: WebSocket, _message: WebsocketMessage<any>) {
-    client.send(
-      JSON.stringify({ clientId: client.id, type: WebsocketEvents.PONG, data: {
-        clientsCount: this.clientsRegistry.size,
-        maxClients: this.clientsRegistry.maxClients
-      }})
-    );
+  private handlePing(client: WebSocket) {
+    const message = new WebsocketMessage<GameServerResponse>();
+    const serverInfo = new GameServerResponse();
+
+    serverInfo.clientsCount = this.clientsRegistry.size;
+    serverInfo.maxClients = this.clientsRegistry.maxClients;
+
+    message.type = WebsocketEvents.PONG;
+    message.data = serverInfo;
+
+    client.send(JSON.stringify(message), () => {
+      if (client.isProbe) {
+        try {
+          client.close();
+        } catch {}
+      }
+    });
   }
 
 }

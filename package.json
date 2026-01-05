@@ -1,0 +1,15 @@
+{
+  "name": "fantasyworld",
+  "description": "An MMO game project",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gsborgz/FantasyWorld.git"
+  },
+  "license": "ISC",
+  "author": "Gabriel da Silva Borges",
+  "scripts": {
+    "auth": "cd auth-server && npm run dev",
+    "game": "cd game-server && npm run dev",
+    "build:shared": "cd game-server && npm run build:shared"
+  }
+}

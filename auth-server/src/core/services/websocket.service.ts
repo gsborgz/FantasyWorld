@@ -12,8 +12,9 @@ export class WebsocketService {
 
   public async ping(url: string, timeoutMs = 2000): Promise<{ ok: boolean; message?: WebsocketMessage<any>; error?: any }> {
     const payload = { type: WebsocketEvents.PING };
+    const probeUrl = this.addProbeFlag(url);
 
-    return this.sendAndWait(url, payload, (m) => m && m.type === WebsocketEvents.PONG, { timeoutMs });
+    return this.sendAndWait(probeUrl, payload, (m) => m && m.type === WebsocketEvents.PONG, { timeoutMs });
   }
 
   private async sendAndWait<T = any>(
@@ -62,7 +63,7 @@ export class WebsocketService {
       connection.on('message', (data) => {
         const msg = this.parseMessage(data);
 
-        if (msg === undefined) return; // ignore invalid JSON, wait for timeout or next message
+        if (msg === undefined) return;
 
         try {
           if (responsePredicate(msg)) {
@@ -83,11 +84,29 @@ export class WebsocketService {
     });
   }
 
+  private addProbeFlag(url: string): string {
+    try {
+      const urlObj = new URL(url);
+      // Don't override existing probe flag if present
+      
+      if (!urlObj.searchParams.has('probe')) {
+        urlObj.searchParams.set('probe', '1');
+      }
+
+      return urlObj.toString();
+    } catch {
+      // Fallback for relative/invalid URLs: naive append
+      
+      if (url.includes('?')) return `${url}&probe=1`;
+
+      return `${url}?probe=1`;
+    }
+  }
+
   private closeConnection(connection: WebSocket | null): void {
     try {
       if (connection) {
-        // remove listeners to avoid leaks and then close
-        (connection as any).removeAllListeners?.();
+        connection.removeAllListeners?.();
         connection.close();
       }
     } catch {

@@ -21,11 +21,11 @@ export class GameServerService {
   private getBasicServersInfos(): GameServerResponse[] {
     const servers = process.env.GAME_SERVERS ? process.env.GAME_SERVERS.split(';') || [] : [];
     const serversInfos: GameServerResponse[] = servers.map((serverString) => {
-      const [name, location, url] = serverString.split(',');
+      const [name, region, url] = serverString.split(',');
       const serverInfo = new GameServerResponse();
   
       serverInfo.name = name || 'Unknown';
-      serverInfo.location = location || 'Unknown';
+      serverInfo.region = region || 'Unknown';
       serverInfo.url = url || '';
 
       return serverInfo;
@@ -48,7 +48,7 @@ export class GameServerService {
       const data: GameServerResponse = result.message?.data;
 
       server.status = 'online';
-      server.clientsCount = Math.max(0, data.clientsCount - 1); // Exclude the ping client
+      server.clientsCount = data.clientsCount;
       server.maxClients = data.maxClients;
     } else {
       server.status = 'offline';

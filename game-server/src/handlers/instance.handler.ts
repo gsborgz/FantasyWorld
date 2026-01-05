@@ -17,7 +17,7 @@ export class InstanceHandler {
     private readonly clientsRegistry: ClientsRegistryService,
   ) {}
 
-  getHandlers() {
+  public getHandlers() {
     return {
       [WebsocketEvents.JOIN_INSTANCE]: this.handleJoinInstance.bind(this),
       [WebsocketEvents.UPDATE_POSITION]: this.handlePositionUpdate.bind(this),

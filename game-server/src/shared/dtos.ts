@@ -88,11 +88,11 @@ export class UpdatePositionResponse {
 
 export class GameServerResponse {
   name: string;
-  location: string;
+  region: string;
   url: string;
-  status?: 'online' | 'offline';
-  clientsCount?: number; // Integer
-  maxClients?: number; // Integer
+  status: 'online' | 'offline';
+  clientsCount: number; // Integer
+  maxClients: number; // Integer
 }
 
 export class CharactersListResponse {

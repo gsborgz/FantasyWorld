@@ -12,7 +12,7 @@ export class AuthHandler {
 
   constructor() {}
 
-  getHandlers() {
+  public getHandlers() {
     return {
       [WebsocketEvents.LOGIN]: this.handleLogin.bind(this),
     } satisfies Partial<Record<WebsocketEvents, Handler>>;
