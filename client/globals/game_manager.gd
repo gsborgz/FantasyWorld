@@ -3,7 +3,6 @@ extends Node
 var client_id: int
 var _current_scene_root: Node
 
-
 func set_scene(scenePath: String) -> void:
 	if _current_scene_root != null:
 		_current_scene_root.queue_free()

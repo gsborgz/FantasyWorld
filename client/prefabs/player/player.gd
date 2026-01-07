@@ -8,7 +8,7 @@ const Scene := preload("res://prefabs/player/player.tscn")
 
 @onready var _collision_shape: CircleShape2D = $CharacterBody2D/CollisionShape2D.shape
 @onready var _nameplate: Label = $CharacterBody2D/Nameplate
-@onready var _camera: Camera2D = $CharacterBody2D/Camera2D
+@onready var _camera: Camera2D = $CharacterBody2D/Camera
 @onready var _body: CharacterBody2D = $CharacterBody2D
 
 var player_id: String
@@ -19,7 +19,6 @@ var speed: float
 var direction: _dtos.Direction
 var is_player: bool
 var movement_enabled: bool
-
 var velocity: Vector2
 var radius: float:
 	set(new_radius):
@@ -50,21 +49,43 @@ static func instantiate(character: _dtos.ClientCharacter, is_player: bool) -> Pl
 	@warning_ignore("int_as_enum_without_cast")
 	player.direction = character.direction
 	player.is_player = is_player
-
+	
 	return player
 
 
 func _ready():
 	position = Vector2(x, y)
-	_nameplate.text = player_name
 	_camera.enabled = is_player
 	movement_enabled = true
+	
+	if (!is_player):
+		_nameplate.text = player_name
+
+
+func update_camera_limits() -> void:
+	var tilemap: TileMapLayer
+	var tilemaps := get_tree().get_nodes_in_group("main_layer")
+	
+	tilemap = tilemaps.get(0)
+	
+	if not tilemap:
+		return
+	
+	var used_rect: Rect2i = tilemap.get_used_rect()
+	var tile_map_size := tilemap.tile_set.get_tile_size()
+	
+	_camera.limit_left = used_rect.position.x
+	_camera.limit_top = used_rect.position.y * tile_map_size.y
+	_camera.limit_right = (used_rect.position.x + used_rect.size.x) * tile_map_size.x
+	_camera.limit_bottom = (used_rect.position.y + used_rect.size.y) * tile_map_size.y
 
 
 func get_input():
 	if !is_player:
 		return
+	
 	var input_direction = Input.get_vector("left", "right", "up", "down")
+	
 	_body.velocity = input_direction * speed
 
 
@@ -77,23 +98,31 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 	
 	_send_accum += delta
+	
 	var moving := _body.velocity != Vector2.ZERO
+	
 	if is_player and moving and _send_accum >= SEND_INTERVAL:
 		x = _body.global_position.x
 		y = _body.global_position.y
-		_send_update_position_message()
+		
+		send_update_position_message()
+		
 		_send_accum = 0.0
 		_was_moving = true
 	elif is_player and !moving and _was_moving:
 		x = _body.global_position.x
 		y = _body.global_position.y
-		_send_update_position_message()
+		
+		send_update_position_message()
+		
 		_was_moving = false
 	
 	if !is_player and _remote_has_target:
 		var step: float = max(50.0, speed) * delta
 		var new_pos: Vector2 = _body.global_position.move_toward(_remote_target, step)
+		
 		_body.global_position = new_pos
+		
 		if new_pos.distance_to(_remote_target) < 1.0:
 			_remote_has_target = false
 
@@ -103,14 +132,13 @@ func _draw() -> void:
 		draw_circle(_body.position, _collision_shape.radius, Color.DARK_ORCHID)
 
 
-func _send_update_position_message():
+func send_update_position_message():
 	if !is_player:
 		return
-
+	
 	var message := _ws_utils.WebsocketMessage.new()
 	var data := _dtos.UpdatePositionRequest.new()
-
-	# Direção baseada no movimento atual
+	
 	var v := _body.velocity
 	if v != Vector2.ZERO:
 		if v.x > 0:
@@ -124,16 +152,15 @@ func _send_update_position_message():
 		_last_direction = direction
 	else:
 		direction = _last_direction
-
+	
 	data.direction = direction
 	data.x = x
 	data.y = y
-	# Envia 0 quando parado, caso contrário velocidade configurada
 	data.speed = 0.0 if v == Vector2.ZERO else speed
-
+	
 	message.type = _ws_utils.WebsocketEvents.UPDATE_POSITION
 	message.data = data
-
+	
 	WS.send(message)
 
 
@@ -150,3 +177,8 @@ func apply_remote_update(character: _dtos.ClientCharacter) -> void:
 
 func set_movement_enabled(enabled: bool):
 	movement_enabled = enabled
+
+
+# Handlers
+func _handle_area_entered(area: Area2D) -> void:
+	print(area)

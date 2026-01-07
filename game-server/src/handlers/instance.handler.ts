@@ -33,7 +33,9 @@ export class InstanceHandler {
 
     this.sendInstanceLeftMessageToPreviousInstance(sender);
     
-    sender.character!.instancePath = newSenderInstancePath;
+    sender.character.instancePath = newSenderInstancePath;
+
+    this.dataSource.getRepository(Character).update({ id: sender.character.id }, { instancePath: sender.character.instancePath });
 
     this.sendClientCharacterToInstanceClients(sender);
     this.sendPreviousCharactersInInstanceToClient(sender);

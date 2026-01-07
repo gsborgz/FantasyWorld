@@ -50,11 +50,11 @@ export class CharacterHandler {
 
     character.userId = client.user.id;
     character.name = data.name;
-    character.instancePath = WorldInstancePath.MainCity.MainCityA;
-    character.x = 0;
-    character.y = 0;
+    character.instancePath = WorldInstancePath.Village;
+    character.x = 200;
+    character.y = 200;
     character.direction = Direction.DOWN;
-    
+
     await this.dataSource.getRepository(Character).save(character);
 
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_ADDED }));

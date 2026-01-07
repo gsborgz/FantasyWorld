@@ -10,11 +10,11 @@ var _players: Dictionary[String, Player] = {}
 
 
 # Functions
-func set_ui(ui: UI) -> void:
+func set_ui_node(ui: UI) -> void:
 	_ui = ui
 
 
-func set_world(world: Node2D) -> void:
+func set_world_node(world: Node2D) -> void:
 	_world = world
 
 
@@ -22,8 +22,10 @@ func init_instance() -> void:
 	WS.message_received.connect(_main_handle_ws_message_received)
 	
 	_ui.setChatPlayers(_players)
-	_add_player(Session.getCharacter())
+	# Primeiro pede para entrar na instância correta (usa Session.instancePath atualizado)
 	_join_instance()
+	# Depois adiciona o player local usando os dados da Session
+	_add_player(Session.getCharacter())
 
 
 func _join_instance() -> void:
@@ -49,6 +51,11 @@ func _add_player(character: _dtos.ClientCharacter) -> void:
 	
 	_world.add_child(player)
 	_ui.setChatPlayers(_players)
+	
+	if is_player:
+		player.update_camera_limits()
+		# Envia uma atualização inicial de posição após o JOIN para fixar o spawn no servidor
+		player.send_update_position_message()
 
 
 func _update_player(character: _dtos.ClientCharacter) -> void:
