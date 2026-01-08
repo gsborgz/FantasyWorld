@@ -5,11 +5,17 @@ const ServerOption := preload("res://prefabs/server_option/server_option.gd")
 const _ws_utils := preload("res://shared/ws-utils.gd")
 
 @onready var _v_box_container: VBoxContainer = $UI/Container/VBoxContainer
+@onready var _exit_button: Button = $UI/ExitButton
 
 
 func _ready() -> void:
 	_get_game_servers()
 	_init_get_servers_timer()
+	
+	if not GameManager.get_session_sid():
+		GameManager.set_scene("auth")
+	
+	_exit_button.pressed.connect(_handle_exit_button_pressed)
 	
 	if not WS.message_received.is_connected(_on_ws_message_received):
 		WS.message_received.connect(_on_ws_message_received)
@@ -46,9 +52,11 @@ func _on_ws_message_received(message: _ws_utils.WebsocketMessage):
 		return
 	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
 		var cid := ""
+		
 		if typeof(message.data) == TYPE_DICTIONARY:
 			cid = message.data.get("clientId", "")
-		Session.setClientId(cid)
+		
+		GameManager.set_session_client_id(cid)
 		GameManager.set_scene("character_selection")
 	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
 		GameManager.set_scene("server_list")
@@ -71,3 +79,9 @@ func _init_get_servers_timer() -> void:
 
 func _get_game_servers() -> void:
 	Api.get_data("/v1/game-servers", _on_game_servers_request_completed)
+
+
+# Handlers
+func _handle_exit_button_pressed() -> void:
+	GameManager.set_session_sid("")
+	GameManager.set_scene("auth")

@@ -26,19 +26,37 @@ export class InstanceHandler {
 
   // Handlers
   private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<JoinInstanceRequest>) {
-    const newSenderInstancePath = message.data.instancePath;
     const clientId = sender.id;
     
     if (!clientId) return;
-
-    this.sendInstanceLeftMessageToPreviousInstance(sender);
     
-    sender.character.instancePath = newSenderInstancePath;
+    const newSenderInstancePath = message.data.instancePath;
+    const previousInstance = sender.character?.instancePath;
 
-    this.dataSource.getRepository(Character).update({ id: sender.character.id }, { instancePath: sender.character.instancePath });
-
+    this.updateClientCharacterInstance(sender, newSenderInstancePath);
+    
+    const { x, y, direction } = message.data as Partial<JoinInstanceRequest> & { x?: number; y?: number; direction?: number };
+    
+    if (typeof x === 'number' && typeof y === 'number' && sender.character) {
+      sender.character.x = x;
+      sender.character.y = y;
+      
+      if (typeof direction === 'number') {
+        sender.character.direction = direction as any;
+      }
+      
+      await this.dataSource.getRepository(Character).update(
+        { id: sender.character.id },
+        { x: sender.character.x, y: sender.character.y, direction: sender.character.direction }
+      );
+    }
+    
     this.sendClientCharacterToInstanceClients(sender);
     this.sendPreviousCharactersInInstanceToClient(sender);
+    
+    if (previousInstance && previousInstance !== newSenderInstancePath) {
+      this.sendInstanceLeftMessageToPreviousInstance(sender, previousInstance);
+    }
   }
 
   private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>) {
@@ -60,18 +78,14 @@ export class InstanceHandler {
   }
 
   // Utils
-  public sendInstanceLeftMessageToPreviousInstance(sender: WebSocket) {
-    const previousSenderInstancePath = sender.character?.instancePath;
+  public sendInstanceLeftMessageToPreviousInstance(sender: WebSocket, previousSenderInstancePath: string) {
+    const message = new WebsocketMessage<ClientCharacter>();
+    
+    message.clientId = sender.id!;
+    message.type = WebsocketEvents.INSTANCE_LEFT;
+    message.data = sender.character!;
 
-    if (previousSenderInstancePath) {
-      const message = new WebsocketMessage<ClientCharacter>();
-      
-      message.clientId = sender.id!;
-      message.type = WebsocketEvents.INSTANCE_LEFT;
-      message.data = sender.character!;
-
-      this.broadcastHelper.broadcastToInstance(sender, previousSenderInstancePath, message);
-    }
+    this.broadcastHelper.broadcastToInstance(sender, previousSenderInstancePath, message);
   }
 
   private async sendPreviousCharactersInInstanceToClient(sender: WebSocket) {
@@ -99,11 +113,11 @@ export class InstanceHandler {
   private sendClientCharacterToInstanceClients(sender: WebSocket) {
     const message = new WebsocketMessage<ClientCharacter>();
 
-    message.clientId = sender.id!;
-    message.type = WebsocketEvents.UPDATE_POSITION;
-    message.data = sender.character!;
+    message.clientId = sender.id;
+    message.type = WebsocketEvents.JOIN_INSTANCE;
+    message.data = sender.character;
     
-    this.broadcastHelper.broadcastToInstance(sender, sender.character!.instancePath!, message);
+    this.broadcastHelper.broadcastToInstance(sender, sender.character.instancePath, message);
   }
 
   private updateClientCharacterPosition(client: WebSocket, data: UpdatePositionRequest) {
@@ -116,9 +130,15 @@ export class InstanceHandler {
       client.character.y = y;
       client.character.direction = direction;
       client.character.lastPositionUpdate = Date.now();
-  
+      
       this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y, direction });
     }
+  }
+
+  private updateClientCharacterInstance(client: WebSocket, instancePath: string) {
+      client.character.instancePath = instancePath;
+
+      this.dataSource.getRepository(Character).update({ id: client.character.id }, { instancePath });
   }
 
 }

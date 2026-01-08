@@ -24,7 +24,7 @@ func _on_body_entered(body: Node2D) -> void:
 		if not player.is_player:
 			return
 		
-		var player_char = Session.getCharacter()
+		var player_char = GameManager.get_player_character()
 		
 		if direction == _dtos.Direction.UP or direction == _dtos.Direction.DOWN:
 			var diffX = player.x - position.x
@@ -39,7 +39,7 @@ func _on_body_entered(body: Node2D) -> void:
 		player_char.x = new_x
 		player_char.y = new_y
 		
-		Session.setCharacter(player_char)
+		GameManager.set_player_character(player_char)
 		GameManager.call_deferred("set_scene", "map_instances/" + to)
 
 

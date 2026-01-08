@@ -7,8 +7,6 @@ const _dtos := preload("res://shared/dtos.gd")
 @onready var _log: Log = $Log
 @onready var _line_edit: LineEdit = $LineEdit
 
-var players: Dictionary[String, Player]
-
 
 func _ready() -> void:
 	WS.message_received.connect(_handle_ws_message_received)
@@ -24,7 +22,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _toggle_player_movement_enabled(enabled: bool):
-	var player = players[Session.getCharacter().id]
+	var player = GameManager.get_player_character()
 	
 	player.set_movement_enabled(enabled)
 

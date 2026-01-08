@@ -13,6 +13,7 @@ const Scene := preload("res://prefabs/player/player.tscn")
 
 var player_id: String
 var player_name: String
+var instancePath: String
 var x: float
 var y: float
 var speed: float
@@ -48,6 +49,7 @@ static func instantiate(character: _dtos.ClientCharacter, is_player: bool) -> Pl
 	player.speed = character.speed
 	@warning_ignore("int_as_enum_without_cast")
 	player.direction = character.direction
+	player.instancePath = character.instancePath
 	player.is_player = is_player
 	
 	return player
@@ -74,7 +76,7 @@ func update_camera_limits() -> void:
 	var used_rect: Rect2i = tilemap.get_used_rect()
 	var tile_map_size := tilemap.tile_set.get_tile_size()
 	
-	_camera.limit_left = used_rect.position.x
+	_camera.limit_left = used_rect.position.x * tile_map_size.x
 	_camera.limit_top = used_rect.position.y * tile_map_size.y
 	_camera.limit_right = (used_rect.position.x + used_rect.size.x) * tile_map_size.x
 	_camera.limit_bottom = (used_rect.position.y + used_rect.size.y) * tile_map_size.y
@@ -109,6 +111,8 @@ func _physics_process(delta: float) -> void:
 		
 		_send_accum = 0.0
 		_was_moving = true
+		
+		GameManager.set_player_character(self)
 	elif is_player and !moving and _was_moving:
 		x = _body.global_position.x
 		y = _body.global_position.y
@@ -116,6 +120,8 @@ func _physics_process(delta: float) -> void:
 		send_update_position_message()
 		
 		_was_moving = false
+		
+		GameManager.set_player_character(self)
 	
 	if !is_player and _remote_has_target:
 		var step: float = max(50.0, speed) * delta

@@ -30,20 +30,23 @@ func connect_to_url(url: String) -> int:
 
 
 func send(msg: _ws_utils.WebsocketMessage) -> int:
-	# Serializa uma representação em Dictionary do objeto
 	var payload_data = msg.data
+	
 	if typeof(payload_data) == TYPE_OBJECT and payload_data != null:
 		if payload_data.has_method("to_dict"):
 			payload_data = payload_data.to_dict()
 		else:
 			# Sem método de conversão: tenta deixar como está (pode falhar)
 			payload_data = payload_data
+	
 	var json_obj := {
-		"clientId": Session.getClientId() if Session.has_method("getClientId") else "",
+		"clientId": GameManager.get_session_client_id(),
 		"type": msg.type,
 		"data": payload_data,
 	}
+	
 	var json_str = JSON.stringify(json_obj)
+	
 	return socket.send_text(json_str)
 
 

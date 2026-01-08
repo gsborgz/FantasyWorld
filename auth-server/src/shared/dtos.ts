@@ -84,6 +84,9 @@ export class AddCharacterRequest {
 export class JoinInstanceRequest {
 
   instancePath: string;
+  x?: number;
+  y?: number;
+  direction?: Direction;
 
 }
 

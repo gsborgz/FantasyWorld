@@ -68,6 +68,9 @@ export class AddCharacterRequest {
 
 export class JoinInstanceRequest {
   instancePath: string;
+  x?: number; // Float
+  y?: number; // Float
+  direction?: Direction;
 }
 
 export type ClientCharacter = Character & {

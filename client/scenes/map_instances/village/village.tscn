@@ -3146,8 +3146,7 @@ scale = Vector2(1, 6)
 tp_scale = Vector2(1, 6)
 direction = 3
 to = "forest"
-new_x = 20.0
+new_x = 10.0
 new_y = 216.0
 
 [node name="Ui" parent="." instance=ExtResource("3_k4t5b")]
-visible = false

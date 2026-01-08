@@ -54,7 +54,7 @@ func _on_enter_button_pressed() -> void:
 	
 	if server_url:
 		var ws_url := _to_ws_url(server_url)
-		print("Connecting to:", ws_url)
+		
 		WS.connect_to_url(ws_url)
 	else:
 		print("URL do servidor inválida")
@@ -63,9 +63,8 @@ func _on_enter_button_pressed() -> void:
 func _on_ws_connected_to_server_once() -> void:
 	var message := _ws_utils.WebsocketMessage.new()
 	var data := _dtos.LoginRequest.new()
-
-	# Usa o SID diretamente como String; não serializa JSON aqui
-	data.sid = Session.getSid()
+	
+	data.sid = GameManager.get_session_sid()
 	
 	message.type = _ws_utils.WebsocketEvents.LOGIN
 	message.data = data

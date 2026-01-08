@@ -101,7 +101,10 @@ export class AppGateway implements OnModuleDestroy {
   private handleClose(client: WebSocket) {
     if (!this.clientsRegistry.has(client)) return;
     
-    this.instanceHandler.sendInstanceLeftMessageToPreviousInstance(client);
+    if (client.character?.instancePath) {
+      this.instanceHandler.sendInstanceLeftMessageToPreviousInstance(client, client.character.instancePath);
+    }
+
     this.clientsRegistry.delete(client);
   }
 

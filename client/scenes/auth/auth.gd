@@ -36,7 +36,7 @@ func _on_register_button_pressed() -> void:
 
 func _on_login_request_completed(response: Api.ResponseData) -> void:
 	if response.ok():
-		Session.setSid(response.get_body().token)
+		GameManager.set_session_sid(response.get_body().token)
 		GameManager.set_scene("server_list")
 	else:
 		_log.error(response.get_body().message)
