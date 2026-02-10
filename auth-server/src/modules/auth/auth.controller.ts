@@ -1,10 +1,9 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { SigninDTO, SignupDTO } from '../auth/auth.dto';
+import { BaseMessageResponse, MeResponse, SigninDTO, SignupDTO } from '../auth/auth.dto';
 import { AuthService } from '../auth/auth.service';
 import { Request } from 'express';
 import { AuthGuard } from '../../core/guards/auth.guard';
 import { MainSession } from '../../core/entities/session.entity';
-import { BaseMessage, MeResponse } from '../../shared/dtos';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -18,7 +17,7 @@ export class AuthController {
   }
 
   @Post('/signup')
-  public signup(@Body() body: SignupDTO): Promise<BaseMessage> {
+  public signup(@Body() body: SignupDTO): Promise<BaseMessageResponse> {
     return this.authService.signup(body);
   }
 
@@ -29,7 +28,7 @@ export class AuthController {
 
   @Post('/signout')
   @UseGuards(AuthGuard)
-  public signout(@Req() req: Request): Promise<BaseMessage> {
+  public signout(@Req() req: Request): Promise<BaseMessageResponse> {
     return this.authService.signout(req.userId, req.sessionId);
   }
 

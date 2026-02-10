@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
 import { DataSource } from 'typeorm';
 import { Character } from '../core/entities/character.entity';
-import { ClientCharacter, JoinInstanceRequest, UpdatePositionRequest } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, ClientCharacter, JoinInstanceRequest, CharacterPosition } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
@@ -59,7 +58,7 @@ export class InstanceHandler {
     }
   }
 
-  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<UpdatePositionRequest>) {
+  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<CharacterPosition>) {
     const instancePath = client.character?.instancePath;
     const clientId = client.id;
     const data = message.data;
@@ -120,7 +119,7 @@ export class InstanceHandler {
     this.broadcastHelper.broadcastToInstance(sender, sender.character.instancePath, message);
   }
 
-  private updateClientCharacterPosition(client: WebSocket, data: UpdatePositionRequest) {
+  private updateClientCharacterPosition(client: WebSocket, data: CharacterPosition) {
     const x = data.x;
     const y = data.y;
     const direction = data.direction;

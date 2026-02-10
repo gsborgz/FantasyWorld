@@ -2,7 +2,7 @@ import { OnModuleDestroy } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { WebSocketServer as WsServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import { WebsocketMessage } from '../shared/ws-utils';
+import { WebsocketMessage } from '../shared/dtos';
 import { RouterService } from '../core/services/router.service';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 import { randomUUID } from 'node:crypto';

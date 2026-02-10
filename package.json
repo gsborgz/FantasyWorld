@@ -10,6 +10,6 @@
   "scripts": {
     "auth": "cd auth-server && npm run dev",
     "game": "cd game-server && npm run dev",
-    "build:shared": "cd game-server && npm run build:shared"
+    "generate:godot": "cd game-server && npm run generate:godot"
   }
 }

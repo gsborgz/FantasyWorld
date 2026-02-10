@@ -1,5 +1,46 @@
 import type { Character } from "../core/entities/character.entity";
 
+export enum WebsocketEvents {
+  NONE,
+  
+  // Requests
+  SELECT_CHARACTER,
+  UPDATE_POSITION,
+  JOIN_INSTANCE,
+  LOGIN,
+  PING,
+  ADD_CHARACTER,
+  LIST_CHARACTERS,
+  DELETE_CHARACTER,
+  
+  // Responses
+  POSITION_UPDATED,
+  CHARACTER_ADDED,
+  CHARACTERS_LISTED,
+  CHARACTER_SELECTED,
+  CHARACTER_DELETED,
+  INSTANCE_LEFT,
+  INSTANCE_JOINED,
+  PONG,
+  OK_RESPONSE,
+  DENY_RESPONSE,
+  
+  // Request and Response
+  GLOBAL_CHAT_MESSAGE,
+  INSTANCE_CHAT_MESSAGE,
+}
+
+export class WebsocketMessage<T> {
+  clientId: string;
+  type: WebsocketEvents;
+  data: T;
+}
+
+export enum WorldInstance {
+  Forest = 'forest',
+  Village = 'village',
+}
+
 export enum Direction {
   UP,
   DOWN,
@@ -7,55 +48,26 @@ export enum Direction {
   RIGHT,
 }
 
-export class LoginData {
-  username: string;
-  password: string;
-}
-
-export class RegisterData {
-  username: string;
-  password: string;
-  passwordConfirmation: string;
-}
-
-export class BaseMessage {
-
-  message: string | { key: string; args?: Record<string, any> };
-
-}
-
-export class MeResponse {
-
-  id: string;
-  username: string;
-
-}
-
-export class SessionData {
-
-  token: string;
-
-}
-
 export class ChatMessage {
   text: string;
   senderName: string;
 }
 
+export class CharacterPosition {
+  characterId?: string;
+  x: number; // Float
+  y: number; // Float
+  direction: Direction;
+  speed: number; // Float
+}
+
 // Request
-export class LoginRequest {
+export class AuthenticationRequest {
   sid: string;
 }
 
 export class SelectCharacterRequest {
   characterId: string;
-}
-
-export class UpdatePositionRequest {
-  x: number; // Float
-  y: number; // Float
-  direction: Direction;
-  speed: number; // Float
 }
 
 export class DeleteCharacterRequest {
@@ -66,11 +78,12 @@ export class AddCharacterRequest {
   name: string;
 }
 
+
 export class JoinInstanceRequest {
   instancePath: string;
-  x?: number; // Float
-  y?: number; // Float
-  direction?: Direction;
+  x: number; // Float
+  y: number; // Float
+  direction: Direction;
 }
 
 export type ClientCharacter = Character & {
@@ -80,25 +93,8 @@ export type ClientCharacter = Character & {
 
 
 // Response
-export class UpdatePositionResponse {
-  characterId: string;
-  characterName: string;
-  x: number; // Float
-  y: number; // Float
-  direction: Direction;
-  speed: number; // Float
-}
-
 export class GameServerResponse {
   name: string;
   region: string;
   url: string;
-  status: 'online' | 'offline';
-  clientsCount: number; // Integer
-  maxClients: number; // Integer
 }
-
-export class CharactersListResponse {
-  characters: ClientCharacter[];
-}
-

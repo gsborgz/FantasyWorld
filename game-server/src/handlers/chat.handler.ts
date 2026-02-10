@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
-import { ChatMessage } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, ChatMessage } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 
 @Injectable()

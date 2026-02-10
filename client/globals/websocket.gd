@@ -2,8 +2,6 @@ class_name WebSocketClient
 extends Node
 
 const _ws_utils := preload("res://shared/ws-utils.gd")
-const _dtos := preload("res://shared/dtos.gd")
-const _instances := preload("res://shared/world-instances.gd")
 
 @export var handshake_headers: PackedStringArray
 @export var supported_protocols: PackedStringArray
@@ -31,13 +29,8 @@ func connect_to_url(url: String) -> int:
 
 func send(msg: _ws_utils.WebsocketMessage) -> int:
 	var payload_data = msg.data
-	
-	if typeof(payload_data) == TYPE_OBJECT and payload_data != null:
-		if payload_data.has_method("to_dict"):
-			payload_data = payload_data.to_dict()
-		else:
-			# Sem método de conversão: tenta deixar como está (pode falhar)
-			payload_data = payload_data
+	if typeof(payload_data) == TYPE_OBJECT and payload_data != null and payload_data.has_method("to_dict"):
+		payload_data = payload_data.to_dict()
 	
 	var json_obj := {
 		"clientId": GameManager.get_session_client_id(),
@@ -60,20 +53,17 @@ func get_message() -> Variant:
 		var err = json.parse(data.get_string_from_utf8())
 
 		if err == OK:
-			# Retorna dados genéricos (Dictionary/Array) sem conversão para DTOs
 			if typeof(json.data) == TYPE_DICTIONARY:
 				var dict: Dictionary = json.data
 				var msg := _ws_utils.WebsocketMessage.new()
 				msg.type = dict.get("type", _ws_utils.WebsocketEvents.NONE)
 				var payload = dict.get("data", null)
-				# Embute clientId no payload para evitar depender de msg.clientId
 				if typeof(payload) == TYPE_DICTIONARY:
 					payload["clientId"] = dict.get("clientId", "")
 				msg.data = payload
 				return msg
 			return null
-		else:
-			return null
+		return null
 	return null
 
 
@@ -85,10 +75,6 @@ func close(code: int = 1000, reason: String = "") -> void:
 func clear() -> void:
 	socket = WebSocketPeer.new()
 	last_state = socket.get_ready_state()
-
-
-func get_socket() -> WebSocketPeer:
-	return socket
 
 
 func poll() -> void:

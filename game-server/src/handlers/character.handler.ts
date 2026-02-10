@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
-import { WorldInstancePath } from '../shared/world-instances';
-import { AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest, WorldInstance } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 
 @Injectable()
@@ -50,7 +48,7 @@ export class CharacterHandler {
 
     character.userId = client.user.id;
     character.name = data.name;
-    character.instancePath = WorldInstancePath.Village;
+    character.instancePath = WorldInstance.Village;
     character.x = 200;
     character.y = 200;
     character.direction = Direction.DOWN;

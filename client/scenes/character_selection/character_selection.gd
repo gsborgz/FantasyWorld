@@ -10,7 +10,7 @@ const CharacterOption := preload("res://prefabs/character_option/character_optio
 @onready var _exit_button: Button = $UI/Buttons/ExitButton
 
 var _characters_list: _dtos.CharactersListResponse
-var _already_searched: bool = false
+
 
 func _ready() -> void:
 	WS.message_received.connect(_handle_ws_message_received)
@@ -18,13 +18,8 @@ func _ready() -> void:
 	_exit_button.pressed.connect(_handle_exit_button_pressed)
 	_get_characters()
 
-func _process(delta: float) -> void:
-	if not _already_searched:
-		print("ainda estou aqui")
 
 func _get_characters() -> void:
-	_already_searched = true
-	
 	var message := _ws_utils.WebsocketMessage.new()
 	
 	message.type = _ws_utils.WebsocketEvents.LIST_CHARACTERS

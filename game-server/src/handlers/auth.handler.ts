@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../shared/ws-utils';
 import { Handler } from '../types/ws.types';
-import { LoginRequest } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, AuthenticationRequest } from '../shared/dtos';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,12 +13,12 @@ export class AuthHandler {
 
   public getHandlers() {
     return {
-      [WebsocketEvents.LOGIN]: this.handleLogin.bind(this),
+      [WebsocketEvents.LOGIN]: this.handleAuthentication.bind(this),
     } satisfies Partial<Record<WebsocketEvents, Handler>>;
   }
 
   // Handlers
-  private async handleLogin(client: WebSocket, message: WebsocketMessage<LoginRequest>) {
+  private async handleAuthentication(client: WebSocket, message: WebsocketMessage<AuthenticationRequest>) {
     const res = await fetch(`${process.env.AUTH_SERVER_URL}/v1/auth/me`, {
       headers: {
         Cookie: `sid=${message.data.sid}`,

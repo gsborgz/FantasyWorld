@@ -65,7 +65,7 @@ func _on_character_delete() -> void:
 
 func _on_character_selected(data: _dtos.ClientCharacter) -> void:
 	if data.id == character_id:
-		var player_character = Player.instantiate(data, true)
+		var player_character = Character.instantiate(data, true)
 		
 		GameManager.set_player_character(player_character)
-		GameManager.set_scene("map_instances/" + player_character.instancePath)
+		GameManager.set_scene("map_instances/" + player_character.props.instancePath)

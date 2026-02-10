@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { WebsocketMessage } from "../shared/ws-utils";
+import { WebsocketMessage } from "../shared/dtos";
 import { WebSocket } from 'ws';
 import { ClientsRegistryService } from "../core/services/clients-registry.service";
 

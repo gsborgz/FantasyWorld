@@ -2,11 +2,10 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { DataSource } from 'typeorm';
 import crypto from 'node:crypto';
 import { User } from '../../core/entities/user.entity';
-import { SigninDTO, SignupDTO } from '../auth/auth.dto';
+import { SigninDTO, SignupDTO, BaseMessageResponse, MeResponse } from '../auth/auth.dto';
 import { BcryptService } from '../../core/services/bcrypt.service';
 import { MainSession } from '../../core/entities/session.entity';
 import { daysInMilliseconds } from '../../core/utils/utils';
-import { BaseMessage, MeResponse } from '../../shared/dtos';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +27,7 @@ export class AuthService {
     return data;
   }
 
-  public async signup(body: SignupDTO): Promise<BaseMessage> {
+  public async signup(body: SignupDTO): Promise<BaseMessageResponse> {
     await this.validateSignupData(body);
     await this.createUser(body);
 
@@ -45,7 +44,7 @@ export class AuthService {
     return session;
   }
 
-  public async signout(userId: string, sessionId: string): Promise<BaseMessage> {
+  public async signout(userId: string, sessionId: string): Promise<BaseMessageResponse> {
     await this.dataSource.getRepository(MainSession).delete({ id: sessionId, user: { id: userId } });
 
     return {

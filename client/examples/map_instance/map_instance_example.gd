@@ -5,9 +5,7 @@ extends MapInstance
 
 
 func _ready() -> void:
-	set_ui_node(_ui_node)
-	set_world_node(_world_node)
-	init_instance()
+	init_instance(_ui_node, _world_node)
 
 
 #Handlers

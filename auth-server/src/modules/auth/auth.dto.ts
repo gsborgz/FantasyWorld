@@ -36,3 +36,16 @@ export class SigninDTO {
   password: string;
 
 }
+
+export class BaseMessageResponse {
+
+  message: string | { key: string; args?: Record<string, any> };
+
+}
+
+export class MeResponse {
+
+  id: string;
+  username: string;
+
+}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocket } from 'ws';
-import { WebsocketEvents, WebsocketMessage } from '../../shared/ws-utils';
+import { WebsocketEvents, WebsocketMessage } from '../../shared/dtos';
 import { Handler } from '../../types/ws.types';
 import { AuthHandler } from '../../handlers/auth.handler';
 import { PingHandler } from '../../handlers/ping.handler';

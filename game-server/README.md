@@ -2,6 +2,14 @@
 
 para gerar/atualizar arquivos de tipagem na pasta "shared" do client, use o comando `npm run build:shared`.
 
+## Godot (GDScript)
+
+Para gerar/atualizar os DTOs em GDScript (a partir de `src/shared/dtos.ts`) para o client do Godot:
+
+- `npm run generate:godot`
+
+Saída padrão: `../client/shared/generated/dtos.gd`.
+
 ## Redis
 
 - O projeto usa Redis para manter sessões e membros de instâncias de mapa.

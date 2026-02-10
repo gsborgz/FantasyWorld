@@ -1,26 +1,22 @@
 extends Node2D
-class_name Player
+class_name Character
 
 const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
-const Scene := preload("res://prefabs/player/player.tscn")
+const CharacterScene := preload("res://prefabs/character/character.tscn")
 
 @onready var _collision_shape: CircleShape2D = $CharacterBody2D/CollisionShape2D.shape
 @onready var _nameplate: Label = $CharacterBody2D/Nameplate
 @onready var _camera: Camera2D = $CharacterBody2D/Camera
 @onready var _body: CharacterBody2D = $CharacterBody2D
 
-var player_id: String
-var player_name: String
-var instancePath: String
-var x: float
-var y: float
-var speed: float
-var direction: _dtos.Direction
+
+var props := _dtos.ClientCharacter.new()
+
+var is_running: bool = false
+var movement_enabled: bool = true
 var is_player: bool
-var movement_enabled: bool
-var velocity: Vector2
 var radius: float:
 	set(new_radius):
 		radius = new_radius
@@ -38,30 +34,21 @@ var _remote_target: Vector2 = Vector2.ZERO
 var _remote_has_target: bool = false
 
 
-@warning_ignore("shadowed_variable")
-static func instantiate(character: _dtos.ClientCharacter, is_player: bool) -> Player:
-	var player := Scene.instantiate() as Player
+static func instantiate(char_props: _dtos.ClientCharacter, is_player_char: bool) -> Character:
+	var player := CharacterScene.instantiate() as Character
 	
-	player.player_id = character.id
-	player.player_name = character.name
-	player.x = character.x
-	player.y = character.y
-	player.speed = character.speed
-	@warning_ignore("int_as_enum_without_cast")
-	player.direction = character.direction
-	player.instancePath = character.instancePath
-	player.is_player = is_player
+	player.props = char_props
+	player.is_player = is_player_char
 	
 	return player
 
 
 func _ready():
-	position = Vector2(x, y)
+	position = Vector2(props.x, props.y)
 	_camera.enabled = is_player
-	movement_enabled = true
 	
 	if (!is_player):
-		_nameplate.text = player_name
+		_nameplate.text = props.name
 
 
 func update_camera_limits() -> void:
@@ -82,11 +69,22 @@ func update_camera_limits() -> void:
 	_camera.limit_bottom = (used_rect.position.y + used_rect.size.y) * tile_map_size.y
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("run"):
+		is_running = true
+	elif event.is_action_released("run"):
+		is_running = false
+
+
 func get_input():
 	if !is_player:
 		return
 	
 	var input_direction = Input.get_vector("left", "right", "up", "down")
+	var speed = props.speed
+	
+	if is_running:
+		speed += 200
 	
 	_body.velocity = input_direction * speed
 
@@ -102,29 +100,17 @@ func _physics_process(delta: float) -> void:
 	_send_accum += delta
 	
 	var moving := _body.velocity != Vector2.ZERO
-	
-	if is_player and moving and _send_accum >= SEND_INTERVAL:
-		x = _body.global_position.x
-		y = _body.global_position.y
-		
-		send_update_position_message()
-		
-		_send_accum = 0.0
-		_was_moving = true
-		
-		GameManager.set_player_character(self)
-	elif is_player and !moving and _was_moving:
-		x = _body.global_position.x
-		y = _body.global_position.y
-		
-		send_update_position_message()
-		
-		_was_moving = false
-		
-		GameManager.set_player_character(self)
+
+	if is_player:
+		if moving and _send_accum >= SEND_INTERVAL:
+			_update_and_send_position()
+			_send_accum = 0.0
+		elif !moving and _was_moving:
+			_update_and_send_position()
+		_was_moving = moving
 	
 	if !is_player and _remote_has_target:
-		var step: float = max(50.0, speed) * delta
+		var step: float = max(50.0, props.speed) * delta
 		var new_pos: Vector2 = _body.global_position.move_toward(_remote_target, step)
 		
 		_body.global_position = new_pos
@@ -148,21 +134,21 @@ func send_update_position_message():
 	var v := _body.velocity
 	if v != Vector2.ZERO:
 		if v.x > 0:
-			direction = _dtos.Direction.RIGHT
+			props.direction = _dtos.Direction.RIGHT
 		elif v.x < 0:
-			direction = _dtos.Direction.LEFT
+			props.direction = _dtos.Direction.LEFT
 		elif v.y < 0:
-			direction = _dtos.Direction.UP
+			props.direction = _dtos.Direction.UP
 		elif v.y > 0:
-			direction = _dtos.Direction.DOWN
-		_last_direction = direction
+			props.direction = _dtos.Direction.DOWN
+		_last_direction = props.direction
 	else:
-		direction = _last_direction
+		props.direction = _last_direction
 	
-	data.direction = direction
-	data.x = x
-	data.y = y
-	data.speed = 0.0 if v == Vector2.ZERO else speed
+	data.direction = props.direction
+	data.x = props.x
+	data.y = props.y
+	data.speed = 0.0 if v == Vector2.ZERO else props.speed
 	
 	message.type = _ws_utils.WebsocketEvents.UPDATE_POSITION
 	message.data = data
@@ -170,14 +156,22 @@ func send_update_position_message():
 	WS.send(message)
 
 
+func _update_and_send_position() -> void:
+	props.x = _body.global_position.x
+	props.y = _body.global_position.y
+	send_update_position_message()
+	GameManager.set_player_character(self)
+
+
 func apply_remote_update(character: _dtos.ClientCharacter) -> void:
-	x = character.x
-	y = character.y
-	@warning_ignore("int_as_enum_without_cast")
-	direction = character.direction
-	speed = character.speed
+	props.x = character.x
+	props.y = character.y
+	props.direction = character.direction
+	props.speed = character.speed
+	
 	_remote_target = Vector2(character.x, character.y)
 	_remote_has_target = true
+	
 	queue_redraw()
 
 
