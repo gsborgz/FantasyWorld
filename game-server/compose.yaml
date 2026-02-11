@@ -6,8 +6,3 @@ services:
       - '.env'
     ports:
       - '5432:5432'
-  redis_game:
-    container_name: 'redis_game'
-    image: 'redis:6.2'
-    ports:
-      - '6379:6379'

@@ -2,7 +2,6 @@ extends Node
 
 const _dtos := preload("res://shared/dtos.gd")
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
-const _ws_utils := preload("res://shared/ws-utils.gd")
 
 @onready var _v_box_container: VBoxContainer = $UI/Container/VBoxContainer
 @onready var _exit_button: Button = $UI/ExitButton
@@ -47,10 +46,10 @@ func _create_server_list(servers: Array[_dtos.GameServerResponse]) -> void:
 		_v_box_container.add_child(serverOption)
 
 
-func _on_ws_message_received(message: _ws_utils.WebsocketMessage):
+func _on_ws_message_received(message: _dtos.WebsocketMessage):
 	if message == null:
 		return
-	if message.type == _ws_utils.WebsocketEvents.OK_RESPONSE:
+	if message.type == _dtos.WebsocketEvents.OK_RESPONSE:
 		var cid := ""
 		
 		if typeof(message.data) == TYPE_DICTIONARY:
@@ -58,7 +57,7 @@ func _on_ws_message_received(message: _ws_utils.WebsocketMessage):
 		
 		GameManager.set_session_client_id(cid)
 		GameManager.set_scene("character_selection")
-	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
+	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
 		GameManager.set_scene("server_list")
 
 

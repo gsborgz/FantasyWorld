@@ -1,6 +1,5 @@
 extends Node
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
 const CharacterOption := preload("res://prefabs/character_option/character_option.gd")
@@ -9,7 +8,7 @@ const CharacterOption := preload("res://prefabs/character_option/character_optio
 @onready var _new_character_button: Button = $UI/Buttons/NewCharacterButton
 @onready var _exit_button: Button = $UI/Buttons/ExitButton
 
-var _characters_list: _dtos.CharactersListResponse
+var _characters_list: Array[_dtos.ClientCharacter]
 
 
 func _ready() -> void:
@@ -20,32 +19,38 @@ func _ready() -> void:
 
 
 func _get_characters() -> void:
-	var message := _ws_utils.WebsocketMessage.new()
+	var message := _dtos.WebsocketMessage.new()
 	
-	message.type = _ws_utils.WebsocketEvents.LIST_CHARACTERS
+	message.type = _dtos.WebsocketEvents.LIST_CHARACTERS
 	
 	WS.send(message)
 
 
-func _list_characters(data: _dtos.CharactersListResponse) -> void:
+func _list_characters(data: Array[_dtos.ClientCharacter]) -> void:
 	_characters_list = data
 	
 	for child in h_box_container.get_children():
 		h_box_container.remove_child(child)
 	
-	for character in data.characters:
+	for character in data:
 		var option := CharacterOption.instantiate(character.name, character.id)
 		h_box_container.add_child(option)
 
 
 # Handlers
-func _handle_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
-	if message.type == _ws_utils.WebsocketEvents.CHARACTERS_LISTED:
-		var data := _dtos.CharactersListResponse.from(message.data)
-		_list_characters(data)
-	elif message.type == _ws_utils.WebsocketEvents.CHARACTER_DELETED:
+func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
+	if message.type == _dtos.WebsocketEvents.CHARACTERS_LISTED:
+		var list: Array[_dtos.ClientCharacter] = [];
+		
+		for character in message.data:
+			var newCharacter = _dtos.ClientCharacter.from(message.data);
+			
+			list.append(newCharacter);
+		
+		_list_characters(list)
+	elif message.type == _dtos.WebsocketEvents.CHARACTER_DELETED:
 		_get_characters()
-	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
+	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
 		pass
 
 

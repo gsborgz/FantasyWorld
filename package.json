@@ -9,7 +9,6 @@
   "author": "Gabriel da Silva Borges",
   "scripts": {
     "auth": "cd auth-server && npm run dev",
-    "game": "cd game-server && npm run dev",
-    "generate:godot": "cd game-server && npm run generate:godot"
+    "game": "cd game-server && npm run dev"
   }
 }

@@ -10,5 +10,5 @@ func _ready() -> void:
 
 #Handlers
 @warning_ignore("unused_parameter")
-func _handle_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
+func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	pass

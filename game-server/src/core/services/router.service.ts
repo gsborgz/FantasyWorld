@@ -5,7 +5,6 @@ import { Handler } from '../../types/ws.types';
 import { AuthHandler } from '../../handlers/auth.handler';
 import { PingHandler } from '../../handlers/ping.handler';
 import { ChatHandler } from '../../handlers/chat.handler';
-import { InstanceHandler } from '../../handlers/instance.handler';
 import { CharacterHandler } from '../../handlers/character.handler';
 
 @Injectable()
@@ -17,14 +16,12 @@ export class RouterService {
     private readonly auth: AuthHandler,
     private readonly ping: PingHandler,
     private readonly chat: ChatHandler,
-    private readonly instance: InstanceHandler,
     private readonly character: CharacterHandler
   ) {
     this.handlers = {
       ...this.auth.getHandlers(),
       ...this.ping.getHandlers(),
       ...this.chat.getHandlers(),
-      ...this.instance.getHandlers(),
       ...this.character.getHandlers(),
     };
   }

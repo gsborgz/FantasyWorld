@@ -6,7 +6,7 @@ import { WebsocketMessage } from '../shared/dtos';
 import { RouterService } from '../core/services/router.service';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 import { randomUUID } from 'node:crypto';
-import { InstanceHandler } from '../handlers/instance.handler';
+import { CharacterHandler } from '../handlers/character.handler';
 
 @WebSocketGateway({ path: '/ws' })
 export class AppGateway implements OnModuleDestroy {
@@ -17,7 +17,7 @@ export class AppGateway implements OnModuleDestroy {
   constructor(
     private readonly router: RouterService,
     private readonly clientsRegistry: ClientsRegistryService,
-    private readonly instanceHandler: InstanceHandler
+    private readonly characterHandler: CharacterHandler
   ) {}
 
   public afterInit() {
@@ -102,7 +102,7 @@ export class AppGateway implements OnModuleDestroy {
     if (!this.clientsRegistry.has(client)) return;
     
     if (client.character?.instancePath) {
-      this.instanceHandler.sendInstanceLeftMessageToPreviousInstance(client, client.character.instancePath);
+      this.characterHandler.sendInstanceLeftMessageToPreviousInstance(client, client.character.instancePath);
     }
 
     this.clientsRegistry.delete(client);

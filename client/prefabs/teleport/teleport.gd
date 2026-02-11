@@ -19,30 +19,4 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if body.get_parent() is Player:
-		var player := body.get_parent() as Player
-		
-		if not player.is_player:
-			return
-		
-		var player_char = GameManager.get_player_character()
-		
-		if direction == _dtos.Direction.UP or direction == _dtos.Direction.DOWN:
-			var diffX = player.x - position.x
-			
-			new_x += diffX
-		elif direction == _dtos.Direction.LEFT or direction == _dtos.Direction.RIGHT:
-			var diffY = player.y - position.y
-			
-			new_y += diffY
-		
-		player_char.instancePath = to
-		player_char.x = new_x
-		player_char.y = new_y
-		
-		GameManager.set_player_character(player_char)
-		GameManager.call_deferred("set_scene", "map_instances/" + to)
-
-
-func has_overlaps() -> bool:
-	return get_overlapping_bodies().size() > 0 or get_overlapping_areas().size() > 0
+	pass

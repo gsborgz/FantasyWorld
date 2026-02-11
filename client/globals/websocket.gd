@@ -1,7 +1,7 @@
 class_name WebSocketClient
 extends Node
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
+const _dtos := preload("res://shared/dtos.gd")
 
 @export var handshake_headers: PackedStringArray
 @export var supported_protocols: PackedStringArray
@@ -12,7 +12,7 @@ var last_state := WebSocketPeer.STATE_CLOSED
 
 signal connected_to_server()
 signal connection_closed()
-signal message_received(message: _ws_utils.WebsocketMessage)
+signal message_received(message: _dtos.WebsocketMessage)
 
 
 func connect_to_url(url: String) -> int:
@@ -27,7 +27,7 @@ func connect_to_url(url: String) -> int:
 	return OK
 
 
-func send(msg: _ws_utils.WebsocketMessage) -> int:
+func send(msg: _dtos.WebsocketMessage) -> int:
 	var payload_data = msg.data
 	if typeof(payload_data) == TYPE_OBJECT and payload_data != null and payload_data.has_method("to_dict"):
 		payload_data = payload_data.to_dict()
@@ -55,8 +55,8 @@ func get_message() -> Variant:
 		if err == OK:
 			if typeof(json.data) == TYPE_DICTIONARY:
 				var dict: Dictionary = json.data
-				var msg := _ws_utils.WebsocketMessage.new()
-				msg.type = dict.get("type", _ws_utils.WebsocketEvents.NONE)
+				var msg := _dtos.WebsocketMessage.new()
+				msg.type = dict.get("type", _dtos.WebsocketEvents.NONE)
 				var payload = dict.get("data", null)
 				if typeof(payload) == TYPE_DICTIONARY:
 					payload["clientId"] = dict.get("clientId", "")

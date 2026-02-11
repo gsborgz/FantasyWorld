@@ -1,6 +1,5 @@
 extends BoxContainer
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
 const ServerOption := preload("res://prefabs/server_option/server_option.gd")
@@ -61,13 +60,10 @@ func _on_enter_button_pressed() -> void:
 
 
 func _on_ws_connected_to_server_once() -> void:
-	var message := _ws_utils.WebsocketMessage.new()
-	var data := _dtos.LoginRequest.new()
+	var message := _dtos.WebsocketMessage.new()
 	
-	data.sid = GameManager.get_session_sid()
-	
-	message.type = _ws_utils.WebsocketEvents.LOGIN
-	message.data = data
+	message.type = _dtos.WebsocketEvents.LOGIN
+	message.data = { "sid": GameManager.get_session_sid() }
 	
 	WS.send(message)
 	

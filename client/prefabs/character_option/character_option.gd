@@ -1,8 +1,6 @@
 extends VBoxContainer
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
-
 const Scene := preload("res://prefabs/character_option/character_option.tscn")
 const CharacterOption := preload("res://prefabs/character_option/character_option.gd")
 
@@ -32,32 +30,32 @@ func _ready() -> void:
 	_delete_character.pressed.connect(_on_character_delete)
 
 
-func _on_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
-	if message.type == _ws_utils.WebsocketEvents.CHARACTER_SELECTED:
+func _on_ws_message_received(message: _dtos.WebsocketMessage) -> void:
+	if message.type == _dtos.WebsocketEvents.CHARACTER_SELECTED:
 		_on_character_selected(_dtos.ClientCharacter.from(message.data))
-	elif message.type == _ws_utils.WebsocketEvents.DENY_RESPONSE:
+	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
 		pass
 
 
 func _on_character_select() -> void:
-	var message := _ws_utils.WebsocketMessage.new()
+	var message := _dtos.WebsocketMessage.new()
 	var data := _dtos.SelectCharacterRequest.new()
 	
 	data.characterId = character_id
 	
-	message.type = _ws_utils.WebsocketEvents.SELECT_CHARACTER
+	message.type = _dtos.WebsocketEvents.SELECT_CHARACTER
 	message.data = data
 	
 	WS.send(message)
 
 
 func _on_character_delete() -> void:
-	var message := _ws_utils.WebsocketMessage.new()
+	var message := _dtos.WebsocketMessage.new()
 	var data := _dtos.DeleteCharacterRequest.new()
 	
 	data.characterId = character_id
 	
-	message.type = _ws_utils.WebsocketEvents.DELETE_CHARACTER
+	message.type = _dtos.WebsocketEvents.DELETE_CHARACTER
 	message.data = data
 	
 	WS.send(message)

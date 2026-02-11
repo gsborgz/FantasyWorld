@@ -1,7 +1,6 @@
 extends Node2D
 class_name Character
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
 const CharacterScene := preload("res://prefabs/character/character.tscn")
@@ -128,8 +127,8 @@ func send_update_position_message():
 	if !is_player:
 		return
 	
-	var message := _ws_utils.WebsocketMessage.new()
-	var data := _dtos.UpdatePositionRequest.new()
+	var message := _dtos.WebsocketMessage.new()
+	var data := _dtos.CharacterPosition.new()
 	
 	var v := _body.velocity
 	if v != Vector2.ZERO:
@@ -150,7 +149,7 @@ func send_update_position_message():
 	data.y = props.y
 	data.speed = 0.0 if v == Vector2.ZERO else props.speed
 	
-	message.type = _ws_utils.WebsocketEvents.UPDATE_POSITION
+	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
 	message.data = data
 	
 	WS.send(message)

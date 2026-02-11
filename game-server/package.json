@@ -14,7 +14,7 @@
     "services:up": "docker compose up -d",
     "services:stop": "docker compose stop",
     "services:down": "docker compose down",
-    "generate:godot": "node scripts/generate-godot-dtos.js",
+    "build:dtos": "ts-node scripts/build-dtos.ts",
     "lint:prettier:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
     "lint:prettier:fix": "prettier --write \"**/*.{json,md,yml,yaml}\"",
     "lint": "npm run lint:prettier:fix",
@@ -28,7 +28,6 @@
     "migration:new": "rm -rf dist && npm run build && npm run migration:run && npm run migration:generate"
   },
   "dependencies": {
-    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
@@ -36,7 +35,6 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.0.1",
     "dotenv": "^17.2.3",
-    "ioredis": "^5.8.2",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

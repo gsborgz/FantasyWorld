@@ -1,7 +1,6 @@
 class_name Chat
 extends VBoxContainer
 
-const _ws_utils := preload("res://shared/ws-utils.gd")
 const _dtos := preload("res://shared/dtos.gd")
 
 @onready var _log: Log = $Log
@@ -28,8 +27,8 @@ func _toggle_player_movement_enabled(enabled: bool):
 
 
 # Handlers
-func _handle_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
-	if message.type == _ws_utils.WebsocketEvents.INSTANCE_CHAT_MESSAGE:
+func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
+	if message.type == _dtos.WebsocketEvents.INSTANCE_CHAT_MESSAGE:
 		_handle_instance_chat_message_received(_dtos.ChatMessage.from(message.data))
 
 
@@ -41,12 +40,12 @@ func _handle_line_edit_text_submitted(new_text: String) -> void:
 	if not new_text:
 		return
 	
-	var message = _ws_utils.WebsocketMessage.new()
+	var message = _dtos.WebsocketMessage.new()
 	var data = _dtos.ChatMessage.new()
 	
 	data.text = new_text
 	
-	message.type = _ws_utils.WebsocketEvents.INSTANCE_CHAT_MESSAGE
+	message.type = _dtos.WebsocketEvents.INSTANCE_CHAT_MESSAGE
 	message.data = data
 	
 	_log.chat("You", new_text)
