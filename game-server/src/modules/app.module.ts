@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { RedisModule } from '@nestjs-modules/ioredis';
 import { AppGateway } from './app.gateway';
 import { RouterService } from '../core/services/router.service';
 import { PostgresConfig } from '../core/datasources/postgres.datasource';

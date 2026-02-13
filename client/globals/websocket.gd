@@ -18,11 +18,11 @@ signal message_received(message: _dtos.WebsocketMessage)
 func connect_to_url(url: String) -> int:
 	socket.supported_protocols = supported_protocols
 	socket.handshake_headers = handshake_headers
-
+	
 	var err := socket.connect_to_url(url, tls_options)
 	if err != OK:
 		return err
-
+	
 	last_state = socket.get_ready_state()
 	return OK
 
@@ -46,12 +46,12 @@ func send(msg: _dtos.WebsocketMessage) -> int:
 func get_message() -> Variant:
 	if socket.get_available_packet_count() < 1:
 		return null
-
+	
 	var data := socket.get_packet()
 	if socket.was_string_packet():
 		var json = JSON.new()
 		var err = json.parse(data.get_string_from_utf8())
-
+	
 		if err == OK:
 			if typeof(json.data) == TYPE_DICTIONARY:
 				var dict: Dictionary = json.data
@@ -80,9 +80,9 @@ func clear() -> void:
 func poll() -> void:
 	if socket.get_ready_state() != socket.STATE_CLOSED:
 		socket.poll()
-
+	
 	var state := socket.get_ready_state()
-
+	
 	if last_state != state:
 		last_state = state
 		if state == socket.STATE_OPEN:

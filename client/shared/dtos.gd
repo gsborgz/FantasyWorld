@@ -207,39 +207,6 @@ class AddCharacterRequest:
 			return obj
 		return null
 
-class JoinInstanceRequest:
-	var instancePath: String
-	var x: float
-	var y: float
-	var direction: int
-
-	func _init(_instancePath: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0):
-		instancePath = _instancePath
-		x = _x
-		y = _y
-		direction = _direction
-
-	func to_dict() -> Dictionary:
-		var d: Dictionary = {}
-		d["instancePath"] = instancePath
-		d["x"] = x
-		d["y"] = y
-		d["direction"] = direction
-		return d
-
-	static func from(value: Variant) -> JoinInstanceRequest:
-		if typeof(value) == TYPE_OBJECT and value is JoinInstanceRequest:
-			return value
-		if typeof(value) == TYPE_DICTIONARY:
-			var raw: Dictionary = value
-			var obj := JoinInstanceRequest.new()
-			obj.instancePath = raw.get("instancePath", "")
-			obj.x = raw.get("x", 0.0)
-			obj.y = raw.get("y", 0.0)
-			obj.direction = raw.get("direction", 0)
-			return obj
-		return null
-
 class GameServerResponse:
 	var name: String
 	var region: String

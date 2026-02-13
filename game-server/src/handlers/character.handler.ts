@@ -3,7 +3,7 @@ import { WebSocket } from 'ws';
 import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
-import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest, WorldInstance, JoinInstanceRequest, CharacterPosition } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest, WorldInstance, CharacterPosition } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
@@ -38,7 +38,7 @@ export class CharacterHandler {
       where: { userId: client.user.id },
     });
 
-    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTERS_LISTED, data: { characters } }));
+    client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTERS_LISTED, data: characters }));
   }
 
   private async handleCharacterAdd(client: WebSocket, message: WebsocketMessage<AddCharacterRequest>) {
@@ -79,22 +79,17 @@ export class CharacterHandler {
     }
 
     sender.character = {
-      id: character.id,
-      name: character.name,
-      instancePath: character.instancePath,
-      x: character.x,
-      y: character.y,
-      direction: character.direction,
+      ...character,
       speed: 200,
       lastPositionUpdate: Date.now(),
     } as ClientCharacter;
-    
+
     const joinMessage: WebsocketMessage<ClientCharacter> = {
       clientId: sender.id!,
       type: WebsocketEvents.JOIN_INSTANCE,
       data: sender.character,
     };
-    
+
     this.broadcastHelper.broadcastToInstance(sender, sender.character?.instancePath, joinMessage);
 
     sender.send(JSON.stringify({ clientId: sender.id, type: WebsocketEvents.CHARACTER_SELECTED, data: sender.character }));
@@ -121,7 +116,7 @@ export class CharacterHandler {
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.CHARACTER_DELETED, data: character }));
   }
 
-  private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<JoinInstanceRequest>) {
+  private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<ClientCharacter>) {
     const clientId = sender.id;
     
     if (!clientId) return;
@@ -131,7 +126,7 @@ export class CharacterHandler {
 
     this.updateClientCharacterInstance(sender, newSenderInstancePath);
     
-    const { x, y, direction } = message.data as Partial<JoinInstanceRequest> & { x?: number; y?: number; direction?: number };
+    const { x, y, direction } = message.data as Partial<ClientCharacter> & { x?: number; y?: number; direction?: number };
     
     if (typeof x === 'number' && typeof y === 'number' && sender.character) {
       sender.character.x = x;
@@ -146,6 +141,8 @@ export class CharacterHandler {
         { x: sender.character.x, y: sender.character.y, direction: sender.character.direction }
       );
     }
+    
+    sender.send(JSON.stringify({ clientId, type: WebsocketEvents.JOIN_INSTANCE, data: sender.character }));
     
     this.sendClientCharacterToInstanceClients(sender);
     this.sendPreviousCharactersInInstanceToClient(sender);
@@ -178,7 +175,7 @@ export class CharacterHandler {
     const message = new WebsocketMessage<ClientCharacter>();
     
     message.clientId = sender.id!;
-    message.type = WebsocketEvents.INSTANCE_LEFT;
+    message.type = WebsocketEvents.LEFT_INSTANCE;
     message.data = sender.character!;
 
     this.broadcastHelper.broadcastToInstance(sender, previousSenderInstancePath, message);

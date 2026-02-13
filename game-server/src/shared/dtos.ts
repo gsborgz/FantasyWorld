@@ -19,8 +19,7 @@ export enum WebsocketEvents {
   CHARACTERS_LISTED,
   CHARACTER_SELECTED,
   CHARACTER_DELETED,
-  INSTANCE_LEFT,
-  INSTANCE_JOINED,
+  LEFT_INSTANCE,
   PONG,
   OK_RESPONSE,
   DENY_RESPONSE,
@@ -76,14 +75,6 @@ export class DeleteCharacterRequest {
 
 export class AddCharacterRequest {
   name: string;
-}
-
-
-export class JoinInstanceRequest {
-  instancePath: string;
-  x: number; // Float
-  y: number; // Float
-  direction: Direction;
 }
 
 export type ClientCharacter = Character & {

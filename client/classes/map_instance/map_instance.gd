@@ -15,6 +15,8 @@ func init_instance(ui: UI, world: Node2D) -> void:
 	_world = world
 	
 	WS.message_received.connect(_main_handle_ws_message_received)
+	
+	_send_join_instance_message()
 
 
 # Handlers
@@ -29,9 +31,17 @@ func _main_handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 		_handle_ws_message_received(message)
 
 
-@warning_ignore("unused_parameter")
 func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	pass
+
+
+func _send_join_instance_message() -> void:
+	var message = _dtos.WebsocketMessage.new()
+	
+	message.type = _dtos.WebsocketEvents.JOIN_INSTANCE
+	message.data = GameManager.get_client_character()
+	
+	WS.send(message)
 
 
 func _on_update_position(character: _dtos.ClientCharacter) -> void:
@@ -39,6 +49,8 @@ func _on_update_position(character: _dtos.ClientCharacter) -> void:
 
 
 func _on_join_instance(character: _dtos.ClientCharacter) -> void:
+	print(character.id)
+	print(GameManager.get_client_character().id)
 	pass
 
 

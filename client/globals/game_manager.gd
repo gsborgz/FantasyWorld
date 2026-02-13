@@ -1,10 +1,12 @@
 extends Node
 
+const _dtos := preload("res://shared/dtos.gd")
+
 var client_id: int
 var _current_scene_root: Node
 var _session_sid: String
 var _session_client_id: String
-var _player_character: Character
+var _client_character: _dtos.ClientCharacter
 
 func set_session_sid(sid: String) -> void:
 	_session_sid = sid
@@ -22,20 +24,15 @@ func get_session_client_id() -> String:
 	return _session_client_id
 
 
-func set_player_character(player: Character) -> void:
-	_player_character = player
+func set_client_character(character: _dtos.ClientCharacter) -> void:
+	_client_character = character
 
 
-func get_player_character() -> Character:
-	return _player_character
+func get_client_character() -> _dtos.ClientCharacter:
+	return _client_character
 
 
 func set_scene(scenePath: String) -> void:
-	if _is_map_scene(scenePath):
-		_preserve_player_character()
-	else:
-		_detach_player_character()
-
 	if _current_scene_root != null:
 		_current_scene_root.queue_free()
 	
@@ -44,23 +41,6 @@ func set_scene(scenePath: String) -> void:
 	var sceneFullPath = "res://scenes/" + scenePath + "/" + fileName + ".tscn"
 	
 	get_tree().call_deferred("change_scene_to_file", sceneFullPath)
-
-
-func _preserve_player_character() -> void:
-	if _player_character != null and is_instance_valid(_player_character):
-		if _player_character.is_inside_tree():
-			var parent := _player_character.get_parent()
-			if parent != null:
-				parent.call_deferred("remove_child", _player_character)
-		call_deferred("add_child", _player_character)
-
-
-func _detach_player_character() -> void:
-	if _player_character != null and is_instance_valid(_player_character):
-		if _player_character.is_inside_tree():
-			var parent := _player_character.get_parent()
-			if parent != null:
-				parent.call_deferred("remove_child", _player_character)
 
 
 func _is_map_scene(scenePath: String) -> bool:

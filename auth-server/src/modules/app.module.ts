@@ -7,6 +7,7 @@ import path from 'node:path';
 import * as dotenv from 'dotenv';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { GameServerModule } from './game-server/game-server.module';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ dotenv.config();
     }),
     TypeOrmModule.forRoot(PostgresConfig),
     AuthModule,
+    GameServerModule
   ],
   controllers: [AppController],
   providers: [AppService],

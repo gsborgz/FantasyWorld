@@ -12,12 +12,11 @@ var character_id: String
 var character_name: String
 
 
-@warning_ignore("shadowed_variable")
-static func instantiate(character_name: String, character_id: String) -> CharacterOption:
+static func instantiate(character: _dtos.ClientCharacter) -> CharacterOption:
 	var character_option := Scene.instantiate()
 	
-	character_option.character_id = character_id
-	character_option.character_name = character_name
+	character_option.character_id = character.id
+	character_option.character_name = character.name
 	
 	return character_option
 
@@ -25,16 +24,8 @@ static func instantiate(character_name: String, character_id: String) -> Charact
 func _ready() -> void:
 	_name.text = character_name
 	
-	WS.message_received.connect(_on_ws_message_received)
 	_select_character.pressed.connect(_on_character_select)
 	_delete_character.pressed.connect(_on_character_delete)
-
-
-func _on_ws_message_received(message: _dtos.WebsocketMessage) -> void:
-	if message.type == _dtos.WebsocketEvents.CHARACTER_SELECTED:
-		_on_character_selected(_dtos.ClientCharacter.from(message.data))
-	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
-		pass
 
 
 func _on_character_select() -> void:
@@ -59,11 +50,3 @@ func _on_character_delete() -> void:
 	message.data = data
 	
 	WS.send(message)
-
-
-func _on_character_selected(data: _dtos.ClientCharacter) -> void:
-	if data.id == character_id:
-		var player_character = Character.instantiate(data, true)
-		
-		GameManager.set_player_character(player_character)
-		GameManager.set_scene("map_instances/" + player_character.props.instancePath)
