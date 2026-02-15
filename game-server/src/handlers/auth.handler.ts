@@ -37,7 +37,7 @@ export class AuthHandler {
       username: user.username,
     };
     client.sid = message.data.sid;
-  
+    
     client.send(JSON.stringify({ clientId: client.id, type: WebsocketEvents.OK_RESPONSE }));
   }
 }

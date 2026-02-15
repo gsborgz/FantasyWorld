@@ -19,20 +19,15 @@ func init_instance(ui: UI, world: Node2D) -> void:
 	_send_join_instance_message()
 
 
-# Handlers
 func _main_handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	if message.type == _dtos.WebsocketEvents.UPDATE_POSITION:
-		_on_update_position(_dtos.ClientCharacter.from(message.data))
+		_handle_update_position(_dtos.ClientCharacter.from(message.data))
 	elif message.type == _dtos.WebsocketEvents.JOIN_INSTANCE:
-		_on_join_instance(_dtos.ClientCharacter.from(message.data))
-	elif message.type == _dtos.WebsocketEvents.INSTANCE_LEFT:
-		_on_instance_left(_dtos.ClientCharacter.from(message.data))
+		_handle_join_instance(_dtos.ClientCharacter.from(message.data))
+	elif message.type == _dtos.WebsocketEvents.LEFT_INSTANCE:
+		_handle_instance_left(_dtos.ClientCharacter.from(message.data))
 	else:
 		_handle_ws_message_received(message)
-
-
-func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
-	pass
 
 
 func _send_join_instance_message() -> void:
@@ -44,15 +39,31 @@ func _send_join_instance_message() -> void:
 	WS.send(message)
 
 
-func _on_update_position(character: _dtos.ClientCharacter) -> void:
-	pass
+func addUserCharacter(character: _dtos.ClientCharacter) -> void:
+	var userChar = Character.instantiate(character)
+	
+	_players[character.id] = userChar
+	_world.add_child(userChar)
 
 
-func _on_join_instance(character: _dtos.ClientCharacter) -> void:
-	print(character.id)
-	print(GameManager.get_client_character().id)
-	pass
+func _handle_update_position(character: _dtos.ClientCharacter) -> void:
+	if _players.has(character.id) and character.id != GameManager.get_client_character().id:
+		_players[character.id].x = character.x
+		_players[character.id].y = character.y
+		_players[character.id].direction = character.direction
+		_players[character.id].speed = character.speed
 
 
-func _on_instance_left(character: _dtos.ClientCharacter) -> void:
+func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
+	addUserCharacter(character)
+
+
+func _handle_instance_left(character: _dtos.ClientCharacter) -> void:
+	if _players.has(character.id):
+		_world.remove_child(_players[character.id])
+		_players.erase(character.id)
+
+
+@warning_ignore("unused_parameter")
+func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	pass

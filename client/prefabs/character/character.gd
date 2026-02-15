@@ -33,13 +33,14 @@ var _remote_target: Vector2 = Vector2.ZERO
 var _remote_has_target: bool = false
 
 
-static func instantiate(char_props: _dtos.ClientCharacter, is_player_char: bool) -> Character:
-	var player := CharacterScene.instantiate() as Character
+static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
+	var isPlayer = user_char.id == GameManager.get_client_character().id
+	var character := CharacterScene.instantiate() as Character
 	
-	player.props = char_props
-	player.is_player = is_player_char
+	character.props = user_char
+	character.is_player = isPlayer
 	
-	return player
+	return character
 
 
 func _ready():
@@ -102,10 +103,10 @@ func _physics_process(delta: float) -> void:
 
 	if is_player:
 		if moving and _send_accum >= SEND_INTERVAL:
-			_update_and_send_position()
+			send_update_position_message()
 			_send_accum = 0.0
 		elif !moving and _was_moving:
-			_update_and_send_position()
+			send_update_position_message()
 		_was_moving = moving
 	
 	if !is_player and _remote_has_target:
@@ -124,6 +125,9 @@ func _draw() -> void:
 
 
 func send_update_position_message():
+	props.x = _body.global_position.x
+	props.y = _body.global_position.y
+	
 	if !is_player:
 		return
 	
@@ -152,14 +156,16 @@ func send_update_position_message():
 	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
 	message.data = data
 	
+	var clientCharacter = GameManager.get_client_character()
+	
+	clientCharacter.direction = data.direction
+	clientCharacter.x = data.x
+	clientCharacter.y = data.y
+	clientCharacter.speed = data.speed
+	
+	GameManager.set_client_character(clientCharacter)
+	
 	WS.send(message)
-
-
-func _update_and_send_position() -> void:
-	props.x = _body.global_position.x
-	props.y = _body.global_position.y
-	send_update_position_message()
-	GameManager.set_player_character(self)
 
 
 func apply_remote_update(character: _dtos.ClientCharacter) -> void:

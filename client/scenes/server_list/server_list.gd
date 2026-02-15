@@ -15,11 +15,26 @@ func _ready() -> void:
 	
 	_exit_button.pressed.connect(_handle_exit_button_pressed)
 	
-	WS.message_received.connect(_on_ws_message_received)
-	WS.connection_closed.connect(_on_ws_connection_closed)
+	WS.message_received.connect(_handle_ws_message_received)
+	WS.connection_closed.connect(_handle_ws_connection_closed)
+	WS.connected_to_server.connect(_handle_ws_connected_to_server)
 
 
-func _on_game_servers_request_completed(response: Api.ResponseData) -> void:
+func _create_server_list(servers: Array[_dtos.GameServerResponse]) -> void:
+	for child in _v_box_container.get_children():
+		_v_box_container.remove_child(child)
+	
+	for server in servers:
+		var serverOption := ServerOption.instantiate(server, _handle_enter_button_pressed.bind(server.url))
+		
+		_v_box_container.add_child(serverOption)
+
+
+func _get_game_servers() -> void:
+	Api.get_data("/v1/game-servers", _handle_game_servers_request_completed)
+
+
+func _handle_game_servers_request_completed(response: Api.ResponseData) -> void:
 	if response.ok() and typeof(response.get_body()) == TYPE_ARRAY:
 		var servers: Array[_dtos.GameServerResponse] = []
 		
@@ -33,17 +48,7 @@ func _on_game_servers_request_completed(response: Api.ResponseData) -> void:
 		print("falha ao buscar servidores")
 
 
-func _create_server_list(servers: Array[_dtos.GameServerResponse]) -> void:
-	for child in _v_box_container.get_children():
-		_v_box_container.remove_child(child)
-	
-	for server in servers:
-		var serverOption := ServerOption.instantiate(server, _handle_enter_button_pressed.bind(server.url))
-		
-		_v_box_container.add_child(serverOption)
-
-
-func _on_ws_connected_to_server() -> void:
+func _handle_ws_connected_to_server() -> void:
 	var message := _dtos.WebsocketMessage.new()
 	
 	message.type = _dtos.WebsocketEvents.LOGIN
@@ -52,9 +57,10 @@ func _on_ws_connected_to_server() -> void:
 	WS.send(message)
 
 
-func _on_ws_message_received(message: _dtos.WebsocketMessage):
+func _handle_ws_message_received(message: _dtos.WebsocketMessage):
 	if message == null:
 		return
+	
 	if message.type == _dtos.WebsocketEvents.OK_RESPONSE:
 		var cid := ""
 		
@@ -64,23 +70,16 @@ func _on_ws_message_received(message: _dtos.WebsocketMessage):
 		GameManager.set_session_client_id(cid)
 		GameManager.set_scene("character_selection")
 	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
-		#WS.disconnect()
 		GameManager.set_scene("server_list")
 
 
-func _on_ws_connection_closed() -> void:
+func _handle_ws_connection_closed() -> void:
 	GameManager.set_scene("server_list")
 
 
-func _get_game_servers() -> void:
-	Api.get_data("/v1/game-servers", _on_game_servers_request_completed)
-
-
-# Handlers
 func _handle_enter_button_pressed(url: String) -> void:
 	WS.clear()
-	WS.connected_to_server.connect(_on_ws_connected_to_server)
-	WS.connect_to_url(url)
+	WS.connect_to_url("ws://localhost:8080/ws")
 
 
 func _handle_exit_button_pressed() -> void:
