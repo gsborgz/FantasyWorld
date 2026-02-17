@@ -3,7 +3,7 @@ import { WebSocket } from 'ws';
 import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
-import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, Direction, SelectCharacterRequest, WorldInstance, CharacterPosition } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, SelectCharacterRequest, WorldInstance, CharacterPosition } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
@@ -55,7 +55,6 @@ export class CharacterHandler {
     character.instancePath = WorldInstance.Village;
     character.x = 200;
     character.y = 200;
-    character.direction = Direction.DOWN;
 
     await this.dataSource.getRepository(Character).save(character);
 
@@ -126,19 +125,15 @@ export class CharacterHandler {
 
     this.updateClientCharacterInstance(sender, newSenderInstancePath);
     
-    const { x, y, direction } = message.data as Partial<ClientCharacter> & { x?: number; y?: number; direction?: number };
+    const { x, y } = message.data as Partial<ClientCharacter> & { x?: number; y?: number; };
     
     if (typeof x === 'number' && typeof y === 'number' && sender.character) {
       sender.character.x = x;
       sender.character.y = y;
       
-      if (typeof direction === 'number') {
-        sender.character.direction = direction as any;
-      }
-      
       await this.dataSource.getRepository(Character).update(
         { id: sender.character.id },
-        { x: sender.character.x, y: sender.character.y, direction: sender.character.direction }
+        { x: sender.character.x, y: sender.character.y }
       );
     }
     
@@ -152,7 +147,7 @@ export class CharacterHandler {
     }
   }
 
-  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<CharacterPosition>) {
+  private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<ClientCharacter>) {
     const instancePath = client.character?.instancePath;
     const clientId = client.id;
     const data = message.data;
@@ -190,8 +185,7 @@ export class CharacterHandler {
       const chunk = characters.slice(i, i + chunkSize);
       const message = new WebsocketMessage<ClientCharacter>();
 
-      message.clientId = sender.id!;
-      message.type = WebsocketEvents.UPDATE_POSITION;
+      message.type = WebsocketEvents.JOIN_INSTANCE;
       
       chunk.forEach(char => {
         message.data = char;
@@ -213,25 +207,23 @@ export class CharacterHandler {
     this.broadcastHelper.broadcastToInstance(sender, sender.character.instancePath, message);
   }
 
-  private updateClientCharacterPosition(client: WebSocket, data: CharacterPosition) {
+  private updateClientCharacterPosition(client: WebSocket, data: ClientCharacter) {
     const x = data.x;
     const y = data.y;
-    const direction = data.direction;
 
     if (client.character) {
       client.character.x = x;
       client.character.y = y;
-      client.character.direction = direction;
       client.character.lastPositionUpdate = Date.now();
       
-      this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y, direction });
+      this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y });
     }
   }
 
   private updateClientCharacterInstance(client: WebSocket, instancePath: string) {
-      client.character.instancePath = instancePath;
+    client.character.instancePath = instancePath;
 
-      this.dataSource.getRepository(Character).update({ id: client.character.id }, { instancePath });
+    this.dataSource.getRepository(Character).update({ id: client.character.id }, { instancePath });
   }
 
 }

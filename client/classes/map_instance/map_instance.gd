@@ -5,7 +5,7 @@ const _dtos := preload("res://shared/dtos.gd")
 
 var _ui: UI
 var _world: Node2D
-var _players: Dictionary[String, Character] = {}
+var _userCharacters: Dictionary[String, Character] = {}
 
 
 func init_instance(ui: UI, world: Node2D) -> void:
@@ -39,29 +39,26 @@ func _send_join_instance_message() -> void:
 	WS.send(message)
 
 
-func addUserCharacter(character: _dtos.ClientCharacter) -> void:
+func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
+	if _userCharacters.has(character.id):
+		return
+	
 	var userChar = Character.instantiate(character)
 	
-	_players[character.id] = userChar
+	_userCharacters[character.id] = userChar
 	_world.add_child(userChar)
 
 
 func _handle_update_position(character: _dtos.ClientCharacter) -> void:
-	if _players.has(character.id) and character.id != GameManager.get_client_character().id:
-		_players[character.id].x = character.x
-		_players[character.id].y = character.y
-		_players[character.id].direction = character.direction
-		_players[character.id].speed = character.speed
-
-
-func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
-	addUserCharacter(character)
+	if _userCharacters.has(character.id) and character.id != GameManager.get_client_character().id:
+		pass
 
 
 func _handle_instance_left(character: _dtos.ClientCharacter) -> void:
-	if _players.has(character.id):
-		_world.remove_child(_players[character.id])
-		_players.erase(character.id)
+	if _userCharacters.has(character.id):
+		_world.remove_child(_userCharacters[character.id])
+		_userCharacters[character.id].queue_free()
+		_userCharacters.erase(character.id)
 
 
 @warning_ignore("unused_parameter")

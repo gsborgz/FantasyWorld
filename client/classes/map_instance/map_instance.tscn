@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://b3o5o4mopunyd"]
+[gd_scene format=3 uid="uid://b3o5o4mopunyd"]
 
 [sub_resource type="GDScript" id="GDScript_8t2sn"]
 script/source = "extends MapInstance
@@ -14,5 +14,5 @@ func _handle_ws_message_received(message: _ws_utils.WebsocketMessage) -> void:
 	pass
 "
 
-[node name="MapInstance" type="Node2D"]
+[node name="MapInstance" type="Node2D" unique_id=259545589]
 script = SubResource("GDScript_8t2sn")

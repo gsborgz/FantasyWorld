@@ -26,13 +26,6 @@ const WorldInstance = {
 	"Village": "village",
 }
 
-enum Direction {
-	UP = 0,
-	DOWN = 1,
-	LEFT = 2,
-	RIGHT = 3,
-}
-
 class WebsocketMessage:
 	var type: int
 	var data: Variant
@@ -89,14 +82,12 @@ class CharacterPosition:
 	var characterId: String
 	var x: float
 	var y: float
-	var direction: int
 	var speed: float
 
-	func _init(_characterId: String = "", _x: float = 0.0, _y: float = 0.0, _direction: int = 0, _speed: float = 0.0):
+	func _init(_characterId: String = "", _x: float = 0.0, _y: float = 0.0, _speed: float = 0.0):
 		characterId = _characterId
 		x = _x
 		y = _y
-		direction = _direction
 		speed = _speed
 
 	func to_dict() -> Dictionary:
@@ -104,7 +95,6 @@ class CharacterPosition:
 		d["characterId"] = characterId
 		d["x"] = x
 		d["y"] = y
-		d["direction"] = direction
 		d["speed"] = speed
 		return d
 
@@ -117,7 +107,6 @@ class CharacterPosition:
 			obj.characterId = raw.get("characterId", "")
 			obj.x = raw.get("x", 0.0)
 			obj.y = raw.get("y", 0.0)
-			obj.direction = raw.get("direction", 0)
 			obj.speed = raw.get("speed", 0.0)
 			return obj
 		return null
@@ -243,7 +232,6 @@ class ClientCharacter:
 	var instancePath: String
 	var x: float
 	var y: float
-	var direction: int
 	var userId: String
 	var speed: float
 	var lastPositionUpdate: int
@@ -256,7 +244,6 @@ class ClientCharacter:
 		instancePath = _instancePath
 		x = _x
 		y = _y
-		direction = _direction
 		userId = _userId
 		speed = _speed
 		lastPositionUpdate = _lastPositionUpdate
@@ -270,7 +257,6 @@ class ClientCharacter:
 		d["instancePath"] = instancePath
 		d["x"] = x
 		d["y"] = y
-		d["direction"] = direction
 		d["userId"] = userId
 		d["speed"] = speed
 		d["lastPositionUpdate"] = lastPositionUpdate
@@ -289,7 +275,6 @@ class ClientCharacter:
 			obj.instancePath = raw.get("instancePath", "")
 			obj.x = raw.get("x", 0.0)
 			obj.y = raw.get("y", 0.0)
-			obj.direction = raw.get("direction", 0)
 			obj.userId = raw.get("userId", "")
 			obj.speed = raw.get("speed", 0.0)
 			obj.lastPositionUpdate = raw.get("lastPositionUpdate", 0)

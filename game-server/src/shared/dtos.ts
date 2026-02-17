@@ -40,13 +40,6 @@ export enum WorldInstance {
   Village = 'village',
 }
 
-export enum Direction {
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT,
-}
-
 export class ChatMessage {
   text: string;
   senderName: string;
@@ -56,7 +49,6 @@ export class CharacterPosition {
   characterId?: string;
   x: number; // Float
   y: number; // Float
-  direction: Direction;
   speed: number; // Float
 }
 

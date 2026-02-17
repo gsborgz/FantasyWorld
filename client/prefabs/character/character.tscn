@@ -1,24 +1,24 @@
-[gd_scene load_steps=3 format=3 uid="uid://bcm26qqlh5e78"]
+[gd_scene format=3 uid="uid://bcyql4gs8gjjm"]
 
-[ext_resource type="Script" path="res://prefabs/character/character.gd" id="1"]
+[ext_resource type="Script" uid="uid://cnrxfhprl4b53" path="res://prefabs/character/character.gd" id="1_ytlax"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_iqmyr"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_mwj4u"]
 resource_local_to_scene = true
 radius = 5.0
 
-[node name="Character" type="Node2D"]
-script = ExtResource("1")
+[node name="Char" type="Node2D" unique_id=1284080195]
+script = ExtResource("1_ytlax")
 
-[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." unique_id=127786582]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
-shape = SubResource("CircleShape2D_iqmyr")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D" unique_id=1851866130]
+shape = SubResource("CircleShape2D_mwj4u")
 
-[node name="Camera" type="Camera2D" parent="CharacterBody2D"]
+[node name="Camera" type="Camera2D" parent="CharacterBody2D" unique_id=1610965716]
 zoom = Vector2(2, 2)
 position_smoothing_speed = 0.0
 
-[node name="Nameplate" type="Label" parent="CharacterBody2D"]
+[node name="Nameplate" type="Label" parent="CharacterBody2D" unique_id=463266275]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -26,3 +26,4 @@ offset_left = -20.0
 offset_right = 20.0
 offset_bottom = 23.0
 grow_horizontal = 2
+metadata/_edit_use_anchors_ = true

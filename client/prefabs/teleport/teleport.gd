@@ -7,7 +7,6 @@ const _dtos := preload("res://shared/dtos.gd")
 	set(new_scale):
 		tp_scale = new_scale
 		scale = tp_scale
-@export var direction: _dtos.Direction
 @export var to: String
 @export var new_x: float
 @export var new_y: float
