@@ -30,9 +30,13 @@ func set_client_character(character: _dtos.ClientCharacter) -> void:
 
 
 func update_client_character_position() -> void:
-	_client_character.x = _user_character.x
-	_client_character.y = _user_character.y
-	_client_character.speed = _user_character.speed
+	var character = get_client_character()
+	
+	character.x = _user_character.global_position.x
+	character.y = _user_character.global_position.y
+	character.speed = _user_character.speed
+	
+	set_client_character(character)
 
 
 func get_client_character() -> _dtos.ClientCharacter:

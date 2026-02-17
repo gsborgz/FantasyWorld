@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bcyql4gs8gjjm"]
+[gd_scene format=3 uid="uid://b6g6gj8fpvnpb"]
 
 [ext_resource type="Script" uid="uid://cnrxfhprl4b53" path="res://prefabs/character/character.gd" id="1_ytlax"]
 
@@ -6,19 +6,17 @@
 resource_local_to_scene = true
 radius = 5.0
 
-[node name="Char" type="Node2D" unique_id=1284080195]
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1650561900]
 script = ExtResource("1_ytlax")
 
-[node name="CharacterBody2D" type="CharacterBody2D" parent="." unique_id=127786582]
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D" unique_id=1851866130]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1827301716]
 shape = SubResource("CircleShape2D_mwj4u")
 
-[node name="Camera" type="Camera2D" parent="CharacterBody2D" unique_id=1610965716]
+[node name="Camera" type="Camera2D" parent="." unique_id=2002941976]
 zoom = Vector2(2, 2)
 position_smoothing_speed = 0.0
 
-[node name="Nameplate" type="Label" parent="CharacterBody2D" unique_id=463266275]
+[node name="Nameplate" type="Label" parent="." unique_id=1791263938]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5

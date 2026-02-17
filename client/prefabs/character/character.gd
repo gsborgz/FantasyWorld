@@ -1,13 +1,12 @@
-extends Node2D
+extends CharacterBody2D
 class_name Character
 
 const _dtos := preload("res://shared/dtos.gd")
 const CharacterScene := preload("res://prefabs/character/character.tscn")
 
-@onready var _body: CharacterBody2D = $CharacterBody2D
-@onready var _collision_shape: CircleShape2D = $CharacterBody2D/CollisionShape2D.shape
-@onready var _nameplate: Label = $CharacterBody2D/Nameplate
-@onready var _camera: Camera2D = $CharacterBody2D/Camera
+@onready var _collision_shape: CircleShape2D = $CollisionShape2D.shape
+@onready var _nameplate: Label = $Nameplate
+@onready var _camera: Camera2D = $Camera
 
 var char_name: String = ""
 var x: float = 0
@@ -29,6 +28,7 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	character.char_name = user_char.name
 	character.speed = user_char.speed
 	character.is_player = user_char.id == GameManager.get_client_character().id
+	character.z_index = 5
 	
 	if character.is_player:
 		GameManager.set_user_character(character)
@@ -43,6 +43,8 @@ func set_movement_enabled(enabled: bool):
 func _ready():
 	position = Vector2(x, y)
 	_camera.enabled = is_player
+	if is_player and _camera.has_method("make_current"):
+		_camera.make_current()
 	
 	_update_camera_limits()
 	
@@ -54,18 +56,18 @@ func _physics_process(delta: float) -> void:
 	if !_movement_enabled:
 		return
 	
-	_body.velocity = Vector2.ZERO
+	velocity = Vector2.ZERO
 	
 	_move_character()
+	_send_update_position_message()
 	queue_redraw()
-	
-	#_send_update_position_message()
 	
 	_was_moving = _is_moving
 
 
 func _draw() -> void:
-	draw_circle(_body.position, _collision_shape.radius, Color.DARK_ORCHID)
+	# Desenho em coordenadas locais; usar `position` aqui duplica o deslocamento.
+	draw_circle(Vector2.ZERO, _collision_shape.radius, Color.DARK_ORCHID)
 
 
 func _update_camera_limits() -> void:
@@ -99,18 +101,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func _move_character() -> void:
 	var direction := Input.get_vector("left", "right", "up", "down")
 	
-	_body.velocity = direction * (speed * (2 if _is_running else 1))
+	velocity = direction * (speed * (2 if _is_running else 1))
 	
 	_is_moving = direction != Vector2.ZERO
 	
-	_body.move_and_slide()
+	move_and_slide()
 	
-	if is_player:
+	if is_player && (_is_moving || _was_moving):
 		GameManager.update_client_character_position()
 
 
 func _send_update_position_message() -> void:
-	if !is_player || (!_is_moving and !_was_moving):
+	if !is_player || (!_is_moving && !_was_moving):
 		return
 	
 	var message := _dtos.WebsocketMessage.new()
