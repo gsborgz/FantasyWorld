@@ -7,6 +7,7 @@ var _current_scene_root: Node
 var _session_sid: String
 var _session_client_id: String
 var _client_character: _dtos.ClientCharacter
+var _user_character: Character
 
 func set_session_sid(sid: String) -> void:
 	_session_sid = sid
@@ -28,8 +29,22 @@ func set_client_character(character: _dtos.ClientCharacter) -> void:
 	_client_character = character
 
 
+func update_client_character_position() -> void:
+	_client_character.x = _user_character.x
+	_client_character.y = _user_character.y
+	_client_character.speed = _user_character.speed
+
+
 func get_client_character() -> _dtos.ClientCharacter:
 	return _client_character
+
+
+func set_user_character(character: Character) -> void:
+	_user_character = character
+
+
+func get_user_character() -> Character:
+	return _user_character
 
 
 func set_scene(scenePath: String) -> void:

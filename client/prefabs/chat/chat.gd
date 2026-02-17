@@ -21,7 +21,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _toggle_player_movement_enabled(enabled: bool):
-	var player = GameManager.get_player_character()
+	var player = GameManager.get_user_character()
 	
 	player.set_movement_enabled(enabled)
 

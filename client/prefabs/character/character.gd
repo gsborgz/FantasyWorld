@@ -30,6 +30,9 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	character.speed = user_char.speed
 	character.is_player = user_char.id == GameManager.get_client_character().id
 	
+	if character.is_player:
+		GameManager.set_user_character(character)
+	
 	return character
 
 
@@ -93,19 +96,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_is_running = false
 
 
-func _update_client_character():
-	if !is_player:
-		return
-	
-	var clientCharacter = GameManager.get_client_character()
-	
-	clientCharacter.x = x
-	clientCharacter.y = y
-	clientCharacter.speed = speed
-	
-	GameManager.set_client_character(clientCharacter)
-
-
 func _move_character() -> void:
 	var direction := Input.get_vector("left", "right", "up", "down")
 	
@@ -115,7 +105,8 @@ func _move_character() -> void:
 	
 	_body.move_and_slide()
 	
-	_update_client_character()
+	if is_player:
+		GameManager.update_client_character_position()
 
 
 func _send_update_position_message() -> void:
