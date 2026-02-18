@@ -45,14 +45,6 @@ export class ChatMessage {
   senderName: string;
 }
 
-export class CharacterPosition {
-  characterId?: string;
-  x: number; // Float
-  y: number; // Float
-  speed: number; // Float
-}
-
-// Request
 export class AuthenticationRequest {
   sid: string;
 }
@@ -74,8 +66,6 @@ export type ClientCharacter = Character & {
   lastPositionUpdate: number; // Integer
 };
 
-
-// Response
 export class GameServerResponse {
   name: string;
   region: string;

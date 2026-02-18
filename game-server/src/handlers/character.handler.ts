@@ -3,7 +3,7 @@ import { WebSocket } from 'ws';
 import { Handler } from '../types/ws.types';
 import { Character } from '../core/entities/character.entity';
 import { DataSource } from 'typeorm';
-import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, SelectCharacterRequest, WorldInstance, CharacterPosition } from '../shared/dtos';
+import { WebsocketEvents, WebsocketMessage, AddCharacterRequest, ClientCharacter, DeleteCharacterRequest, SelectCharacterRequest, WorldInstance } from '../shared/dtos';
 import { BroadcastHelper } from '../helpers/broadcast.helper';
 import { ClientsRegistryService } from '../core/services/clients-registry.service';
 
