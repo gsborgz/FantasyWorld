@@ -51,7 +51,9 @@ func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
 
 func _handle_update_position(character: _dtos.ClientCharacter) -> void:
 	if _userCharacters.has(character.id) and character.id != GameManager.get_client_character().id:
-		pass
+		_userCharacters[character.id].position.x = character.x
+		_userCharacters[character.id].position.y = character.y
+		_userCharacters[character.id].speed = character.speed
 
 
 func _handle_instance_left(character: _dtos.ClientCharacter) -> void:

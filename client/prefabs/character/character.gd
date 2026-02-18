@@ -99,6 +99,9 @@ func _listen_run_input(event: InputEvent) -> void:
 
 
 func _move_character() -> void:
+	if !is_player:
+		return
+	
 	var direction := Input.get_vector("left", "right", "up", "down")
 	
 	velocity = direction * (speed * (2 if _is_running else 1))
@@ -108,7 +111,7 @@ func _move_character() -> void:
 	
 	move_and_slide()
 	
-	if is_player && (_is_moving || _was_moving):
+	if _is_moving || _was_moving:
 		GameManager.update_client_character_position()
 		_send_update_position_message()
 
