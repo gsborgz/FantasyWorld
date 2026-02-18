@@ -40,6 +40,12 @@ func set_movement_enabled(enabled: bool):
 	_movement_enabled = enabled
 
 
+func update_remote_position(user_char: _dtos.ClientCharacter) -> void:
+	position.x = user_char.x
+	position.y = user_char.y
+	speed = user_char.speed
+
+
 func _ready():
 	position = Vector2(x, y)
 	
@@ -49,6 +55,7 @@ func _ready():
 		_nameplate.text = char_name
 
 
+@warning_ignore("unused_parameter")
 func _physics_process(delta: float) -> void:
 	if !_movement_enabled:
 		return

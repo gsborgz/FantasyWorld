@@ -30,6 +30,32 @@ func _main_handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 		_handle_ws_message_received(message)
 
 
+func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
+	if _userCharacters.has(character.id):
+		return
+	
+	_add_character(character)
+
+
+func _handle_update_position(character: _dtos.ClientCharacter) -> void:
+	if !_userCharacters.has(character.id) or character.id == GameManager.get_client_character().id:
+		return
+	
+	_userCharacters[character.id].update_remote_position(character)
+
+
+func _handle_instance_left(character: _dtos.ClientCharacter) -> void:
+	if !_userCharacters.has(character.id):
+		return
+	
+	_remove_character(character)
+
+
+@warning_ignore("unused_parameter")
+func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
+	pass
+
+
 func _send_join_instance_message() -> void:
 	var message = _dtos.WebsocketMessage.new()
 	
@@ -39,30 +65,14 @@ func _send_join_instance_message() -> void:
 	WS.send(message)
 
 
-func _handle_join_instance(character: _dtos.ClientCharacter) -> void:
-	if _userCharacters.has(character.id):
-		return
-	
+func _add_character(character: _dtos.ClientCharacter) -> void:
 	var userChar = Character.instantiate(character)
 	
 	_userCharacters[character.id] = userChar
 	_world.add_child(userChar)
 
 
-func _handle_update_position(character: _dtos.ClientCharacter) -> void:
-	if _userCharacters.has(character.id) and character.id != GameManager.get_client_character().id:
-		_userCharacters[character.id].position.x = character.x
-		_userCharacters[character.id].position.y = character.y
-		_userCharacters[character.id].speed = character.speed
-
-
-func _handle_instance_left(character: _dtos.ClientCharacter) -> void:
-	if _userCharacters.has(character.id):
-		_world.remove_child(_userCharacters[character.id])
-		_userCharacters[character.id].queue_free()
-		_userCharacters.erase(character.id)
-
-
-@warning_ignore("unused_parameter")
-func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
-	pass
+func _remove_character(character: _dtos.ClientCharacter) -> void:
+	_world.remove_child(_userCharacters[character.id])
+	_userCharacters[character.id].queue_free()
+	_userCharacters.erase(character.id)
