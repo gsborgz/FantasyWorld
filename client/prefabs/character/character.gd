@@ -42,11 +42,8 @@ func set_movement_enabled(enabled: bool):
 
 func _ready():
 	position = Vector2(x, y)
-	_camera.enabled = is_player
-	if is_player and _camera.has_method("make_current"):
-		_camera.make_current()
 	
-	_update_camera_limits()
+	_set_camera()
 	
 	if (!is_player):
 		_nameplate.text = char_name
@@ -56,24 +53,27 @@ func _physics_process(delta: float) -> void:
 	if !_movement_enabled:
 		return
 	
-	velocity = Vector2.ZERO
-	
 	_move_character()
-	_send_update_position_message()
 	queue_redraw()
-	
-	_was_moving = _is_moving
 
 
 func _draw() -> void:
-	# Desenho em coordenadas locais; usar `position` aqui duplica o deslocamento.
 	draw_circle(Vector2.ZERO, _collision_shape.radius, Color.DARK_ORCHID)
 
 
-func _update_camera_limits() -> void:
-	if !is_player:
-		return
+func _unhandled_input(event: InputEvent) -> void:
+	_listen_run_input(event)
+
+
+func _set_camera() -> void:
+	_camera.enabled = is_player
 	
+	if is_player:
+		_camera.make_current()
+		_update_camera_limits()
+
+
+func _update_camera_limits() -> void:
 	var tilemap: TileMapLayer
 	var tilemaps := get_tree().get_nodes_in_group("main_layer")
 	
@@ -91,7 +91,7 @@ func _update_camera_limits() -> void:
 	_camera.limit_bottom = (used_rect.position.y + used_rect.size.y) * tile_map_size.y
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _listen_run_input(event: InputEvent) -> void:
 	if event.is_action_pressed("run"):
 		_is_running = true
 	elif event.is_action_released("run"):
@@ -104,17 +104,16 @@ func _move_character() -> void:
 	velocity = direction * (speed * (2 if _is_running else 1))
 	
 	_is_moving = direction != Vector2.ZERO
+	_was_moving = _is_moving
 	
 	move_and_slide()
 	
 	if is_player && (_is_moving || _was_moving):
 		GameManager.update_client_character_position()
+		_send_update_position_message()
 
 
 func _send_update_position_message() -> void:
-	if !is_player || (!_is_moving && !_was_moving):
-		return
-	
 	var message := _dtos.WebsocketMessage.new()
 	
 	message.type = _dtos.WebsocketEvents.UPDATE_POSITION

@@ -210,9 +210,6 @@ export class CharacterHandler {
   private updateClientCharacterPosition(client: WebSocket, data: ClientCharacter) {
     const { x, y } = data;
 
-    console.log(x, y);
-    
-
     if (client.character) {
       client.character.x = x;
       client.character.y = y;
