@@ -39,19 +39,6 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	return character
 
 
-func send_update_position_message() -> void:
-	var message := _dtos.WebsocketMessage.new()
-	
-	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
-	message.data = GameManager.get_client_character()
-	
-	print(GameManager.get_client_character().x)
-	print(GameManager.get_client_character().y)
-	print("---------------")
-	
-	WS.send(message)
-
-
 func set_movement_enabled(enabled: bool):
 	_movement_enabled = enabled
 
@@ -136,4 +123,13 @@ func _move_character() -> void:
 	
 	if _is_moving || _was_moving:
 		GameManager.update_client_character_position(position)
-		send_update_position_message()
+		_send_update_position_message()
+
+
+func _send_update_position_message() -> void:
+	var message := _dtos.WebsocketMessage.new()
+	
+	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
+	message.data = GameManager.get_client_character()
+	
+	WS.send(message)

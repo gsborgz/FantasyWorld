@@ -122,8 +122,6 @@ export class CharacterHandler {
     
     const newSenderInstancePath = message.data.instancePath;
     const previousInstance = sender.character.instancePath;
-    
-    console.log(message.data);
 
     await this.updateClientCharacterPosition(sender, message.data);
     
