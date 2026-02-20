@@ -79,7 +79,7 @@ func _handle_ws_connection_closed() -> void:
 
 func _handle_enter_button_pressed(url: String) -> void:
 	WS.clear()
-	WS.connect_to_url("ws://localhost:8080/ws")
+	WS.connect_to_url(url)
 
 
 func _handle_exit_button_pressed() -> void:
