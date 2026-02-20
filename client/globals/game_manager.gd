@@ -29,12 +29,11 @@ func set_client_character(character: _dtos.ClientCharacter) -> void:
 	_client_character = character
 
 
-func update_client_character_position() -> void:
+func update_client_character_position(new_pos: Vector2) -> void:
 	var character = get_client_character()
 	
-	character.x = _user_character.global_position.x
-	character.y = _user_character.global_position.y
-	character.speed = _user_character.speed
+	character.x = new_pos.x
+	character.y = new_pos.y
 	
 	set_client_character(character)
 
@@ -60,7 +59,3 @@ func set_scene(scenePath: String) -> void:
 	var sceneFullPath = "res://scenes/" + scenePath + "/" + fileName + ".tscn"
 	
 	get_tree().call_deferred("change_scene_to_file", sceneFullPath)
-
-
-func _is_map_scene(scenePath: String) -> bool:
-	return scenePath.begins_with("map_instances/")

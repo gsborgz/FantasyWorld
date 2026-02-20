@@ -5,7 +5,11 @@ extends MapInstance
 
 
 func _ready() -> void:
-	init_instance(_ui_node, _world_node)
+	_instance_name = _dtos.WorldInstance.Village
+	_ui = _ui_node
+	_world = _world_node
+	
+	init_instance()
 
 
 #Handlers

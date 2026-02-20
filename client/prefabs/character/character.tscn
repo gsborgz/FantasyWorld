@@ -6,7 +6,7 @@
 resource_local_to_scene = true
 radius = 5.0
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1650561900]
+[node name="PlayerCharacter" type="CharacterBody2D" unique_id=1650561900]
 script = ExtResource("1_ytlax")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1827301716]

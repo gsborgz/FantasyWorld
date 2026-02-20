@@ -3144,8 +3144,8 @@ tile_set = SubResource("TileSet_j60go")
 position = Vector2(1466, 488)
 scale = Vector2(1, 6)
 tp_scale = Vector2(1, 6)
+direction = 3
 to = "forest"
-new_x = 10.0
-new_y = 216.0
+new_position = Vector2(10, 216)
 
 [node name="Ui" parent="." unique_id=1505136740 instance=ExtResource("3_k4t5b")]

@@ -8,6 +8,7 @@ const CharacterScene := preload("res://prefabs/character/character.tscn")
 @onready var _nameplate: Label = $Nameplate
 @onready var _camera: Camera2D = $Camera
 
+var char_id: String = ""
 var char_name: String = ""
 var x: float = 0
 var y: float = 0
@@ -23,17 +24,32 @@ var _was_moving: bool = false
 static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	var character := CharacterScene.instantiate() as Character
 	
+	character.char_id = user_char.id
 	character.x = user_char.x
 	character.y = user_char.y
 	character.char_name = user_char.name
 	character.speed = user_char.speed
 	character.is_player = user_char.id == GameManager.get_client_character().id
 	character.z_index = 5
+	character._movement_enabled = false
 	
 	if character.is_player:
 		GameManager.set_user_character(character)
 	
 	return character
+
+
+func send_update_position_message() -> void:
+	var message := _dtos.WebsocketMessage.new()
+	
+	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
+	message.data = GameManager.get_client_character()
+	
+	print(GameManager.get_client_character().x)
+	print(GameManager.get_client_character().y)
+	print("---------------")
+	
+	WS.send(message)
 
 
 func set_movement_enabled(enabled: bool):
@@ -119,14 +135,5 @@ func _move_character() -> void:
 	move_and_slide()
 	
 	if _is_moving || _was_moving:
-		GameManager.update_client_character_position()
-		_send_update_position_message()
-
-
-func _send_update_position_message() -> void:
-	var message := _dtos.WebsocketMessage.new()
-	
-	message.type = _dtos.WebsocketEvents.UPDATE_POSITION
-	message.data = GameManager.get_client_character()
-	
-	WS.send(message)
+		GameManager.update_client_character_position(position)
+		send_update_position_message()

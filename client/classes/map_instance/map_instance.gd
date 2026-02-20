@@ -3,16 +3,15 @@ extends Node2D
 
 const _dtos := preload("res://shared/dtos.gd")
 
+var _instance_name: String
 var _ui: UI
 var _world: Node2D
 var _userCharacters: Dictionary[String, Character] = {}
 
 
-func init_instance(ui: UI, world: Node2D) -> void:
-	assert(ui and world, "You must inform UI and World nodes in init_instance")
-	
-	_ui = ui
-	_world = world
+func init_instance() -> void:
+	assert(_instance_name, "You must set instance_name")
+	assert(_ui and _world, "You must inform UI and World nodes in init_instance")
 	
 	WS.message_received.connect(_main_handle_ws_message_received)
 	
@@ -58,9 +57,12 @@ func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 
 func _send_join_instance_message() -> void:
 	var message = _dtos.WebsocketMessage.new()
+	var client_char = GameManager.get_client_character()
+	
+	client_char.instancePath = _instance_name
 	
 	message.type = _dtos.WebsocketEvents.JOIN_INSTANCE
-	message.data = GameManager.get_client_character()
+	message.data = client_char
 	
 	WS.send(message)
 
@@ -70,6 +72,8 @@ func _add_character(character: _dtos.ClientCharacter) -> void:
 	
 	_userCharacters[character.id] = userChar
 	_world.add_child(userChar)
+	
+	userChar.set_movement_enabled(true)
 
 
 func _remove_character(character: _dtos.ClientCharacter) -> void:

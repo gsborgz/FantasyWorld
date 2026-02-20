@@ -40,6 +40,13 @@ export enum WorldInstance {
   Village = 'village',
 }
 
+export enum Direction {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
+}
+
 export class ChatMessage {
   text: string;
   senderName: string;

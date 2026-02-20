@@ -118,24 +118,14 @@ export class CharacterHandler {
   private async handleJoinInstance(sender: WebSocket, message: WebsocketMessage<ClientCharacter>) {
     const clientId = sender.id;
     
-    if (!clientId) return;
+    if (!clientId || !sender.character) return;
     
     const newSenderInstancePath = message.data.instancePath;
-    const previousInstance = sender.character?.instancePath;
+    const previousInstance = sender.character.instancePath;
+    
+    console.log(message.data);
 
-    this.updateClientCharacterInstance(sender, newSenderInstancePath);
-    
-    const { x, y } = message.data as Partial<ClientCharacter> & { x?: number; y?: number; };
-    
-    if (typeof x === 'number' && typeof y === 'number' && sender.character) {
-      sender.character.x = x;
-      sender.character.y = y;
-      
-      await this.dataSource.getRepository(Character).update(
-        { id: sender.character.id },
-        { x: sender.character.x, y: sender.character.y }
-      );
-    }
+    await this.updateClientCharacterPosition(sender, message.data);
     
     sender.send(JSON.stringify({ clientId, type: WebsocketEvents.JOIN_INSTANCE, data: sender.character }));
     
@@ -207,22 +197,20 @@ export class CharacterHandler {
     this.broadcastHelper.broadcastToInstance(sender, sender.character.instancePath, message);
   }
 
-  private updateClientCharacterPosition(client: WebSocket, data: ClientCharacter) {
-    const { x, y } = data;
+  private async updateClientCharacterPosition(client: WebSocket, data: ClientCharacter): Promise<void> {
+    const { x, y, instancePath } = data;
 
     if (client.character) {
       client.character.x = x;
       client.character.y = y;
       client.character.lastPositionUpdate = Date.now();
+
+      if (instancePath) {
+        client.character.instancePath = instancePath;
+      }
       
-      this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y });
+      await this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y });
     }
-  }
-
-  private updateClientCharacterInstance(client: WebSocket, instancePath: string) {
-    client.character.instancePath = instancePath;
-
-    this.dataSource.getRepository(Character).update({ id: client.character.id }, { instancePath });
   }
 
 }
