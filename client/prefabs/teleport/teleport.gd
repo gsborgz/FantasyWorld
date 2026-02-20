@@ -20,33 +20,34 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if !_teleporting && body.name != "PlayerCharacter" || ((body as Character).char_id != GameManager.get_user_character().char_id):
+	if !_teleporting && body.name != "PlayerCharacter" || ((body as Character).char_id != GameManager.get_player_character().char_id):
 		return
 	
 	_teleporting = true
 	
-	var character = GameManager.get_user_character()
+	var character = GameManager.get_player_character()
 	
 	character.set_movement_enabled(false)
 	
-	_set_client_character_starting_position()
+	_set_player_character_position()
 	
 	GameManager.set_scene("map_instances/" + to)
 	
 	_teleporting = false
 
 
-func _set_client_character_starting_position() -> void:
-	var player_char = GameManager.get_user_character()
+func _set_player_character_position() -> void:
+	var playerChar = GameManager.get_player_character()
 	var startPosition = new_position
 	
 	if direction == _dtos.Direction.UP or direction == _dtos.Direction.DOWN:
-		var diffX = player_char.position.x - position.x
+		var diffX = playerChar.position.x - position.x
 		
 		startPosition.x += diffX
 	elif direction == _dtos.Direction.LEFT or direction == _dtos.Direction.RIGHT:
-		var diffY = player_char.position.y - position.y
+		var diffY = playerChar.position.y - position.y
 		
 		startPosition.y += diffY
 	
+	playerChar.position = startPosition
 	GameManager.update_client_character_position(startPosition)

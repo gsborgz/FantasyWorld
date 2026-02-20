@@ -7,7 +7,7 @@ var _current_scene_root: Node
 var _session_sid: String
 var _session_client_id: String
 var _client_character: _dtos.ClientCharacter
-var _user_character: Character
+var _player_character: Character
 
 func set_session_sid(sid: String) -> void:
 	_session_sid = sid
@@ -42,12 +42,12 @@ func get_client_character() -> _dtos.ClientCharacter:
 	return _client_character
 
 
-func set_user_character(character: Character) -> void:
-	_user_character = character
+func set_player_character(character: Character) -> void:
+	_player_character = character
 
 
-func get_user_character() -> Character:
-	return _user_character
+func get_player_character() -> Character:
+	return _player_character
 
 
 func set_scene(scenePath: String) -> void:

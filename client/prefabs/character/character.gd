@@ -34,7 +34,7 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	character._movement_enabled = false
 	
 	if character.is_player:
-		GameManager.set_user_character(character)
+		GameManager.set_player_character(character)
 	
 	return character
 
