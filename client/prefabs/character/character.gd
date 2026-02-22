@@ -53,9 +53,18 @@ func _ready():
 	position = Vector2(x, y)
 	
 	_set_camera()
-	
-	if (!is_player):
+
+
+@warning_ignore("unused_parameter")
+func _mouse_shape_enter(shape_idx: int) -> void:
+	if !is_player:
 		_nameplate.text = char_name
+
+
+@warning_ignore("unused_parameter")
+func _mouse_shape_exit(shape_idx: int) -> void:
+	if _nameplate.text:
+		_nameplate.text = ""
 
 
 @warning_ignore("unused_parameter")
