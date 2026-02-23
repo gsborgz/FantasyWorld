@@ -20,6 +20,7 @@ var _run_speed = 220
 var _movement_enabled: bool = true
 var _is_running: bool = false
 var _is_moving: bool = false
+var _preferred_direction = Vector2.ZERO
 
 
 static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
@@ -81,6 +82,7 @@ func _draw() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	_listen_run_input(event)
+	_listen_direction_input(event)
 
 
 func _set_camera() -> void:
@@ -116,11 +118,22 @@ func _listen_run_input(event: InputEvent) -> void:
 		_is_running = false
 
 
+func _listen_direction_input(event: InputEvent) -> void:
+	if event.is_action_pressed("left"):
+		_preferred_direction = Vector2.LEFT
+	elif event.is_action_pressed("right"):
+		_preferred_direction = Vector2.RIGHT
+	elif event.is_action_pressed("up"):
+		_preferred_direction = Vector2.UP
+	elif event.is_action_pressed("down"):
+		_preferred_direction = Vector2.DOWN
+
+
 func _move_character() -> void:
 	if !is_player:
 		return
 	
-	var direction := Input.get_vector("left", "right", "up", "down")
+	var direction := _get_direction()
 	var speed = _run_speed if _is_running else _walk_speed
 	
 	velocity = direction * speed
@@ -141,3 +154,23 @@ func _send_update_position_message() -> void:
 	message.data = GameManager.get_client_character()
 	
 	WS.send(message)
+
+
+func _get_direction() -> Vector2:
+	var horizontal := Input.get_action_strength("right") - Input.get_action_strength("left")
+	var vertical := Input.get_action_strength("down") - Input.get_action_strength("up")
+	var direction := Vector2.ZERO
+	
+	if horizontal != 0.0 and vertical != 0.0:
+		if _preferred_direction.y != 0.0:
+			direction = Vector2(0.0, vertical)
+		elif _preferred_direction.x != 0.0:
+			direction = Vector2(horizontal, 0.0)
+		else:
+			direction = Vector2(horizontal, 0.0)
+	elif horizontal != 0.0:
+		direction = Vector2(horizontal, 0.0)
+	elif vertical != 0.0:
+		direction = Vector2(0.0, vertical)
+	
+	return direction
