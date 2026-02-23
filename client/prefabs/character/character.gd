@@ -4,16 +4,16 @@ class_name Character
 const _dtos := preload("res://shared/dtos.gd")
 const CharacterScene := preload("res://prefabs/character/character.tscn")
 
-@onready var _collision_shape: CircleShape2D = $CollisionShape2D.shape
 @onready var _nameplate: Label = $Nameplate
 @onready var _camera: Camera2D = $Camera
+@onready var _animation_player: AnimationPlayer = $Sprite/AnimationPlayer
 
 var char_id = ""
 var char_name = ""
 var x = 0.0
 var y = 0.0
 var is_player = false
-var input_direction = Vector2(0,0)
+var current_direction = _dtos.Direction
 
 var _walk_speed = 100
 var _run_speed = 220
@@ -21,7 +21,18 @@ var _movement_enabled: bool = true
 var _is_running: bool = false
 var _is_moving: bool = false
 var _preferred_direction = Vector2.ZERO
-
+var _idle_animation_map = {
+	_dtos.Direction.UP: "idle_up",
+	_dtos.Direction.DOWN: "idle_down",
+	_dtos.Direction.RIGHT: "idle_right",
+	_dtos.Direction.LEFT: "idle_left"
+}
+var _walk_animation_map = {
+	_dtos.Direction.UP: "walk_up",
+	_dtos.Direction.DOWN: "walk_down",
+	_dtos.Direction.RIGHT: "walk_right",
+	_dtos.Direction.LEFT: "walk_left"
+}
 
 static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	var character := CharacterScene.instantiate() as Character
@@ -31,6 +42,7 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	character.y = user_char.y
 	character.char_name = user_char.name
 	character.is_player = user_char.id == GameManager.get_client_character().id
+	character.current_direction = user_char.direction
 	character.z_index = 5
 	character._movement_enabled = false
 	
@@ -44,9 +56,10 @@ func set_movement_enabled(enabled: bool):
 	_movement_enabled = enabled
 
 
-func update_remote_position(user_char: _dtos.ClientCharacter) -> void:
-	position.x = user_char.x
-	position.y = user_char.y
+func update_remote_position(client_char: _dtos.ClientCharacter) -> void:
+	position.x = client_char.x
+	position.y = client_char.y
+	current_direction = client_char.direction
 
 
 func _ready():
@@ -73,11 +86,6 @@ func _physics_process(delta: float) -> void:
 		return
 	
 	_move_character()
-	queue_redraw()
-
-
-func _draw() -> void:
-	draw_circle(Vector2.ZERO, _collision_shape.radius, Color.DARK_ORCHID)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -134,6 +142,9 @@ func _move_character() -> void:
 		return
 	
 	var direction := _get_direction()
+	
+	_set_current_direction(direction)
+	
 	var speed = _run_speed if _is_running else _walk_speed
 	
 	velocity = direction * speed
@@ -143,8 +154,11 @@ func _move_character() -> void:
 	move_and_slide()
 	
 	if _is_moving:
-		GameManager.update_client_character_position(position)
+		GameManager.update_client_character_position(position, current_direction)
 		_send_update_position_message()
+		_play_walk_animation()
+	else:
+		_play_idle_animation()
 
 
 func _send_update_position_message() -> void:
@@ -174,3 +188,26 @@ func _get_direction() -> Vector2:
 		direction = Vector2(0.0, vertical)
 	
 	return direction
+
+
+func _set_current_direction(direction: Vector2) -> void:
+	if direction == Vector2.RIGHT:
+		current_direction = _dtos.Direction.RIGHT
+	elif direction == Vector2.LEFT:
+		current_direction = _dtos.Direction.LEFT
+	elif direction == Vector2.UP:
+		current_direction = _dtos.Direction.UP
+	elif direction == Vector2.DOWN:
+		current_direction = _dtos.Direction.DOWN
+
+
+func _play_walk_animation() -> void:
+	var animation = _walk_animation_map[current_direction]
+	var speed = 3 if _is_running else 1 
+	
+	_animation_player.play(animation, -1, speed)
+
+func _play_idle_animation() -> void:
+	var animation = _idle_animation_map[current_direction]
+	
+	_animation_player.play(animation)

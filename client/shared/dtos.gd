@@ -206,11 +206,12 @@ class ClientCharacter:
 	var instancePath: String
 	var x: float
 	var y: float
+	var direction: Direction
 	var userId: String
 	var speed: float
 	var lastPositionUpdate: int
 
-	func _init(_id: String = "", _createdAt: Variant = null, _updatedAt: Variant = null, _name: String = "", _instancePath: String = "", _x: float = 0.0, _y: float = 0.0, _userId: String = "", _speed: float = 0.0, _lastPositionUpdate: int = 0):
+	func _init(_id: String = "", _createdAt: Variant = null, _updatedAt: Variant = null, _name: String = "", _instancePath: String = "", _x: float = 0.0, _y: float = 0.0, _direction: Direction = Direction.DOWN, _userId: String = "", _speed: float = 0.0, _lastPositionUpdate: int = 0):
 		id = _id
 		createdAt = _createdAt
 		updatedAt = _updatedAt
@@ -218,6 +219,7 @@ class ClientCharacter:
 		instancePath = _instancePath
 		x = _x
 		y = _y
+		direction = _direction
 		userId = _userId
 		speed = _speed
 		lastPositionUpdate = _lastPositionUpdate
@@ -231,6 +233,7 @@ class ClientCharacter:
 		d["instancePath"] = instancePath
 		d["x"] = x
 		d["y"] = y
+		d["direction"] = direction
 		d["userId"] = userId
 		d["speed"] = speed
 		d["lastPositionUpdate"] = lastPositionUpdate
@@ -249,6 +252,18 @@ class ClientCharacter:
 			obj.instancePath = raw.get("instancePath", "")
 			obj.x = raw.get("x", 0.0)
 			obj.y = raw.get("y", 0.0)
+			var _raw_direction = raw.get("direction", Direction.DOWN)
+			if typeof(_raw_direction) == TYPE_STRING:
+				match String(_raw_direction):
+					"UP": obj.direction = Direction.UP
+					"DOWN": obj.direction = Direction.DOWN
+					"LEFT": obj.direction = Direction.LEFT
+					"RIGHT": obj.direction = Direction.RIGHT
+					_: obj.direction = Direction.DOWN
+			elif typeof(_raw_direction) == TYPE_INT or typeof(_raw_direction) == TYPE_FLOAT:
+				obj.direction = int(_raw_direction)
+			else:
+				obj.direction = Direction.DOWN
 			obj.userId = raw.get("userId", "")
 			obj.speed = raw.get("speed", 0.0)
 			obj.lastPositionUpdate = raw.get("lastPositionUpdate", 0)

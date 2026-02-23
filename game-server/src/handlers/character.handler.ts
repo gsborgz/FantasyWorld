@@ -196,18 +196,19 @@ export class CharacterHandler {
   }
 
   private async updateClientCharacterPosition(client: WebSocket, data: ClientCharacter): Promise<void> {
-    const { x, y, instancePath } = data;
+    const { x, y, instancePath, direction } = data;
 
     if (client.character) {
       client.character.x = x;
       client.character.y = y;
       client.character.lastPositionUpdate = Date.now();
+      client.character.direction = direction;
 
       if (instancePath) {
         client.character.instancePath = instancePath;
       }
       
-      await this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y });
+      await this.dataSource.getRepository(Character).update({ id: client.character.id }, { x, y, direction, instancePath: client.character.instancePath });
     }
   }
 

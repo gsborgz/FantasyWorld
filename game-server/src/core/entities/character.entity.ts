@@ -1,5 +1,6 @@
 import { Column, Entity, Index, OneToMany } from 'typeorm';
 import { CustomBaseEntity } from './base.entity';
+import { Direction } from '../../shared/dtos';
 
 @Entity({ name: 'characters' })
 export class Character extends CustomBaseEntity {
@@ -16,6 +17,9 @@ export class Character extends CustomBaseEntity {
 
   @Column({ type: 'double precision', nullable: false })
   y: number;
+
+  @Column({ type: 'enum', enum: Direction, nullable: true, default: Direction.DOWN })
+  direction: Direction;
 
   @Index()
   @Column({ type: 'uuid', nullable: false })

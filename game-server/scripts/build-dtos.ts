@@ -45,6 +45,8 @@ function getIdentifierText(name: ts.PropertyName | undefined): string | null {
 
 function gdDefaultForType(gdType: string): string {
 	switch (gdType) {
+		case "Direction":
+			return "Direction.DOWN";
 		case "String":
 			return '""';
 		case "float":
@@ -78,7 +80,8 @@ function mapTsTypeToGdType(typeNode: ts.TypeNode | undefined, hint: "Float" | "I
 		if (typeName === "Date") return "Variant";
 		// Enums e tipos externos viram int/Variant no cliente.
 		if (typeName === "WorldInstance") return "String";
-		if (typeName === "Direction" || typeName === "WebsocketEvents") return "int";
+		if (typeName === "Direction") return "Direction";
+		if (typeName === "WebsocketEvents") return "int";
 		return "Variant";
 	}
 
@@ -204,6 +207,22 @@ function emitDefaultClass(name: string, props: PropertySpec[]): string {
 	lines.push(`${INDENT}${INDENT}${INDENT}var raw: Dictionary = value`);
 	lines.push(`${INDENT}${INDENT}${INDENT}var obj := ${name}.new()`);
 	for (const p of props) {
+		if (p.gdType === "Direction") {
+			lines.push(`${INDENT}${INDENT}${INDENT}var _raw_${p.name} = raw.get("${p.name}", ${p.defaultValue})`);
+			lines.push(`${INDENT}${INDENT}${INDENT}if typeof(_raw_${p.name}) == TYPE_STRING:`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}match String(_raw_${p.name}):`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}"UP": obj.${p.name} = Direction.UP`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}"DOWN": obj.${p.name} = Direction.DOWN`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}"LEFT": obj.${p.name} = Direction.LEFT`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}"RIGHT": obj.${p.name} = Direction.RIGHT`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}_: obj.${p.name} = ${p.defaultValue}`);
+			lines.push(`${INDENT}${INDENT}${INDENT}elif typeof(_raw_${p.name}) == TYPE_INT or typeof(_raw_${p.name}) == TYPE_FLOAT:`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}obj.${p.name} = int(_raw_${p.name})`);
+			lines.push(`${INDENT}${INDENT}${INDENT}else:`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}obj.${p.name} = ${p.defaultValue}`);
+			continue;
+		}
+
 		lines.push(`${INDENT}${INDENT}${INDENT}obj.${p.name} = raw.get("${p.name}", ${p.defaultValue})`);
 	}
 	lines.push(`${INDENT}${INDENT}${INDENT}return obj`);
