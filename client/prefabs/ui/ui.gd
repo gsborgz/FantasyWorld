@@ -20,7 +20,7 @@ func _handle_back_to_char_screen_button_pressed() -> void:
 
 
 func _handle_esc_pressed() -> void:
-	var player = GameManager.get_user_character()
+	var player = GameManager.get_player_character()
 	
 	if _menu.visible:
 		player.set_movement_enabled(true)

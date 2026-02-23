@@ -8,17 +8,18 @@ const CharacterScene := preload("res://prefabs/character/character.tscn")
 @onready var _nameplate: Label = $Nameplate
 @onready var _camera: Camera2D = $Camera
 
-var char_id: String = ""
-var char_name: String = ""
-var x: float = 0
-var y: float = 0
-var speed: float = 50
-var is_player: bool
+var char_id = ""
+var char_name = ""
+var x = 0.0
+var y = 0.0
+var is_player = false
+var input_direction = Vector2(0,0)
 
+var _walk_speed = 100
+var _run_speed = 220
 var _movement_enabled: bool = true
 var _is_running: bool = false
 var _is_moving: bool = false
-var _was_moving: bool = false
 
 
 static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
@@ -28,7 +29,6 @@ static func instantiate(user_char: _dtos.ClientCharacter) -> Character:
 	character.x = user_char.x
 	character.y = user_char.y
 	character.char_name = user_char.name
-	character.speed = user_char.speed
 	character.is_player = user_char.id == GameManager.get_client_character().id
 	character.z_index = 5
 	character._movement_enabled = false
@@ -46,7 +46,6 @@ func set_movement_enabled(enabled: bool):
 func update_remote_position(user_char: _dtos.ClientCharacter) -> void:
 	position.x = user_char.x
 	position.y = user_char.y
-	speed = user_char.speed
 
 
 func _ready():
@@ -122,15 +121,15 @@ func _move_character() -> void:
 		return
 	
 	var direction := Input.get_vector("left", "right", "up", "down")
+	var speed = _run_speed if _is_running else _walk_speed
 	
-	velocity = direction * (speed * (2 if _is_running else 1))
+	velocity = direction * speed
 	
 	_is_moving = direction != Vector2.ZERO
-	_was_moving = _is_moving
 	
 	move_and_slide()
 	
-	if _is_moving || _was_moving:
+	if _is_moving:
 		GameManager.update_client_character_position(position)
 		_send_update_position_message()
 

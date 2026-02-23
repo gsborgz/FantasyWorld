@@ -25,6 +25,13 @@ WS="*res://globals/websocket.gd"
 GameManager="*res://globals/game_manager.gd"
 Api="*res://globals/api.gd"
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="ignore"
+
 [input]
 
 left={
