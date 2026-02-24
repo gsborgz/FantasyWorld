@@ -71,6 +71,8 @@ export class AddCharacterRequest {
 export type ClientCharacter = Character & {
   speed: number; // Float
   lastPositionUpdate: number; // Integer
+  is_moving: boolean;
+  is_running: boolean;
 };
 
 export class GameServerResponse {

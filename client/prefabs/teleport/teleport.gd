@@ -50,4 +50,4 @@ func _set_player_character_position() -> void:
 		startPosition.y += diffY
 	
 	playerChar.position = startPosition
-	GameManager.update_client_character_position(startPosition, playerChar.current_direction)
+	GameManager.update_client_character_position(startPosition, playerChar.current_direction, playerChar.is_moving, playerChar.is_running)

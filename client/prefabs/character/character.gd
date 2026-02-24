@@ -14,12 +14,13 @@ var x = 0.0
 var y = 0.0
 var is_player = false
 var current_direction = _dtos.Direction
+var is_moving: bool = false
+var is_running: bool = false
 
 var _walk_speed = 100
 var _run_speed = 220
 var _movement_enabled: bool = true
-var _is_running: bool = false
-var _is_moving: bool = false
+var _was_moving: bool = false
 var _preferred_direction = Vector2.ZERO
 var _idle_animation_map = {
 	_dtos.Direction.UP: "idle_up",
@@ -60,11 +61,19 @@ func update_remote_position(client_char: _dtos.ClientCharacter) -> void:
 	position.x = client_char.x
 	position.y = client_char.y
 	current_direction = client_char.direction
+	is_moving = client_char.is_moving
+	is_running = client_char.is_running
+	
+	if is_moving:
+		_play_walk_animation()
+	else:
+		_play_idle_animation()
 
 
 func _ready():
 	position = Vector2(x, y)
 	
+	_play_idle_animation()
 	_set_camera()
 
 
@@ -121,9 +130,9 @@ func _update_camera_limits() -> void:
 
 func _listen_run_input(event: InputEvent) -> void:
 	if event.is_action_pressed("run"):
-		_is_running = true
+		is_running = true
 	elif event.is_action_released("run"):
-		_is_running = false
+		is_running = false
 
 
 func _listen_direction_input(event: InputEvent) -> void:
@@ -145,16 +154,17 @@ func _move_character() -> void:
 	
 	_set_current_direction(direction)
 	
-	var speed = _run_speed if _is_running else _walk_speed
+	var speed = _run_speed if is_running else _walk_speed
 	
 	velocity = direction * speed
 	
-	_is_moving = direction != Vector2.ZERO
+	_was_moving = is_moving
+	is_moving = direction != Vector2.ZERO
 	
 	move_and_slide()
 	
-	if _is_moving:
-		GameManager.update_client_character_position(position, current_direction)
+	if is_moving || _was_moving:
+		GameManager.update_client_character_position(position, current_direction, is_moving, is_running)
 		_send_update_position_message()
 		_play_walk_animation()
 	else:
@@ -203,7 +213,7 @@ func _set_current_direction(direction: Vector2) -> void:
 
 func _play_walk_animation() -> void:
 	var animation = _walk_animation_map[current_direction]
-	var speed = 3 if _is_running else 1 
+	var speed = 3 if is_running else 1 
 	
 	_animation_player.play(animation, -1, speed)
 

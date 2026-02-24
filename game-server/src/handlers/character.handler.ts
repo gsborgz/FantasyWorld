@@ -196,13 +196,15 @@ export class CharacterHandler {
   }
 
   private async updateClientCharacterPosition(client: WebSocket, data: ClientCharacter): Promise<void> {
-    const { x, y, instancePath, direction } = data;
+    const { x, y, instancePath, direction, is_moving, is_running } = data;
 
     if (client.character) {
       client.character.x = x;
       client.character.y = y;
       client.character.lastPositionUpdate = Date.now();
       client.character.direction = direction;
+      client.character.is_moving = is_moving;
+      client.character.is_running = is_running;
 
       if (instancePath) {
         client.character.instancePath = instancePath;

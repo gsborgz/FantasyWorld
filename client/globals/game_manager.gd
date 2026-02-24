@@ -29,12 +29,14 @@ func set_client_character(character: _dtos.ClientCharacter) -> void:
 	_client_character = character
 
 
-func update_client_character_position(new_pos: Vector2, direction: _dtos.Direction) -> void:
+func update_client_character_position(new_pos: Vector2, direction: _dtos.Direction, is_moving: bool, is_running: bool) -> void:
 	var character = get_client_character()
 	
 	character.x = new_pos.x
 	character.y = new_pos.y
 	character.direction = direction
+	character.is_moving = is_moving
+	character.is_running = is_running
 	
 	set_client_character(character)
 
