@@ -102,7 +102,7 @@ export class AppGateway implements OnModuleDestroy {
     if (!this.clientsRegistry.has(client)) return;
     
     if (client.character?.instancePath) {
-      this.characterHandler.sendInstanceLeftMessageToPreviousInstance(client, client.character.instancePath);
+      this.characterHandler.sendInstanceLeftMessage(client, client.character.instancePath);
     }
 
     this.clientsRegistry.delete(client);

@@ -23,6 +23,7 @@ export class CharacterHandler {
       [WebsocketEvents.SELECT_CHARACTER]: this.handleCharacterSelect.bind(this),
       [WebsocketEvents.DELETE_CHARACTER]: this.handleCharacterDelete.bind(this),
       [WebsocketEvents.JOIN_INSTANCE]: this.handleJoinInstance.bind(this),
+      [WebsocketEvents.LEFT_INSTANCE]: this.handleLeftInstance.bind(this),
       [WebsocketEvents.UPDATE_POSITION]: this.handlePositionUpdate.bind(this),
     } satisfies Partial<Record<WebsocketEvents, Handler>>;
   }
@@ -131,8 +132,12 @@ export class CharacterHandler {
     this.sendPreviousCharactersInInstanceToClient(sender);
     
     if (previousInstance && previousInstance !== newSenderInstancePath) {
-      this.sendInstanceLeftMessageToPreviousInstance(sender, previousInstance);
+      this.sendInstanceLeftMessage(sender, previousInstance);
     }
+  }
+
+  private async handleLeftInstance(sender: WebSocket, message: WebsocketMessage<ClientCharacter>) {
+    this.sendInstanceLeftMessage(sender, message.data.instancePath!);
   }
 
   private async handlePositionUpdate(client: WebSocket, message: WebsocketMessage<ClientCharacter>) {
@@ -154,7 +159,7 @@ export class CharacterHandler {
   }
 
   // Utils
-  public sendInstanceLeftMessageToPreviousInstance(sender: WebSocket, previousSenderInstancePath: string) {
+  public sendInstanceLeftMessage(sender: WebSocket, previousSenderInstancePath: string) {
     const message = new WebsocketMessage<ClientCharacter>();
     
     message.clientId = sender.id!;

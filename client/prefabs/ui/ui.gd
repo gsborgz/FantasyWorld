@@ -1,6 +1,8 @@
 class_name UI
 extends CanvasLayer
 
+const _dtos := preload("res://shared/dtos.gd")
+
 @onready var _back_to_char_screen_button: Button = $Menu/BackToCharScreenButton
 @onready var _menu: VBoxContainer = $Menu
 
@@ -14,8 +16,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_esc_pressed()
 
 
-# Handlers
+func _send_left_instance_message() -> void:
+	var message = _dtos.WebsocketMessage.new()
+	var client_char = GameManager.get_client_character()
+	
+	message.type = _dtos.WebsocketEvents.LEFT_INSTANCE
+	message.data = client_char
+	
+	WS.send(message)
+
+
 func _handle_back_to_char_screen_button_pressed() -> void:
+	_send_left_instance_message()
 	GameManager.set_scene("character_selection")
 
 
