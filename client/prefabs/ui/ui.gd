@@ -32,11 +32,6 @@ func _handle_back_to_char_screen_button_pressed() -> void:
 
 
 func _handle_esc_pressed() -> void:
-	var player = GameManager.get_player_character()
+	_menu.visible = !_menu.visible
 	
-	if _menu.visible:
-		player.set_movement_enabled(true)
-		_menu.visible = false
-	else:
-		player.set_movement_enabled(false)
-		_menu.visible = true
+	GameManager.set_menu_opened(_menu.visible)

@@ -6,6 +6,8 @@ const _dtos := preload("res://shared/dtos.gd")
 @onready var _log: Log = $Log
 @onready var _line_edit: LineEdit = $LineEdit
 
+var _enabled = true
+
 
 func _ready() -> void:
 	WS.message_received.connect(_handle_ws_message_received)
@@ -15,15 +17,16 @@ func _ready() -> void:
 	_line_edit.focus_exited.connect(_handle_line_edit_focus_exited)
 
 
+func _process(delta: float) -> void:
+	_enabled = !GameManager.get_menu_opened()
+	_line_edit.editable = !GameManager.get_menu_opened()
+	_line_edit.visible = !GameManager.get_menu_opened()
+	_log.visible = !GameManager.get_menu_opened()
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("enter") and not _line_edit.has_focus():
+	if _enabled && event.is_action_pressed("enter") && !_line_edit.has_focus():
 		_line_edit.grab_focus()
-
-
-func _toggle_player_movement_enabled(enabled: bool):
-	var player = GameManager.get_player_character()
-	
-	player.set_movement_enabled(enabled)
 
 
 # Handlers
@@ -57,8 +60,8 @@ func _handle_line_edit_text_submitted(new_text: String) -> void:
 
 
 func _handle_line_edit_focus_entered():
-	_toggle_player_movement_enabled(false)
+	GameManager.set_chat_activated(true)
 
 
 func _handle_line_edit_focus_exited():
-	_toggle_player_movement_enabled(true)
+	GameManager.set_chat_activated(false)

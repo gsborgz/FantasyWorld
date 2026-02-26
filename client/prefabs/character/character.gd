@@ -90,8 +90,16 @@ func _mouse_shape_exit(shape_idx: int) -> void:
 
 
 @warning_ignore("unused_parameter")
+func _process(delta: float) -> void:
+	var isInteracting = GameManager.get_chat_activated() || GameManager.get_menu_opened()
+	
+	_movement_enabled = !isInteracting
+
+
+@warning_ignore("unused_parameter")
 func _physics_process(delta: float) -> void:
 	if !_movement_enabled:
+		_play_idle_animation()
 		return
 	
 	_move_character()
