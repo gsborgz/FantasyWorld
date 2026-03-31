@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bmyb7tddtpos8"]
+
+[ext_resource type="Script" uid="uid://vgxgwc4e5ho5" path="res://scenes/auth/signin/signin.gd" id="1_g0p6p"]
+[ext_resource type="Texture2D" uid="uid://cjt53x8k5y3cl" path="res://assets/ui/auth_background.png" id="2_jclen"]
+[ext_resource type="Theme" uid="uid://bu0nu12aqrnhw" path="res://assets/themes/input_default.tres" id="3_75agv"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="4_735mx"]
+[ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="5_e1cyy"]
+[ext_resource type="Theme" uid="uid://xx7p0y3d0v7t" path="res://assets/themes/label_default.tres" id="5_jclen"]
+
+[sub_resource type="Theme" id="Theme_cygr0"]
+VBoxContainer/constants/separation = 4
+
+[node name="Auth" type="Node" unique_id=1360536168]
+script = ExtResource("1_g0p6p")
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=653086071]
+
+[node name="TextureRect" type="TextureRect" parent="UI" unique_id=1136130701]
+texture_filter = 1
+offset_left = -4.0
+offset_right = 1284.8889
+offset_bottom = 725.0
+texture = ExtResource("2_jclen")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI" unique_id=1705032915]
+texture_filter = 1
+custom_minimum_size = Vector2(250, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -154.0
+offset_right = 100.0
+offset_bottom = 94.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_cygr0")
+
+[node name="Username" type="LineEdit" parent="UI/VBoxContainer" unique_id=116444334]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("3_75agv")
+
+[node name="Password" type="LineEdit" parent="UI/VBoxContainer" unique_id=1825665992]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("3_75agv")
+
+[node name="LoginButton" type="Button" parent="UI/VBoxContainer" unique_id=494296310]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("4_735mx")
+text = "Login"
+
+[node name="OrLabel" type="Label" parent="UI/VBoxContainer" unique_id=80973610]
+layout_mode = 2
+theme = ExtResource("5_jclen")
+horizontal_alignment = 1
+
+[node name="RegisterButton" type="Button" parent="UI/VBoxContainer" unique_id=1870265853]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("4_735mx")
+text = "Register"
+
+[node name="Log" type="RichTextLabel" parent="UI/VBoxContainer" unique_id=406225745]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+script = ExtResource("5_e1cyy")
+metadata/_custom_type_script = "uid://cjt7e0nevedq5"

@@ -1,0 +1,53 @@
+[gd_resource type="Theme" format=3 uid="uid://bu0nu12aqrnhw"]
+
+[ext_resource type="FontFile" uid="uid://6aep8dy0538v" path="res://assets/fonts/monogram-extended.ttf" id="1_bqgbc"]
+[ext_resource type="Texture2D" uid="uid://cl5m750dytved" path="res://assets/ui/medieval.png" id="1_hsbss"]
+
+[sub_resource type="DPITexture" id="DPITexture_bqgbc"]
+_source = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><path fill=\"#fff\" fill-opacity=\".75\" d=\"m1 3 2-2 5 5 5-5 2 2-5 5 5 5-2 2-5-5-5 5-2-2 5-5z\"/></svg>
+"
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_47hod"]
+texture = ExtResource("1_hsbss")
+texture_margin_left = 10.0
+texture_margin_top = 4.0
+texture_margin_right = 10.0
+texture_margin_bottom = 6.0
+region_rect = Rect2(864, 704, 97, 96)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_q0k6v"]
+texture = ExtResource("1_hsbss")
+texture_margin_left = 10.0
+texture_margin_top = 4.0
+texture_margin_right = 10.0
+texture_margin_bottom = 6.0
+region_rect = Rect2(864, 704, 97, 96)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_4md1a"]
+texture = ExtResource("1_hsbss")
+texture_margin_left = 10.0
+texture_margin_top = 4.0
+texture_margin_right = 10.0
+texture_margin_bottom = 6.0
+region_rect = Rect2(864, 704, 97, 96)
+
+[resource]
+default_font = ExtResource("1_bqgbc")
+LineEdit/colors/caret_color = Color(0.95, 0.95, 0.95, 1)
+LineEdit/colors/clear_button_color = Color(0.875, 0.875, 0.875, 1)
+LineEdit/colors/clear_button_color_pressed = Color(1, 1, 1, 1)
+LineEdit/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+LineEdit/colors/font_outline_color = Color(0, 0, 0, 1)
+LineEdit/colors/font_placeholder_color = Color(0.875, 0.875, 0.875, 0.6)
+LineEdit/colors/font_selected_color = Color(1, 1, 1, 1)
+LineEdit/colors/font_uneditable_color = Color(0.875, 0.875, 0.875, 0.5)
+LineEdit/colors/selection_color = Color(0.5, 0.5, 0.5, 1)
+LineEdit/constants/caret_width = 1
+LineEdit/constants/minimum_character_width = 4
+LineEdit/constants/outline_size = 0
+LineEdit/font_sizes/font_size = 32
+LineEdit/fonts/font = ExtResource("1_bqgbc")
+LineEdit/icons/clear = SubResource("DPITexture_bqgbc")
+LineEdit/styles/focus = SubResource("StyleBoxTexture_47hod")
+LineEdit/styles/normal = SubResource("StyleBoxTexture_q0k6v")
+LineEdit/styles/read_only = SubResource("StyleBoxTexture_4md1a")
