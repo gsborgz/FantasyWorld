@@ -1,9 +1,5 @@
-import type { Character } from "../core/entities/character.entity";
-
 export enum WebsocketEvents {
   NONE,
-  
-  // Requests
   SELECT_CHARACTER,
   UPDATE_POSITION,
   JOIN_INSTANCE,
@@ -12,8 +8,6 @@ export enum WebsocketEvents {
   ADD_CHARACTER,
   LIST_CHARACTERS,
   DELETE_CHARACTER,
-  
-  // Responses
   POSITION_UPDATED,
   CHARACTER_ADDED,
   CHARACTERS_LISTED,
@@ -23,16 +17,8 @@ export enum WebsocketEvents {
   PONG,
   OK_RESPONSE,
   DENY_RESPONSE,
-  
-  // Request and Response
   GLOBAL_CHAT_MESSAGE,
   INSTANCE_CHAT_MESSAGE,
-}
-
-export class WebsocketMessage<T> {
-  clientId: string;
-  type: WebsocketEvents;
-  data: T;
 }
 
 export enum WorldInstance {
@@ -45,6 +31,12 @@ export enum Direction {
   DOWN,
   LEFT,
   RIGHT,
+}
+
+export class WebsocketMessage<T> {
+  clientId: string;
+  type: WebsocketEvents;
+  data: T;
 }
 
 export class ChatMessage {
@@ -68,7 +60,14 @@ export class AddCharacterRequest {
   name: string;
 }
 
-export type ClientCharacter = Character & {
+export class ClientCharacter {
+  id: string;
+  name: string;
+  instancePath: string;
+  x: number // Float;
+  y: number // Float;
+  direction: Direction;
+  userId: string;
   speed: number; // Float
   lastPositionUpdate: number; // Integer
   is_moving: boolean;

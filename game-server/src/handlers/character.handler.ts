@@ -82,6 +82,8 @@ export class CharacterHandler {
       ...character,
       speed: 200,
       lastPositionUpdate: Date.now(),
+      is_moving: false,
+      is_running: false,
     } as ClientCharacter;
 
     const joinMessage: WebsocketMessage<ClientCharacter> = {

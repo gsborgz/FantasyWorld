@@ -14,7 +14,7 @@
     "services:up": "docker compose up -d",
     "services:stop": "docker compose stop",
     "services:down": "docker compose down",
-    "build:dtos": "ts-node scripts/build-dtos.ts",
+    "ts-to-gds": "ts-node scripts/ts-to-gds.ts D:/Dev/Jogos/FantasyWorld/game-server/src/shared/dtos.ts D:/Dev/Jogos/FantasyWorld/client/shared/dtos.gd",
     "lint:prettier:check": "prettier --check \"**/*.{json,md,yml,yaml}\"",
     "lint:prettier:fix": "prettier --write \"**/*.{json,md,yml,yaml}\"",
     "lint": "npm run lint:prettier:fix",

@@ -1,4 +1,5 @@
 {
   "postman.settings.dotenv-detection-notification-visibility": false,
-  "codeQL.githubDatabase.download": "never"
+  "codeQL.githubDatabase.download": "never",
+  "godotTools.editorPath.godot4": "d:\\Dev\\Programas\\Godot\\Godot_v4.6.1-stable_win64.exe"
 }

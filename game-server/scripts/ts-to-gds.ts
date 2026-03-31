@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import ts, { ClassDeclaration, EnumDeclaration, InterfaceDeclaration, TypeAliasDeclaration } from "typescript";
+import ts, { ClassDeclaration, EnumDeclaration } from "typescript";
 
-const indent = "    ";
+const indent = "  ";
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
@@ -39,72 +39,76 @@ function validateArgs(args: string[]): void {
 }
 
 function setOutput(statements: ts.NodeArray<ts.Statement>): string {
-  const enums: EnumDeclaration[] = [];
-  const classes: ClassDeclaration[] = [];
-
-  for (const statement of statements) {
-    if (ts.isEnumDeclaration(statement)) {
-      enums.push(statement);
-    }
-
-    if (ts.isClassDeclaration(statement)) {
-      classes.push(statement);
-    }
-  }
-
+  const enums: EnumDeclaration[] = statements.filter(ts.isEnumDeclaration);
+  const classes: ClassDeclaration[] = statements.filter(ts.isClassDeclaration);
   const outParts: string[] = [];
 
   for (const e of enums) {
     outParts.push(convertEnum(e));
-		outParts.push("");
   }
 
 	for (const c of classes) {
     outParts.push(convertClass(c));
-		outParts.push("");
 	}
 
-  return outParts.join("\n").trimEnd() + "\n";
+  return outParts.join("\n\n");
 }
 
 function convertEnum(e: ts.EnumDeclaration): string {
-  let text = e.getText(); 
-  
-  if (!text.includes("export enum")) return '';
+  const name = e.name.text;
+  const members = e.members.map(m => {
+    const mName = m.name.getText();
+    
+    if (m.initializer) {
+      const value = m.initializer.getText().replace(/'/g, '"');
+      
+      return `${indent}"${mName}": ${value}`;
+    }
 
-  const isObject = text.includes("=");
-  
-  if (isObject) {
-    text = text.replace(/export\s+enum\s+(\w+)/, "const $1 =");
-    text = text.replace(/'/g, '"');
-    text = text.replace(/(\w+)\s*=/g, '"$1":');
+    return `${indent}${mName}`;
+  });
+
+  const isDictionary = e.members.some(m => m.initializer && ts.isStringLiteral(m.initializer));
+
+  if (isDictionary) {
+    return `const ${name} = {\n${members.join(",\n")}\n}`;
   }
-  
-  if (!isObject) {
-    text = text.replace(/export\s+enum\s+(\w+)/, "enum $1:");
-    text = text.replace(/{/, "").replace(/}$/, "");
-  }
-  
-  return text;
+
+  return `enum ${name} {\n${members.join(",\n")}\n}`;
 }
 
 function convertClass(c: ts.ClassDeclaration): string {
-  let text = c.getText(); 
-  
-  if (!text.includes("export class")) return '';
+  if (!c.name) return "";
 
-  text = text.replace(/export\s+class\s+(\w+)/, "class $1:");
-  text = text.replace(/<[^>]+>/g, "");
-  text = text.replace(/{/, "").replace(/}$/, "");
-  text = text.replace(/\bstring\b/g, "String");
-  text = text.replace(/number;\s*\/\/\s*Integer/g, "int");
-  text = text.replace(/number;\s*\/\/\s*Float/g, "float");
-  text = text.replace(/\bboolean\b/g, "bool");
-  text = text.replace(/:\s*[A-Z]+\s*;/g, ": Variant");
-  text = text.replace(/:\s*Record<string,\s*any>\s*;/g, ": Variant");
-  text = text.replace(/;\s*$/gm, "");
+  const className = c.name.text;
+  let output = `class ${className}:\n`;
 
-  return text;
+  c.members.forEach(member => {
+    if (ts.isPropertyDeclaration(member)) {
+      const propName = member.name.getText();
+      let gdType = "";
+
+      if (member.type) {
+        const tsType = member.type.getText();
+        const fullText = member.getFullText();
+        const typeMap: { [key: string]: string } = {
+          "string": "String",
+          "boolean": "bool",
+          "number": fullText.includes("Integer") ? "int" : "float",
+        };
+
+        gdType = typeMap[tsType] || tsType;
+
+        if (/^[A-Z]$/.test(gdType)) {
+          gdType = "Variant";
+        }
+      }
+
+      output += `${indent}var ${propName}: ${gdType}\n`;
+    }
+  });
+
+  return output.trimEnd();
 }
 
 main().catch((err) => {

@@ -4,7 +4,7 @@ import unusedImports from 'eslint-plugin-unused-imports';
 import stylistic from '@stylistic/eslint-plugin';
 
 export default tseslint.config(
-  { ignores: ['dist/**'] },
+  { ignores: ['dist/**', 'scripts/**'] },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   tseslint.configs.eslintRecommended,
