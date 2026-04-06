@@ -4,6 +4,7 @@ extends RichTextLabel
 
 func _message(message: String, color: Color = Color.WHITE) -> void:
 	append_text("[color=#%s]%s[/color]\n" % [color.to_html(false), message])
+	move_child()
 
 
 func info(message: String) -> void:

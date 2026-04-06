@@ -44,15 +44,13 @@ func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 		var list: Array[_dtos.ClientCharacter] = [];
 		
 		for character in message.data:
-			var newCharacter = _dtos.ClientCharacter.from(character);
-			
-			list.append(newCharacter);
+			list.append(character);
 		
 		_list_characters(list)
 	elif message.type == _dtos.WebsocketEvents.CHARACTER_DELETED:
 		_get_characters()
 	elif message.type == _dtos.WebsocketEvents.CHARACTER_SELECTED:
-		_on_character_selected(_dtos.ClientCharacter.from(message.data))
+		_on_character_selected(message.data)
 	elif message.type == _dtos.WebsocketEvents.DENY_RESPONSE:
 		pass
 

@@ -32,7 +32,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # Handlers
 func _handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	if message.type == _dtos.WebsocketEvents.INSTANCE_CHAT_MESSAGE:
-		_handle_instance_chat_message_received(_dtos.ChatMessage.from(message.data))
+		_handle_instance_chat_message_received(message.data)
 
 
 func _handle_instance_chat_message_received(chat_message: _dtos.ChatMessage) -> void:

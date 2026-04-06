@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://42lghauw5fho" path="res://scenes/map_instances/village/village.gd" id="1_d27pl"]
 [ext_resource type="PackedScene" uid="uid://u6qt3j3hhmr6" path="res://prefabs/teleport/teleport.tscn" id="2_cuxmn"]
-[ext_resource type="Texture2D" uid="uid://dpu6n3vqvf0v3" path="res://assets/tileset.png" id="2_j60go"]
+[ext_resource type="Texture2D" uid="uid://dpu6n3vqvf0v3" path="res://assets/tileset/tileset.png" id="2_j60go"]
 [ext_resource type="PackedScene" uid="uid://br7cw1356bnxv" path="res://prefabs/ui/ui.tscn" id="3_k4t5b"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cuxmn"]

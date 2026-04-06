@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b6g6gj8fpvnpb"]
 
 [ext_resource type="Script" uid="uid://cnrxfhprl4b53" path="res://prefabs/character/character.gd" id="1_ytlax"]
-[ext_resource type="Texture2D" uid="uid://3467hsjgvpbg" path="res://assets/character_green.png" id="2_o6vhl"]
+[ext_resource type="Texture2D" uid="uid://3467hsjgvpbg" path="res://assets/character/character_green.png" id="2_o6vhl"]
 
 [sub_resource type="Animation" id="Animation_o6vhl"]
 length = 0.001

@@ -20,11 +20,11 @@ func init_instance() -> void:
 
 func _main_handle_ws_message_received(message: _dtos.WebsocketMessage) -> void:
 	if message.type == _dtos.WebsocketEvents.UPDATE_POSITION:
-		_handle_update_position(_dtos.ClientCharacter.from(message.data))
+		_handle_update_position(message.data)
 	elif message.type == _dtos.WebsocketEvents.JOIN_INSTANCE:
-		_handle_join_instance(_dtos.ClientCharacter.from(message.data))
+		_handle_join_instance(message.data)
 	elif message.type == _dtos.WebsocketEvents.LEFT_INSTANCE:
-		_handle_instance_left(_dtos.ClientCharacter.from(message.data))
+		_handle_instance_left(message.data)
 	else:
 		_handle_ws_message_received(message)
 

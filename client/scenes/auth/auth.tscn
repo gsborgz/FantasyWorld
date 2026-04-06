@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://bmyb7tddtpos8"]
+
+[ext_resource type="Script" uid="uid://vgxgwc4e5ho5" path="res://scenes/auth/auth.gd" id="1_h4ptk"]
+[ext_resource type="Texture2D" uid="uid://cjt53x8k5y3cl" path="res://assets/ui/auth_background.png" id="2_x35uc"]
+[ext_resource type="Theme" uid="uid://bu0nu12aqrnhw" path="res://assets/themes/input_default.tres" id="3_cbi46"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="4_o65x1"]
+[ext_resource type="Theme" uid="uid://xx7p0y3d0v7t" path="res://assets/themes/label_default.tres" id="5_uvl7s"]
+[ext_resource type="AudioStream" uid="uid://d2pq1qee4kjqs" path="res://assets/music/Track_#1.wav" id="7_wsfv8"]
+
+[sub_resource type="Theme" id="Theme_cygr0"]
+VBoxContainer/constants/separation = 4
+
+[node name="Auth" type="Node" unique_id=1360536168]
+script = ExtResource("1_h4ptk")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=583969846]
+stream = ExtResource("7_wsfv8")
+autoplay = true
+
+[node name="UI" type="CanvasLayer" parent="." unique_id=653086071]
+
+[node name="TextureRect" type="TextureRect" parent="UI" unique_id=1136130701]
+texture_filter = 1
+offset_left = -4.0
+offset_right = 1284.8889
+offset_bottom = 725.0
+texture = ExtResource("2_x35uc")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI" unique_id=1705032915]
+texture_filter = 1
+custom_minimum_size = Vector2(280, 0)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -141.0
+offset_top = 225.0
+offset_right = 139.0
+offset_bottom = 479.0
+grow_horizontal = 2
+theme = SubResource("Theme_cygr0")
+
+[node name="Username" type="LineEdit" parent="UI/VBoxContainer" unique_id=116444334]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("3_cbi46")
+
+[node name="Password" type="LineEdit" parent="UI/VBoxContainer" unique_id=1825665992]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("3_cbi46")
+
+[node name="PasswordConfirmation" type="LineEdit" parent="UI/VBoxContainer" unique_id=983050842]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("3_cbi46")
+
+[node name="ButtonsLayout" type="VBoxContainer" parent="UI/VBoxContainer" unique_id=513702608]
+layout_mode = 2
+
+[node name="LoginButton" type="Button" parent="UI/VBoxContainer/ButtonsLayout" unique_id=494296310]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("4_o65x1")
+text = "Login"
+
+[node name="OrLabel" type="Label" parent="UI/VBoxContainer/ButtonsLayout" unique_id=80973610]
+layout_mode = 2
+theme = ExtResource("5_uvl7s")
+horizontal_alignment = 1
+
+[node name="RegisterButton" type="Button" parent="UI/VBoxContainer/ButtonsLayout" unique_id=1870265853]
+texture_filter = 1
+layout_mode = 2
+theme = ExtResource("4_o65x1")
+text = "Register"
+
+[node name="Info" type="Label" parent="UI/VBoxContainer" unique_id=1879190482]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme = ExtResource("5_uvl7s")
+theme_override_font_sizes/font_size = 26
+autowrap_mode = 3

@@ -1,7 +1,7 @@
-[gd_scene load_steps=14 format=4 uid="uid://bkvu300k1lwj0"]
+[gd_scene format=4 uid="uid://bkvu300k1lwj0"]
 
 [ext_resource type="Script" uid="uid://er8qmqw13n8l" path="res://examples/map_instance/map_instance_example.gd" id="1_r6c2l"]
-[ext_resource type="Texture2D" uid="uid://dpu6n3vqvf0v3" path="res://assets/tileset.png" id="2_r6c2l"]
+[ext_resource type="Texture2D" uid="uid://dpu6n3vqvf0v3" path="res://assets/tileset/tileset.png" id="2_r6c2l"]
 [ext_resource type="PackedScene" uid="uid://br7cw1356bnxv" path="res://prefabs/ui/ui.tscn" id="3_yayx7"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1j3n7"]
