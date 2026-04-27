@@ -77,16 +77,29 @@ function convertEnum(e: ts.EnumDeclaration): string {
   return `enum ${name} {\n${members.join(",\n")}\n}`;
 }
 
+function gdDefault(gdType: string): string {
+  const defaults: { [key: string]: string } = {
+    "String": '""',
+    "bool": "false",
+    "float": "0.0",
+    "int": "0",
+    "Variant": "null",
+  };
+  return defaults[gdType] ?? "0";
+}
+
 function convertClass(c: ts.ClassDeclaration): string {
   if (!c.name) return "";
 
   const className = c.name.text;
   let output = `class ${className}:\n`;
 
+  const props: Array<{ name: string; gdType: string }> = [];
+
   c.members.forEach(member => {
     if (ts.isPropertyDeclaration(member)) {
       const propName = member.name.getText();
-      let gdType = "";
+      let gdType = "Variant";
 
       if (member.type) {
         const tsType = member.type.getText();
@@ -104,9 +117,15 @@ function convertClass(c: ts.ClassDeclaration): string {
         }
       }
 
+      props.push({ name: propName, gdType });
       output += `${indent}var ${propName}: ${gdType}\n`;
     }
   });
+
+  output += `\n${indent}func _init(dict: Dictionary = {}) -> void:\n`;
+  for (const prop of props) {
+    output += `${indent}${indent}${prop.name} = dict.get("${prop.name}", ${gdDefault(prop.gdType)})\n`;
+  }
 
   return output.trimEnd();
 }

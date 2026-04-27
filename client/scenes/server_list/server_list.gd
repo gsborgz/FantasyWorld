@@ -37,10 +37,8 @@ func _get_game_servers() -> void:
 func _handle_game_servers_request_completed(response: Api.ResponseData) -> void:
 	if response.ok() and typeof(response.get_body()) == TYPE_ARRAY:
 		var servers: Array[_dtos.GameServerResponse] = []
-		
-		for server in response.get_body():
-			servers.append(server)
-		
+		for item in response.get_body():
+			servers.append(_dtos.GameServerResponse.new(item))
 		_create_server_list(servers)
 	else:
 		print("falha ao buscar servidores")
