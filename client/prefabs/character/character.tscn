@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://b6g6gj8fpvnpb"]
+[gd_scene format=3 uid="uid://dsbo8sxkww2wl"]
 
 [ext_resource type="Script" uid="uid://cnrxfhprl4b53" path="res://prefabs/character/character.gd" id="1_ytlax"]
 [ext_resource type="Texture2D" uid="uid://3467hsjgvpbg" path="res://assets/character/character_green.png" id="2_o6vhl"]

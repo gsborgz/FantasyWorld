@@ -29,7 +29,7 @@ func _on_create_button_pressed():
 		
 		data.name = _name.text
 		message.type = _dtos.WebsocketEvents.ADD_CHARACTER
-		message.data = data
+		message.data = data as _dtos.AddCharacterRequest
 		
 		WS.send(message)
 

@@ -17,6 +17,8 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="FantasyWorld"
 run/main_scene="uid://ssxr7xrjdr52"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+boot_splash/bg_color=Color(0.55082595, 0.5475977, 0.8192377, 1)
+boot_splash/image="uid://cjt53x8k5y3cl"
 config/icon="res://icon.svg"
 
 [autoload]
@@ -24,6 +26,7 @@ config/icon="res://icon.svg"
 WS="*res://globals/websocket.gd"
 GameManager="*res://globals/game_manager.gd"
 Api="*res://globals/api.gd"
+Main="*uid://ssxr7xrjdr52"
 
 [display]
 
