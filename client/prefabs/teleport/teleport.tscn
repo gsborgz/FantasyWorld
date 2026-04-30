@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://u6qt3j3hhmr6"]
+[gd_scene format=3 uid="uid://u6qt3j3hhmr6"]
 
 [ext_resource type="Script" uid="uid://b4l1evkakgeth" path="res://prefabs/teleport/teleport.gd" id="1_crmny"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jbrhr"]
 
-[node name="Teleport" type="Area2D"]
+[node name="Teleport" type="Area2D" unique_id=2057318949]
+collision_layer = 3
+collision_mask = 3
 script = ExtResource("1_crmny")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=534975296]
 shape = SubResource("RectangleShape2D_jbrhr")

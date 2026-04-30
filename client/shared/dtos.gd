@@ -230,7 +230,7 @@ class ClientCharacter:
 					"RIGHT": obj.direction = Direction.RIGHT
 					_: obj.direction = Direction.DOWN
 			elif typeof(_raw_direction) == TYPE_INT or typeof(_raw_direction) == TYPE_FLOAT:
-				obj.direction = int(_raw_direction)
+				obj.direction = int(_raw_direction) as Direction
 			else:
 				obj.direction = Direction.DOWN
 			obj.userId = raw.get("userId", "")

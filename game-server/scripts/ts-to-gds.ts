@@ -217,7 +217,7 @@ function emitDefaultClass(name: string, props: PropertySpec[]): string {
 			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}"RIGHT": obj.${p.name} = Direction.RIGHT`);
 			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}${INDENT}_: obj.${p.name} = ${p.defaultValue}`);
 			lines.push(`${INDENT}${INDENT}${INDENT}elif typeof(_raw_${p.name}) == TYPE_INT or typeof(_raw_${p.name}) == TYPE_FLOAT:`);
-			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}obj.${p.name} = int(_raw_${p.name})`);
+			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}obj.${p.name} = int(_raw_${p.name}) as Direction`);
 			lines.push(`${INDENT}${INDENT}${INDENT}else:`);
 			lines.push(`${INDENT}${INDENT}${INDENT}${INDENT}obj.${p.name} = ${p.defaultValue}`);
 			continue;
