@@ -1,20 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://bmajrgeh5gpp6"]
+[gd_scene format=3 uid="uid://bmajrgeh5gpp6"]
 
 [ext_resource type="Script" uid="uid://480cehagqmls" path="res://prefabs/character_option/character_option.gd" id="1_j0jx4"]
+[ext_resource type="Theme" uid="uid://xx7p0y3d0v7t" path="res://assets/themes/label_default.tres" id="2_2kp2s"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="3_530i4"]
 
-[node name="CharacterOption" type="VBoxContainer"]
+[node name="CharacterOption" type="VBoxContainer" unique_id=845067508]
 script = ExtResource("1_j0jx4")
 
-[node name="Name" type="Label" parent="."]
+[node name="Name" type="Label" parent="." unique_id=757616335]
+layout_mode = 2
+theme = ExtResource("2_2kp2s")
+theme_override_font_sizes/font_size = 50
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=878505304]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="Select" type="Button" parent="HBoxContainer" unique_id=1931368105]
 layout_mode = 2
+theme = ExtResource("3_530i4")
+text = "Selecionar"
 
-[node name="Select" type="Button" parent="HBoxContainer"]
+[node name="Delete" type="Button" parent="HBoxContainer" unique_id=1076458444]
 layout_mode = 2
-text = "Select"
-
-[node name="Delete" type="Button" parent="HBoxContainer"]
-layout_mode = 2
-text = "Delete"
+theme = ExtResource("3_530i4")
+text = "Deletar"

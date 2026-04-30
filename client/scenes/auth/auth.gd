@@ -22,10 +22,10 @@ var _current_layout: AuthLayout = AuthLayout.Signin
 func _ready() -> void:
 	GameManager.set_theme_and_play(_start_theme)
 	
-	_username_field.placeholder_text = "Username"
-	_password_field.placeholder_text = "Password"
-	_password_confirmation_field.placeholder_text = "Confirm Password"
-	_or_label.text = "Or"
+	_username_field.placeholder_text = "Usuário"
+	_password_field.placeholder_text = "Senha"
+	_password_confirmation_field.placeholder_text = "Confirmar Senha"
+	_or_label.text = "Ou"
 	
 	_reset_form()
 	

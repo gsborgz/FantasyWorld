@@ -1,31 +1,48 @@
-[gd_scene load_steps=2 format=3 uid="uid://bpdp7bp7maudc"]
+[gd_scene format=3 uid="uid://bpdp7bp7maudc"]
 
 [ext_resource type="Script" uid="uid://yf2dv0agi6xn" path="res://scenes/server_list/server_list.gd" id="1_wixno"]
+[ext_resource type="Texture2D" uid="uid://cjt53x8k5y3cl" path="res://assets/ui/auth_background.png" id="2_fo1ft"]
+[ext_resource type="Theme" uid="uid://xx7p0y3d0v7t" path="res://assets/themes/label_default.tres" id="3_o4aun"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="3_qdr1h"]
 
-[node name="ServerList" type="Node"]
+[node name="ServerList" type="Node" unique_id=797283082]
 script = ExtResource("1_wixno")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=855729356]
 
-[node name="Container" type="VBoxContainer" parent="UI"]
+[node name="TextureRect" type="TextureRect" parent="UI" unique_id=480487020]
+texture_filter = 1
+offset_left = -4.0
+offset_right = 1284.8889
+offset_bottom = 725.0
+texture = ExtResource("2_fo1ft")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="Container" type="VBoxContainer" parent="UI" unique_id=1064559346]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -250.0
-offset_top = -20.0
+offset_top = -153.0
 offset_right = 250.0
-offset_bottom = 20.0
+offset_bottom = -113.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="UI/Container"]
+[node name="Label" type="Label" parent="UI/Container" unique_id=1309120561]
 layout_mode = 2
 size_flags_horizontal = 0
+theme = ExtResource("3_o4aun")
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 35
 text = "Servidores:"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/Container"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Container" unique_id=2019242114]
 custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -33,11 +50,14 @@ size_flags_vertical = 4
 alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="ExitButton" type="Button" parent="UI"]
+[node name="ExitButton" type="Button" parent="UI" unique_id=856205546]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -37.0
-offset_bottom = 31.0
+offset_left = -60.0
+offset_top = 5.0
+offset_right = -4.0
+offset_bottom = 42.0
 grow_horizontal = 0
-text = "Exit"
+theme = ExtResource("3_qdr1h")
+text = "Sair"

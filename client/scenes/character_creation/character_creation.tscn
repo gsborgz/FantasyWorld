@@ -1,13 +1,25 @@
-[gd_scene load_steps=2 format=3 uid="uid://bt1n3h8hg8xcc"]
+[gd_scene format=3 uid="uid://bt1n3h8hg8xcc"]
 
 [ext_resource type="Script" uid="uid://bpqj6o7qps3e7" path="res://scenes/character_creation/character_creation.gd" id="1_5w2ck"]
+[ext_resource type="Texture2D" uid="uid://cjt53x8k5y3cl" path="res://assets/ui/auth_background.png" id="2_mjja7"]
+[ext_resource type="Theme" uid="uid://bu0nu12aqrnhw" path="res://assets/themes/input_default.tres" id="3_eib03"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="4_cndol"]
 
-[node name="CharacterCreation" type="Node"]
+[node name="CharacterCreation" type="Node" unique_id=698933101]
 script = ExtResource("1_5w2ck")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=1815500207]
 
-[node name="VBoxContainer" type="VBoxContainer" parent="UI"]
+[node name="TextureRect" type="TextureRect" parent="UI" unique_id=1628716686]
+texture_filter = 1
+offset_left = -4.0
+offset_right = 1284.8889
+offset_bottom = 725.0
+texture = ExtResource("2_mjja7")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI" unique_id=1703543351]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -20,20 +32,20 @@ offset_bottom = 46.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Label" type="Label" parent="UI/VBoxContainer"]
+[node name="Name" type="LineEdit" parent="UI/VBoxContainer" unique_id=1565482016]
 layout_mode = 2
-text = "Name"
+theme = ExtResource("3_eib03")
+placeholder_text = "Nome"
 
-[node name="Name" type="LineEdit" parent="UI/VBoxContainer"]
-layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer" unique_id=2089735581]
 layout_mode = 2
 
-[node name="Create" type="Button" parent="UI/VBoxContainer/HBoxContainer"]
+[node name="Create" type="Button" parent="UI/VBoxContainer/HBoxContainer" unique_id=1143037623]
 layout_mode = 2
-text = "Create"
+theme = ExtResource("4_cndol")
+text = "Criar"
 
-[node name="Cancel" type="Button" parent="UI/VBoxContainer/HBoxContainer"]
+[node name="Cancel" type="Button" parent="UI/VBoxContainer/HBoxContainer" unique_id=1628545066]
 layout_mode = 2
-text = "Cancel"
+theme = ExtResource("4_cndol")
+text = "Cancelar"

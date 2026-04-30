@@ -1,27 +1,40 @@
-[gd_scene load_steps=3 format=3 uid="uid://cijpvfr7wydpq"]
+[gd_scene format=3 uid="uid://cijpvfr7wydpq"]
 
 [ext_resource type="Script" uid="uid://b4avjyhvly88d" path="res://prefabs/chat/chat.gd" id="1_lx5xn"]
+[ext_resource type="FontFile" uid="uid://6aep8dy0538v" path="res://assets/fonts/monogram-extended.ttf" id="2_asp5r"]
 [ext_resource type="Script" uid="uid://cjt7e0nevedq5" path="res://prefabs/log/log.gd" id="2_hij43"]
+[ext_resource type="Theme" uid="uid://bu0nu12aqrnhw" path="res://assets/themes/input_default.tres" id="3_hij43"]
 
-[node name="Chat" type="VBoxContainer"]
+[node name="Chat" type="VBoxContainer" unique_id=1300443265]
 custom_minimum_size = Vector2(300, 0)
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -185.0
+offset_top = -190.0
 offset_right = 300.0
 grow_vertical = 0
 script = ExtResource("1_lx5xn")
 
-[node name="Log" type="RichTextLabel" parent="."]
+[node name="Log" type="RichTextLabel" parent="." unique_id=2137975620]
 custom_minimum_size = Vector2(300, 150)
 layout_mode = 2
 size_flags_vertical = 8
+theme_override_fonts/normal_font = ExtResource("2_asp5r")
+theme_override_fonts/bold_font = ExtResource("2_asp5r")
+theme_override_fonts/bold_italics_font = ExtResource("2_asp5r")
+theme_override_fonts/italics_font = ExtResource("2_asp5r")
+theme_override_fonts/mono_font = ExtResource("2_asp5r")
+theme_override_font_sizes/normal_font_size = 25
+theme_override_font_sizes/bold_font_size = 25
+theme_override_font_sizes/bold_italics_font_size = 25
+theme_override_font_sizes/italics_font_size = 25
+theme_override_font_sizes/mono_font_size = 25
 scroll_following = true
 tab_size = 5
 vertical_alignment = 2
 script = ExtResource("2_hij43")
 metadata/_custom_type_script = "uid://cjt7e0nevedq5"
 
-[node name="LineEdit" type="LineEdit" parent="."]
+[node name="LineEdit" type="LineEdit" parent="." unique_id=1214934490]
 layout_mode = 2
+theme = ExtResource("3_hij43")

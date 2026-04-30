@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bchbw0yxvr77v" path="res://prefabs/ui/ui.gd" id="1_70ykp"]
 [ext_resource type="PackedScene" uid="uid://cijpvfr7wydpq" path="res://prefabs/chat/chat.tscn" id="1_tlstp"]
+[ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="3_4ieor"]
 
 [node name="Ui" type="CanvasLayer" unique_id=1685338694]
 script = ExtResource("1_70ykp")
@@ -23,4 +24,5 @@ grow_vertical = 2
 
 [node name="BackToCharScreenButton" type="Button" parent="Menu" unique_id=1890382773]
 layout_mode = 2
+theme = ExtResource("3_4ieor")
 text = "Back To Character Screen"
