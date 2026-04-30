@@ -1,6 +1,7 @@
 extends Node
 
 const _dtos := preload("res://shared/dtos.gd")
+const _start_theme := preload("res://assets/music/Track_#1.wav")
 
 @onready var _username_field: LineEdit = $UI/VBoxContainer/Username
 @onready var _password_field: LineEdit = $UI/VBoxContainer/Password
@@ -19,6 +20,8 @@ enum AuthLayout {
 var _current_layout: AuthLayout = AuthLayout.Signin
 
 func _ready() -> void:
+	GameManager.set_theme_and_play(_start_theme)
+	
 	_username_field.placeholder_text = "Username"
 	_password_field.placeholder_text = "Password"
 	_password_confirmation_field.placeholder_text = "Confirm Password"

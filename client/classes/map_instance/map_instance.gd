@@ -7,11 +7,15 @@ var _instance_name: String
 var _ui: UI
 var _world: Node2D
 var _playerCharacters: Dictionary[String, Character] = {}
+var _theme: AudioStream
 
 
-func init_instance() -> void:
+func init_instance() -> void: 
 	assert(_instance_name, "You must set instance_name")
 	assert(_ui and _world, "You must inform UI and World nodes in init_instance")
+	
+	if (_theme):
+		GameManager.set_theme_and_play(_theme)
 	
 	WS.message_received.connect(_main_handle_ws_message_received)
 	

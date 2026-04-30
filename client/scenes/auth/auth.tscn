@@ -5,17 +5,12 @@
 [ext_resource type="Theme" uid="uid://bu0nu12aqrnhw" path="res://assets/themes/input_default.tres" id="3_cbi46"]
 [ext_resource type="Theme" uid="uid://d1ee1kqwos26y" path="res://assets/themes/button_default.tres" id="4_o65x1"]
 [ext_resource type="Theme" uid="uid://xx7p0y3d0v7t" path="res://assets/themes/label_default.tres" id="5_uvl7s"]
-[ext_resource type="AudioStream" uid="uid://d2pq1qee4kjqs" path="res://assets/music/Track_#1.wav" id="7_wsfv8"]
 
 [sub_resource type="Theme" id="Theme_cygr0"]
 VBoxContainer/constants/separation = 4
 
 [node name="Auth" type="Node" unique_id=1360536168]
 script = ExtResource("1_h4ptk")
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=583969846]
-stream = ExtResource("7_wsfv8")
-autoplay = true
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=653086071]
 

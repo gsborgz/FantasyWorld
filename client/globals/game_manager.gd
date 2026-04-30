@@ -2,6 +2,8 @@ extends Node
 
 const _dtos := preload("res://shared/dtos.gd")
 
+var _theme_player: AudioStreamPlayer2D
+
 var client_id: int
 var _current_scene_root: Node
 var _session_sid: String
@@ -10,6 +12,12 @@ var _client_character: _dtos.ClientCharacter
 var _player_character: Character
 var _menu_opened: bool = false
 var _chat_activated: bool = false
+
+
+func _ready() -> void:
+	_theme_player = AudioStreamPlayer2D.new()
+	add_child(_theme_player)
+	set_scene("auth")
 
 
 func get_menu_opened() -> bool:
@@ -37,6 +45,16 @@ func set_scene(scenePath: String) -> void:
 	var sceneFullPath = "res://scenes/" + scenePath + "/" + fileName + ".tscn"
 	
 	get_tree().call_deferred("change_scene_to_file", sceneFullPath)
+
+
+# Theme Methods
+func set_theme_and_play(theme: AudioStream) -> void:
+	_theme_player.stream = theme
+	_theme_player.play()
+
+
+func stop_theme() -> void:
+	_theme_player.stop()
 
 
 # Session Methods
